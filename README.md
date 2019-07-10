@@ -1,5 +1,15 @@
 # version-control
 
+# TO RUN
+
+~~~~
+virtualenv venv
+source venv/bin/activate
+pip install pytest
+pytest
+~~~~
+# SPECIFICATION
+
 We assume that we have a set of files Files. These files may have different formats and different structure; they may be text files, they may be audio files, etc. Let us call all these formats Formats.
 
 For any file of any type, we have a number of operations that can be performed on them:
