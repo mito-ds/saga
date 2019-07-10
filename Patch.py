@@ -1,4 +1,4 @@
-
+import copy
 
 class State():
 
@@ -12,18 +12,36 @@ class Operation():
         self.name = name
 
     def apply_operation(self, state):
-        # Returns an option: 
-            # Some (new state) if operation can be applied
-            # None if the operation cannot be applied
-        pass
+        """
+        Returns the new state if the operation is valid on the state.
+        Otherwise returns None
+        """
+        raise NotImplementedError("Must be implemented by specific operation")
+
+    def valid_operation(self, state):
+        """
+        Returns True if the operation is valid on the state.
+        Otherwise returns False
+        """
+        raise NotImplementedError("Must be implemented by specific operation")
 
 class AddFileOperation(Operation):
 
-    def __init__(self, new_file):
+    def __init__(self, new_file, new_file_contents):
+        self.new_file = new_file
+        self.new_file_contents = new_file_contents
+
+    def apply_operation(self, state):
+        if not self.valid_operation(state):
+            return None
+
+        files = copy.deepcopy(state.files)
+        files[self.new_file] = self.new_file_contents
         
+        return State(files)
 
-    def valid_oper
-
+    def valid_operation(self, state):
+        return self.new_file not in state.files
 
 
 class Patch():
@@ -32,51 +50,25 @@ class Patch():
         self.operations = operations # set of operation objects
 
     def apply_patch(self, state):
-        # TODO: returns new state, by applying each operation in the
-        # patch. I actually think this is very monadic, lol.
+        curr_state = state
+        for operation in self.operations:
+            curr_state = operation.apply_operation(curr_state)
+            if curr_state is None:
+                return None
 
-    
+        return curr_state
+
 class Branch():
 
-    def 
-
-
-
-# Linear history of patches; each patch is immutable, and says what it changes
-class Patch():
-    def __init__(self, parent_patch, changes):
-        self.parent_patch = parent_patch
-        # map from fileid -> change (for now, only add a line with some text)
-        self.changes = changes
-
-    def is_ancestor_patch(self, patch):
-        curr_patch = self
-        while curr_patch is not None:
-            if curr_patch == patch:
-                return True
-            curr_patch = curr_patch.parent_patch
-        
-        return False
-        
-    def least_common_ancestor(self, patch):
-        # walk back parent patches
-        curr_patch = self
-
-        while curr_patch and not curr_patch.is_ancestor_patch(patch)
-            curr_patch = curr_patch.parent_patch
-        
-        return curr_patch
-
-class Repository():
     def __init__(self):
         self.patches = []
+        self.states = [State(dict())] # state 0 is the empty state
 
-    def most_recent(self):
-        
-
-    def add_patch(self, new_patch):
-        # TODO: make sure the patch actually can be applied
-        self.patches.add(new_patch)
-
-    def merge(self, repository):
-        # find common ancestor
+    def add_patch(self, patch):
+        # try and apply the new patch
+        old_state = self.states[-1]
+        new_state = patch.apply_patch(old_state)
+        if new_state is None:
+            raise Exception("Invalid patch to add to branch")
+        self.states.append(new_state)
+        self.patches.append(patch)
