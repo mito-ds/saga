@@ -1,10 +1,5 @@
 import copy
-
-class State():
-
-    def __init__(self, files):
-        # map from file id -> contents
-        self.files = files 
+from State import State
 
 class Operation():
 
@@ -42,33 +37,3 @@ class AddFileOperation(Operation):
 
     def valid_operation(self, state):
         return self.new_file not in state.files
-
-
-class Patch():
-
-    def __init__(self, operations):
-        self.operations = operations # set of operation objects
-
-    def apply_patch(self, state):
-        curr_state = state
-        for operation in self.operations:
-            curr_state = operation.apply_operation(curr_state)
-            if curr_state is None:
-                return None
-
-        return curr_state
-
-class Branch():
-
-    def __init__(self):
-        self.patches = []
-        self.states = [State(dict())] # state 0 is the empty state
-
-    def add_patch(self, patch):
-        # try and apply the new patch
-        old_state = self.states[-1]
-        new_state = patch.apply_patch(old_state)
-        if new_state is None:
-            raise Exception("Invalid patch to add to branch")
-        self.states.append(new_state)
-        self.patches.append(patch)
