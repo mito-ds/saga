@@ -17,23 +17,23 @@ def test_add_twice_fails():
     branch = Branch()
     addOp1 = FileOpAdd("filename", "DATA")
     addOp2 = FileOpAdd("filename", "DATA1")
-    patch = Patch(set([addOp1, addOp2]))
+    patch = Patch([addOp1, addOp2])
     with pytest.raises(Exception):
         branch.add_patch(patch)
 
 def test_remove():
     branch = Branch()
     addOp = FileOpAdd("filename", "DATA")
-    patch = Patch(set([addOp]))
+    patch = Patch([addOp])
     branch.add_patch(patch)
 
     removeOp = FileOpRemove("filename")
-    patch = Patch(set([removeOp]))
+    patch = Patch([removeOp])
     branch.add_patch(patch)
 
 def test_remove_not_exist_fails():
     branch = Branch()
     removeOp = FileOpRemove("filename")
-    patch = Patch(set([removeOp]))
+    patch = Patch([removeOp])
     with pytest.raises(Exception):
         branch.add_patch(patch)

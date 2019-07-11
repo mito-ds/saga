@@ -2,7 +2,7 @@ import copy
 from version_control.State import State
 from version_control.Operation import Operation
 
-class TextOpAppendLine(Operation):
+class TextOpInsertLine(Operation):
 
     def __init__(self, file_name, line_number, line_contents):
         self.file_name = file_name
@@ -14,7 +14,7 @@ class TextOpAppendLine(Operation):
             return None
 
         files = copy.deepcopy(state.files)
-        files[self.file_name].change_line(self.line_number, self.line_contents)
+        files[self.file_name].insert_line(self.line_number, self.line_contents)
         
         return State(files)
 

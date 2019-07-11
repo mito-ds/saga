@@ -13,7 +13,7 @@ class BinaryOpChangeContents(Operation):
             return None
 
         files = copy.deepcopy(state.files)
-        files[self.file_name] = self.file_contents
+        files[self.file_name].file_contents = self.file_contents
         
         return State(files)
 

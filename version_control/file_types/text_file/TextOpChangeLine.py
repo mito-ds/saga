@@ -2,7 +2,7 @@ import copy
 from version_control.State import State
 from version_control.Operation import Operation
 
-class TextOpAppendLine(Operation):
+class TextOpChangeLine(Operation):
 
     def __init__(self, file_name, line_number, line_contents):
         self.file_name = file_name

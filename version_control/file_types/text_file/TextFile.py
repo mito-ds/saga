@@ -19,4 +19,4 @@ class TextFile(File):
         self.file_contents.insert(line_number, line_contents)
 
     def append_line(self, line_contents):
-        self.file_contents.push(line_contents)
+        self.file_contents.append(line_contents)
