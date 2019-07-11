@@ -8,6 +8,7 @@ source venv/bin/activate
 pip install pytest
 pytest
 ~~~~
+
 # SPECIFICATION
 
 We assume that we have a set of files Files. These files may have different formats and different structure; they may be text files, they may be audio files, etc. Let us call all these formats Formats.
@@ -20,13 +21,14 @@ Then, for each file with a type format, we may define additional operations that
 - add line
 - remove line
 - modify line
+
 or for an audio file:
 - add track
 - etc.
 
 ------
 
-Now, armed with these operations on files, we can consider a patch to be any valid multi-set of these operations. A valid patch is defined by the operations included in it. Each operation can restrict what other operations it can be in a patch with (e.g. a remove operation may not be allowed with a modify file operation).
+Now, armed with these operations on files, we can consider a patch to be any list of these operations. A valid patch is defined by the operations included in it. Each operation can restrict what other operations it can be in a patch with (e.g. a remove operation may not be allowed with a modify file operation). TODO: this is outdated.
 
 We then define a branch to be any list of valid patches. For a branch to be valid, each patch on the branch must be valid; furthermore, there must be consistency between patches in the branch. For a file to be created, it must not already exist. For a file to be deleted, it must exist. 
 
