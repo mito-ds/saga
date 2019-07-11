@@ -8,6 +8,11 @@ class TextFile(File):
         File.__init__(self, file_name)
         self.file_contents = file_contents
 
+    def get_operations(self, new_file):
+        # TODO: implement longest common subsequence operations...
+        # it's probably the best heuristic here?
+        pass
+
     def change_line(self, line_number, line_contents):
         if line_number >= len(self.file_contents):
             raise Exception("cannot change line that is greater than contents")

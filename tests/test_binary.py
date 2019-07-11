@@ -29,3 +29,17 @@ def test_change_contents():
 
     assert len(branch.states[-1].files) == 1
     assert branch.states[-1].files["filename"].file_contents == "new_data"
+
+def test_get_operations_change():
+    binary_file1 = BinaryFile("filename", "")
+    binary_file2 = BinaryFile("filename", "stuff")
+    operations = binary_file1.get_operations(binary_file2)
+    assert len(operations) == 1
+    assert operations[0].file_name == "filename"
+    assert operations[0].file_contents == "stuff"
+
+def test_get_operations_no_change():
+    binary_file1 = BinaryFile("filename", "")
+    binary_file2 = BinaryFile("filename", "")
+    operations = binary_file1.get_operations(binary_file2)
+    assert len(operations) == 0
