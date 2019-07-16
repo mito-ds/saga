@@ -42,3 +42,14 @@ class BinaryFile(File):
         file_contents = f.read()
         f.close()
         return BinaryFile(file_path, file_contents)
+
+    def print_changes(self, new_file):
+        if new_file.file_name != self.file_name:
+            raise Exception("Can only print operations on the same files")
+
+        print("File diff: {}".format(self.file_name))
+        if self.file_contents == new_file.file_contents:
+            print(self.file_contents)
+        else:
+            print("-" + self.file_contents)
+            print("+" + new_file.file_contents)

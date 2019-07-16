@@ -8,10 +8,9 @@ To install the software on your computer (and add it to your path!)
 
 ~~~~
 git clone https://github.com/naterush/version-control.git
-cd https://github.com/naterush/version-control.git
-python3 -m version-control.install
+cd version-control
+make install
 ~~~~
-
 
 ### Running Tests
 

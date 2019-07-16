@@ -1,5 +1,4 @@
 from copy import deepcopy
-from colorama import Fore, Style
 from version_control.file_types.file.File import File
 from version_control.file_types.text_file.TextOpDeleteLine import TextOpDeleteLine
 from version_control.file_types.text_file.TextOpInsertLine import TextOpInsertLine
@@ -92,16 +91,16 @@ class TextFile(File):
         while old_idx < len(self.file_contents) and new_idx < len(new_file.file_contents):
             # first print all the deletes
             if old_idx not in lcs_indexes_old:
-                print(Fore.RED + "- " + self.file_contents[old_idx])
+                print("- " + self.file_contents[old_idx])
                 old_idx += 1
             # then print all inserts
             elif new_idx not in lcs_indexes_new:
-                print(Fore.GREEN + "+ " + new_file.file_contents[new_idx])
+                print("+ " + new_file.file_contents[new_idx])
                 new_idx += 1
             else:
                 # should march in unison
                 assert new_file.file_contents[new_idx] == self.file_contents[old_idx]
-                print(Fore.BLACK + self.file_contents[old_idx])
+                print(self.file_contents[old_idx])
                 old_idx += 1
                 new_idx += 1
 

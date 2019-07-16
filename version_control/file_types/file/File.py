@@ -37,3 +37,9 @@ class File():
         Writes the file object to the file path (not the string representation)
         """
         raise NotImplementedError("Must be implemented by child class")
+
+    def print_changes(self, new_file):
+        """
+        Displays the changes that are made between prev and curr version
+        """
+        raise NotImplementedError("Must be implemented by child class")

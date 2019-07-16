@@ -10,10 +10,12 @@ from version_control.file_types.binary_file.BinaryFile import BinaryFile
 def main():
     parser = argparse.ArgumentParser(description='Do version control on some files')
     parser.add_argument('action', type=str, help='')
-    parser.add_argument('file', type=str, help='')
+    parser.add_argument('file', type=str, help='', nargs='?')
+
     args = parser.parse_args()
     cwd = os.getcwd()
-
+    curr_branch = get_current_branch()
+    curr_state = curr_branch.curr_state()
 
     if args.action == "init":
         if os.path.isdir(cwd + "/.vcs"):
@@ -24,8 +26,6 @@ def main():
             f = open(cwd + "/.vcs/curr_commit", "w+")
             f.close()
     elif args.action == "add":
-        curr_branch = get_current_branch()
-        curr_state = curr_branch.curr_state()
         # if the file existed before
         if args.file in curr_state.files:
             # we are either deleting it
@@ -60,8 +60,32 @@ def main():
         # make a new current commit
         f = open(cwd + "/.vcs/curr_commit", "w+")
         f.close()
+    elif args.action == "diff":
+        # if the file didn't exist
+        if args.file not in curr_state.files:
+            if not os.path.exists(args.file):
+                print("Error: file didn't + doesn't exist")
+            else:
+                if args.file.endswith(".txt"):
+                    file_obj = TextFile.from_file(args.file)
+                else:
+                    file_obj = BinaryFile.from_file(args.file)
+                print("File diff: {}".format(file_obj.file_name))
+                print("+" + file_obj.file_contents)
+        else:
+            if not os.path.exists(args.file):
+                file_obj = curr_state.files[args.file]
+                print("File diff: {}".format(file_obj.file_contents))
+                print("-" + file_obj.file_contents)
+                print("Error: file didn't + doesn't exist")
+            else:
+                if args.file.endswith(".txt"):
+                    file_obj = TextFile.from_file(args.file)
+                else:
+                    file_obj = BinaryFile.from_file(args.file)
+                curr_state.files[args.file].print_changes(file_obj)
     else:
-        print("Error: usage \{init | add | commit\}")
+        print("Error: usage \{init | add | commit | diff\}")
     
 
 
@@ -80,6 +104,8 @@ def get_current_branch():
     f = open(cwd + "/.vcs/curr_commit", "r")
     patch_file_text = f.read().strip()
     f.close()
+    if patch_file_text == "":
+        return branch
     patch = Patch.from_string(patch_file_text)
     branch.add_patch(patch)
 
