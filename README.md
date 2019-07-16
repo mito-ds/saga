@@ -1,6 +1,21 @@
 # version-control
 
-# TO RUN
+## Instructions
+
+### Installation
+
+To install the software on your computer (and add it to your path!)
+
+~~~~
+git clone https://github.com/naterush/version-control.git
+cd https://github.com/naterush/version-control.git
+python3 -m version-control.install
+~~~~
+
+
+### Running Tests
+
+After installing:
 
 ~~~~
 virtualenv venv
@@ -9,7 +24,7 @@ pip install pytest
 pytest
 ~~~~
 
-# SPECIFICATION
+## SPECIFICATION
 
 We assume that we have a set of files Files. These files may have different formats and different structure; they may be text files, they may be audio files, etc. Let us call all these formats Formats.
 
