@@ -24,4 +24,12 @@ class TextOpInsertLine(Operation):
     def valid_operation(self, state):
         if self.file_name not in state.files:
             return False
-        return self.line_number >= 0 and len(state.files[self.file_name].file_contents) > self.line_number
+        return self.line_number >= 0 and len(state.files[self.file_name].file_contents) >= self.line_number
+
+    def to_string(self):
+        return "TextOpInsertLine\t{}\t{}\t{}".format(self.file_name, self.line_number, self.line_contents)
+
+    @staticmethod
+    def from_string(operation_string):
+        operation = operation_string.split("\t")
+        return TextOpInsertLine(operation[1], int(operation[2]), operation[3])

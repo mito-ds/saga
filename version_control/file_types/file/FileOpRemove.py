@@ -18,3 +18,11 @@ class FileOpRemove(Operation):
 
     def valid_operation(self, state):
         return self.file_name in state.files
+
+    def to_string(self):
+        return "FileOpRemove\t{}".format(self.file_name)
+
+    @staticmethod
+    def from_string(operation_string):
+        operation = operation_string.split("\t")
+        return FileOpRemove(operation[1])

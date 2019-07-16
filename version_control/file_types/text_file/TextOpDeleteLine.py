@@ -24,3 +24,11 @@ class TextOpDeleteLine(Operation):
         if self.file_name not in state.files:
             return False
         return self.line_number >= 0 and len(state.files[self.file_name].file_contents) > self.line_number
+
+    def to_string(self):
+        return "TextOpDeleteLine\t{}\t{}".format(self.file_name, self.line_number)
+
+    @staticmethod
+    def from_string(operation_string):
+        operation = operation_string.split("\t")
+        return TextOpDeleteLine(operation[1], int(operation[2]))

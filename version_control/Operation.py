@@ -25,3 +25,17 @@ class Operation():
         Otherwise returns False
         """
         raise NotImplementedError("Must be implemented by specific operation")
+
+    def to_string(self):
+        """
+        Returns the operation written to a string
+        """
+        raise NotImplementedError("Must be implemented by specific operation")
+
+
+    @staticmethod
+    def from_string(operation_string):
+        """
+        Returns an instance of the operation parsed from a valid operation string
+        """
+        raise NotImplementedError("Must be implemented by specific operation")

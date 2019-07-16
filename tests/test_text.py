@@ -111,8 +111,31 @@ def test_get_operations_complex_changes():
     assert operations[2].line_number == 1
     assert operations[2].line_contents == "k"
 
-def test_read_write_file():
-    text_file = TextFile(os.getcwd() + "/temp/text", ["this", "is", "a", "file"])
-    text_file.write_file()
-    text_file1 = TextFile.read_file(os.getcwd() + "/temp/text")
-    assert "".join(text_file1.file_contents) == "this\nis\na\nfile\n"
+def test_to_from_string():
+    text_file = TextFile("text", ["this", "is", "a", "file"])
+    text_file_string = text_file.to_string()
+    text_file1 = TextFile.from_string(text_file_string)
+    assert text_file.file_name == text_file1.file_name 
+    assert text_file.file_contents == text_file1.file_contents 
+
+def test_to_from_string_insert():
+    insert_op = TextOpInsertLine("binary", 0, "100")
+    insert_op_string = insert_op.to_string()
+    insert_op1 = TextOpInsertLine.from_string(insert_op_string)
+    assert insert_op.file_name == insert_op1.file_name
+    assert insert_op.line_number == insert_op1.line_number
+    assert insert_op.line_contents == insert_op1.line_contents
+
+def test_to_from_string_delete():
+    delete_op = TextOpDeleteLine("binary", 0)
+    delete_op_string = delete_op.to_string()
+    delete_op1 = TextOpDeleteLine.from_string(delete_op_string)
+    assert delete_op.file_name == delete_op1.file_name
+    assert delete_op.line_number == delete_op1.line_number
+
+def test_to_from_file():
+    text_file = TextFile(os.getcwd() + "/temp/text", ["hi", "yo"])
+    text_file.to_file(os.getcwd() + "/temp/text")
+    text_file1 = TextFile.from_file(os.getcwd() + "/temp/text")
+    assert text_file1.file_name == os.getcwd() + "/temp/text"
+    assert text_file1.file_contents == ["hi", "yo"]

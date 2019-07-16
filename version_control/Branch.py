@@ -14,3 +14,12 @@ class Branch():
             raise Exception("Invalid patch to add to branch")
         self.states.append(new_state)
         self.patches.append(patch)
+
+    def curr_state(self):
+        return self.states[-1]
+
+    """
+    def write_to_file():
+        for patch in self.patches:
+            for operation in patch:
+    """

@@ -8,7 +8,6 @@ from version_control.file_types.text_file.TextOpInsertLine import TextOpInsertLi
 class TextFile(File):
 
     # A text file is a map from line number to text data
-    # it's an array of strings, tbh; just bump everything up when you need to
     def __init__(self, file_name, file_contents):
         File.__init__(self, file_name)
         self.file_contents = file_contents
@@ -81,19 +80,6 @@ class TextFile(File):
 
         return delete_patches + insert_patches
 
-    @staticmethod
-    def read_file(file_path):
-        f = open(file_path, "r")
-        new_file = TextFile(file_path, f.readlines())
-        f.close()
-        return new_file
-
-    def write_file(self,):
-        f = open(self.file_name, "w+")
-        for line_contents in self.file_contents:
-            f.write(line_contents + "\n")
-        f.close()
-
     def print_changes(self, new_file):
         if new_file.file_name != self.file_name:
             raise Exception("Can only print operations on the same files")
@@ -126,3 +112,30 @@ class TextFile(File):
     def delete_line(self, line_number):
         # line numbers are the numbers in the current file
         del self.file_contents[line_number]
+
+    def to_string(self):
+        return "TextFile\t{}\t{}".format(self.file_name, "%".join(self.file_contents))
+
+    @staticmethod
+    def from_string(file_string):
+        file_string = file_string.split("\t")
+        file_name = file_string[1]
+        file_contents = file_string[2].split("%")
+        return TextFile(file_name, file_contents)
+
+    def to_file(self, file_path):
+        assert file_path.endswith(self.file_name)
+        f = open(file_path, "w+")
+        f.write("\n".join(self.file_contents))
+        f.close()
+
+    @staticmethod
+    def from_file(file_path):
+        f = open(file_path, "r")
+        file_contents = []
+        for line in f.readlines():
+            if line.endswith("\n"):
+                file_contents.append(line[:len(line) - 1])
+            else:
+                file_contents.append(line)
+        return TextFile(file_path, file_contents)

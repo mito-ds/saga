@@ -20,16 +20,25 @@ class BinaryFile(File):
     def change_contents(self, file_contents):
         self.file_contents = file_contents
 
-    @staticmethod
-    def read_file(file_path):
-        f = open(file_path, "rb")
-        new_file = BinaryFile(file_path, f.read())
-        f.close()
-        return new_file
+    def to_string(self):
+        return "BinaryFile\t{}\t{}".format(self.file_name, self.file_contents)
 
-    def write_file(self):
-        print(os.getcwd())
-        f = open(self.file_name, "wb")
-        for line_contents in self.file_contents:
-            f.write(bytes(line_contents, "utf-8"))
+    @staticmethod
+    def from_string(file_string):
+        file_string = file_string.split("\t")
+        file_name = file_string[1]
+        file_contents = file_string[2]
+        return BinaryFile(file_name, file_contents)
+
+    def to_file(self, file_path):
+        assert file_path.endswith(self.file_name)
+        f = open(file_path, "wb+")
+        f.write(bytes(self.file_contents, "utf-8"))
         f.close()
+
+    @staticmethod
+    def from_file(file_path):
+        f = open(file_path, "r")
+        file_contents = f.read()
+        f.close()
+        return BinaryFile(file_path, file_contents)
