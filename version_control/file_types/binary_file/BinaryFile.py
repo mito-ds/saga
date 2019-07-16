@@ -1,3 +1,4 @@
+import os
 from version_control.file_types.file.File import File
 from version_control.file_types.binary_file.BinaryOpChangeContents import BinaryOpChangeContents
 
@@ -18,3 +19,17 @@ class BinaryFile(File):
     # there's not much here, tbh
     def change_contents(self, file_contents):
         self.file_contents = file_contents
+
+    @staticmethod
+    def read_file(file_path):
+        f = open(file_path, "rb")
+        new_file = BinaryFile(file_path, f.read())
+        f.close()
+        return new_file
+
+    def write_file(self):
+        print(os.getcwd())
+        f = open(self.file_name, "wb")
+        for line_contents in self.file_contents:
+            f.write(bytes(line_contents, "utf-8"))
+        f.close()

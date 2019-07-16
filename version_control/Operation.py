@@ -12,6 +12,13 @@ class Operation():
         """
         raise NotImplementedError("Must be implemented by specific operation")
 
+    def apply_operation_to_file(self, file):
+        """
+        Returns a modified version of the file, with the ooeration applied
+        """
+        raise NotImplementedError("Must be implemented by specific operation")
+
+
     def valid_operation(self, state):
         """
         Returns True if the operation is valid on the state.

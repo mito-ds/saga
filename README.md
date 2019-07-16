@@ -37,3 +37,22 @@ Consider a branch made up of patches P1, P2, P3, ..., Pn. We can consider the st
 Patch Pi can only give it's validity conditions based on state i - 1. Furthermore, any patch must define it's "area of effect." This is the files that it's validity conditions apply to.
 
 Finially, we define a repository to be any set of branches.
+
+
+-------
+
+How do we move from LCS calculation to figuring out what changes were made (for now, just a text file)?
+
+We can think of the indexes as a map:
+
+a b c d e f g h
+|  \   /      
+a k b e z z z z
+
+If a line from the old file has no matches, than it was deleted. If a line from the new file has no matches, than it was added. We can first calculate the removed lines by looping over the all lines in the file and marking the ones that don't have matches. In the above file, this would result in:
+
+a b e
+|  \ \ 
+a k b e z z z z 
+
+Then, we can loop over the new file, and keep track of all the lines that have been added (and what they have been added as).

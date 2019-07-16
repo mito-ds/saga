@@ -12,4 +12,12 @@ class File():
         """
         raise NotImplementedError("Must be implemented by child class")
 
+    @staticmethod
+    def read_file(file_path):
+        """
+        Reads in the file
+        """
+        raise NotImplementedError("Must be implemented by child class")
+
+
     

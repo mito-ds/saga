@@ -13,9 +13,12 @@ class TextOpDeleteLine(Operation):
             return None
 
         files = copy.deepcopy(state.files)
-        files[self.file_name].delete_line(self.line_number)
+        self.apply_operation_to_file(files[self.file_name])
         
         return State(files)
+
+    def apply_operation_to_file(self, file):
+        file.delete_line(self.line_number)
 
     def valid_operation(self, state):
         if self.file_name not in state.files:

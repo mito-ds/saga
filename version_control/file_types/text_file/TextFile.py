@@ -1,4 +1,9 @@
+from copy import deepcopy
+from colorama import Fore, Style
 from version_control.file_types.file.File import File
+from version_control.file_types.text_file.TextOpDeleteLine import TextOpDeleteLine
+from version_control.file_types.text_file.TextOpInsertLine import TextOpInsertLine
+
 
 class TextFile(File):
 
@@ -8,12 +13,7 @@ class TextFile(File):
         File.__init__(self, file_name)
         self.file_contents = file_contents
 
-    def get_operations(self, new_file):
-        # TODO: implement longest common subsequence operations...
-        # it's probably the best heuristic here?
-        if new_file.file_name != self.file_name:
-            raise Exception("Can only get operations on the same files")
-
+    def get_lcs_indexes(self, new_file):
         # adapated from geeksforgeeks
         m = len(self.file_contents) 
         n = len(new_file.file_contents) 
@@ -31,11 +31,11 @@ class TextFile(File):
 
         if L[m][n] == len(self.file_contents) and L[m][n] == len(new_file.file_contents):
             # the files are the same, in this case
-            return []
+            return ([i for i in range(L[m][n])], [i for i in range(L[m][n])])
     
         # Create an array to store indexes of common subsequence
-        lcs_indexes_i = [0] * (L[m][n]) 
-        lcs_indexes_j = [0] * (L[m][n])
+        lcs_indexes_old = [0] * (L[m][n]) 
+        lcs_indexes_new = [0] * (L[m][n])
         index = L[m][n] - 1
     
         # Start from the right-most-bottom-most corner and 
@@ -47,8 +47,8 @@ class TextFile(File):
             # If current character in X[] and Y are same, then 
             # current character is part of LCS 
             if self.file_contents[i-1] == new_file.file_contents[j-1]: 
-                lcs_indexes_i[index] = i-1 
-                lcs_indexes_j[index] = j-1 
+                lcs_indexes_old[index] = i-1 
+                lcs_indexes_new[index] = j-1 
                 i-=1
                 j-=1
                 index-=1
@@ -59,21 +59,70 @@ class TextFile(File):
                 i-=1
             else: 
                 j-=1
-        
 
+        return (lcs_indexes_old, lcs_indexes_new)
 
-        print(lcs_indexes_i)
-        print(lcs_indexes_j)
+    def get_operations(self, new_file):
+        if new_file.file_name != self.file_name:
+            raise Exception("Can only get operations on the same files")
 
+        lcs_indexes_old, lcs_indexes_new = self.get_lcs_indexes(new_file)
 
+        delete_patches = []
+        for line_number in range(len(self.file_contents)):
+            if line_number not in lcs_indexes_old:
+                relative_line_num = line_number - len(delete_patches) # get the relative number, accounting for lines deleted before
+                delete_patches.append(TextOpDeleteLine(self.file_name, relative_line_num))
 
-    def change_line(self, line_number, line_contents):
-        if line_number >= len(self.file_contents):
-            raise Exception("cannot change line that is greater than contents")
-        self.file_contents[line_number] = line_contents
+        insert_patches = []
+        for line_number in range(len(new_file.file_contents)):
+            if line_number not in lcs_indexes_new:
+                insert_patches.append(TextOpInsertLine(self.file_name, line_number, new_file.file_contents[line_number]))
+
+        return delete_patches + insert_patches
+
+    @staticmethod
+    def read_file(file_path):
+        f = open(file_path, "r")
+        new_file = TextFile(file_path, f.readlines())
+        f.close()
+        return new_file
+
+    def write_file(self,):
+        f = open(self.file_name, "w+")
+        for line_contents in self.file_contents:
+            f.write(line_contents + "\n")
+        f.close()
+
+    def print_changes(self, new_file):
+        if new_file.file_name != self.file_name:
+            raise Exception("Can only print operations on the same files")
+
+        lcs_indexes_old, lcs_indexes_new = self.get_lcs_indexes(new_file)
+
+        old_idx = 0
+        new_idx = 0
+        print("File diff: {}".format(self.file_name))
+        while old_idx < len(self.file_contents) and new_idx < len(new_file.file_contents):
+            # first print all the deletes
+            if old_idx not in lcs_indexes_old:
+                print(Fore.RED + "- " + self.file_contents[old_idx])
+                old_idx += 1
+            # then print all inserts
+            elif new_idx not in lcs_indexes_new:
+                print(Fore.GREEN + "+ " + new_file.file_contents[new_idx])
+                new_idx += 1
+            else:
+                # should march in unison
+                assert new_file.file_contents[new_idx] == self.file_contents[old_idx]
+                print(Fore.BLACK + self.file_contents[old_idx])
+                old_idx += 1
+                new_idx += 1
+
 
     def insert_line(self, line_number, line_contents):
         self.file_contents.insert(line_number, line_contents)
 
     def delete_line(self, line_number):
-        self.file_contents.pop(line_number)
+        # line numbers are the numbers in the current file
+        del self.file_contents[line_number]

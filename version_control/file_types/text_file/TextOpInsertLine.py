@@ -14,9 +14,12 @@ class TextOpInsertLine(Operation):
             return None
 
         files = copy.deepcopy(state.files)
-        files[self.file_name].insert_line(self.line_number, self.line_contents)
+        self.apply_operation_to_file(files[self.file_name])
         
         return State(files)
+
+    def apply_operation_to_file(self, file):
+        file.insert_line(self.line_number, self.line_contents)
 
     def valid_operation(self, state):
         if self.file_name not in state.files:
