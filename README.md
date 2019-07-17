@@ -4,24 +4,11 @@
 
 ### Installation
 
-To install the software on your computer (and add it to your path!)
-
-~~~~
-git clone https://github.com/naterush/version-control.git
-cd version-control
-make install
-~~~~
+To install the software on your computer: TODO (it's a hack, currently)
 
 ### Running Tests
 
-After installing:
-
-~~~~
-virtualenv venv
-source venv/bin/activate
-pip install pytest
-pytest
-~~~~
+To run the software: TODO (it's a hack, currently)
 
 ## SPECIFICATION
 
