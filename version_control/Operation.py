@@ -1,4 +1,3 @@
-from version_control.State import State
 
 class Operation():
 

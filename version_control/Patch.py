@@ -22,7 +22,7 @@ class Patch():
         for operation in self.operations:
             operation_strings.append(operation.to_string())
         return "\n".join(operation_strings)
-    
+
     @staticmethod
     def from_string(patch_string):
         operation_strings = patch_string.split("\n")

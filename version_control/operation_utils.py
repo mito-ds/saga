@@ -16,6 +16,3 @@ def parse_operation(operation_string):
     operation = operation_string.split("\t")
     operation_class = OPERATION_DICT[operation[0]]
     return operation_class.from_string(operation_string)
-
-    
-    

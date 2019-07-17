@@ -39,7 +39,7 @@ def main():
             file_class = type(prev_file)
             new_file = file_class.from_file(args.file)
             change_operations = prev_file.get_operations(new_file)
-            
+
             # write them to current commit
             for operation in change_operations:
                 add_op_to_curr_commit(operation)
@@ -86,9 +86,7 @@ def main():
                     file_obj = BinaryFile.from_file(args.file)
                 curr_state.files[args.file].print_changes(file_obj)
     else:
-        print("Error: usage \{init | add | commit | diff\}")
-    
-
+        print("Error: usage {init | add | commit | diff}")
 
 
 def get_current_branch():
