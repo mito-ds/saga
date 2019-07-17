@@ -15,100 +15,135 @@ def main():
 
     args = parser.parse_args()
     cwd = os.getcwd()
-    curr_branch = get_current_branch()
-    curr_state = curr_branch.curr_state()
+    # First, we find out if this folder is the part of an existing .vcs project
+    vcs_path = get_vcs_path(cwd)
+
+    # Handle the case where the project has not been started; the only option is to create it
+    if vcs_path is None:
+        if args.action == "init":
+            init_vcs_folder(cwd)
+        else:
+            print("Error: must create a vcs project using init before running other commands")
+        return
+
+    curr_state = get_curr_state(vcs_path)
 
     if args.action == "init":
-        if os.path.isdir(cwd + "/.vcs"):
-            print("Project already initialized")
-        else:
-            os.mkdir(cwd + "/.vcs")
-            os.mkdir(cwd + "/.vcs/branch")
-            f = open(cwd + "/.vcs/curr_commit", "w+")
-            f.close()
-    elif args.action == "add":
-        # if the file existed before
-        if args.file in curr_state.files:
-            # we are either deleting it
-            if not os.path.exists(args.file):
-                f = open(cwd + "/.vcs/curr_commit", "a+")
-                f.write(FileOpRemove(args.file).to_string())
-                f.close()
-            # or we are changing it
-            prev_file = curr_state.files[args.file]
-            file_class = type(prev_file)
-            new_file = file_class.from_file(args.file)
-            change_operations = prev_file.get_operations(new_file)
-
-            # write them to current commit
-            for operation in change_operations:
-                add_op_to_curr_commit(operation)
-        else:
-            if args.file.endswith(".txt"):
-                file_obj = TextFile.from_file(args.file)
-            else:
-                file_obj = BinaryFile.from_file(args.file)
-            add_op_to_curr_commit(FileOpAdd(args.file, file_obj))
+        print("Error: vcs project already exists at {}".format(vcs_path))
     elif args.action == "commit":
-        # this is a new file
-        patch_file_name = "0"
-        for patch_file_name in os.listdir(cwd + "/.vcs/branch"):
-            pass
-        last = int(patch_file_name)
-        new = last + 1
-        # commit the current commit
-        os.rename(cwd + "/.vcs/curr_commit", cwd + "/.vcs/branch/" + str(new))
-        # make a new current commit
-        f = open(cwd + "/.vcs/curr_commit", "w+")
-        f.close()
+        commit(vcs_path)
+    elif args.file == None:
+        print("Error: must specify a file")
+    elif args.action == "add":
+        add_file(cwd, args.file, curr_state)
     elif args.action == "diff":
-        # if the file didn't exist
-        if args.file not in curr_state.files:
-            if not os.path.exists(args.file):
-                print("Error: file didn't + doesn't exist")
-            else:
-                if args.file.endswith(".txt"):
-                    file_obj = TextFile.from_file(args.file)
-                else:
-                    file_obj = BinaryFile.from_file(args.file)
-                print("File diff: {}".format(file_obj.file_name))
-                print("+" + file_obj.file_contents)
-        else:
-            if not os.path.exists(args.file):
-                file_obj = curr_state.files[args.file]
-                print("File diff: {}".format(file_obj.file_contents))
-                print("-" + file_obj.file_contents)
-                print("Error: file didn't + doesn't exist")
-            else:
-                if args.file.endswith(".txt"):
-                    file_obj = TextFile.from_file(args.file)
-                else:
-                    file_obj = BinaryFile.from_file(args.file)
-                curr_state.files[args.file].print_changes(file_obj)
+        diff(vcs_path, args.file, curr_state)
     else:
         print("Error: usage {init | add | commit | diff}")
 
-
-def get_current_branch():
-    cwd = os.getcwd()
+def get_curr_state(vcs_path):
     branch = Branch()
 
-    for patch_file_name in os.listdir(cwd + "/.vcs/branch"):
-        f = open(cwd + "/.vcs/branch/" + patch_file_name, "r")
+    for patch_file_name in os.listdir(vcs_path + "/branch"):
+        f = open(vcs_path + "/branch/" + patch_file_name, "r")
         patch_file_text = f.read().strip()
         f.close()
         patch = Patch.from_string(patch_file_text)
         branch.add_patch(patch)
 
-    f = open(cwd + "/.vcs/curr_commit", "r")
+    f = open(vcs_path + "/curr_commit", "r")
     patch_file_text = f.read().strip()
     f.close()
     if patch_file_text == "":
-        return branch
+        return branch.curr_state()
     patch = Patch.from_string(patch_file_text)
     branch.add_patch(patch)
 
-    return branch
+    return branch.curr_state()
+
+def get_vcs_path(cwd):
+    path = cwd
+    while path != "/":
+        # check if there is a
+        if os.path.isdir(path + "/.vcs"):
+            return path + "/.vcs"
+        path = os.path.dirname(path)
+    return None
+
+def init_vcs_folder(cwd):
+    os.mkdir(cwd + "/.vcs")
+    os.mkdir(cwd + "/.vcs/branch")
+    f = open(cwd + "/.vcs/curr_commit", "w+")
+    f.close()
+    return cwd + "/.vcs"
+
+def add_file(cwd, file_name, curr_state):
+    # if the file existed before
+    if file_name in curr_state:
+        if not os.path.exists(file_name):
+            # we are either deleting it
+            add_op_to_curr_commit(FileOpRemove(file_name))
+        else:
+            # or we are changing it
+            prev_file = curr_state.files[file_name]
+            file_class = type(prev_file)
+            new_file = file_class.from_file(file_name)
+            change_operations = prev_file.get_operations(new_file)
+
+            # write them to current commit
+            for operation in change_operations:
+                add_op_to_curr_commit(operation)
+    else:
+        # otherwise, it didn't exist before, so we are adding it
+        if file_name.endswith(".txt"):
+            file_obj = TextFile.from_file(file_name)
+        else:
+            file_obj = BinaryFile.from_file(file_name)
+        add_op_to_curr_commit(FileOpAdd(file_name, file_obj))
+
+def commit(vcs_path):
+    # check that the current commit isn't empty:
+    curr_commit = open(vcs_path + "/curr_commit", "r+")
+    text = curr_commit.read()
+    curr_commit.close()
+    if text == "":
+        print("Error: nothing to commit")
+        return
+    # this is a new file
+    patch_file_name = "0"
+    for patch_file_name in os.listdir(vcs_path + "/branch"):
+        pass
+    last = int(patch_file_name)
+    new = last + 1
+    # commit the current commit
+    os.rename(vcs_path + "/curr_commit", vcs_path + "/branch/" + str(new))
+    # make a new current commit
+    f = open(vcs_path + "/curr_commit", "w+")
+    f.close()
+
+def diff(vcs_path, file_name, curr_state):
+    # if the file didn't exist
+    if file_name not in curr_state:
+        if not os.path.exists(file_name):
+            print("Error: no diff as file does not/didn't exist")
+        else:
+            if file_name.endswith(".txt"):
+                file_obj = TextFile.from_file(file_name)
+            else:
+                file_obj = BinaryFile.from_file(file_name)
+            print("File diff: {}".format(file_obj.file_name))
+            print("+" + file_obj.file_contents)
+    else:
+        if not os.path.exists(file_name):
+            file_obj = curr_state.files[file_name]
+            print("File diff: {}".format(file_name))
+            print("Deleted file")
+        else:
+            if file_name.endswith(".txt"):
+                file_obj = TextFile.from_file(file_name)
+            else:
+                file_obj = BinaryFile.from_file(file_name)
+            curr_state.files[file_name].print_changes(file_obj)
 
 def add_op_to_curr_commit(operation):
     operation_string = operation.to_string()

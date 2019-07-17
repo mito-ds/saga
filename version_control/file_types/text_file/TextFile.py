@@ -88,13 +88,13 @@ class TextFile(File):
         old_idx = 0
         new_idx = 0
         print("File diff: {}".format(self.file_name))
-        while old_idx < len(self.file_contents) and new_idx < len(new_file.file_contents):
+        while old_idx < len(self.file_contents) or new_idx < len(new_file.file_contents):
             # first print all the deletes
-            if old_idx not in lcs_indexes_old:
+            if old_idx not in lcs_indexes_old and old_idx < len(self.file_contents):
                 print("- " + self.file_contents[old_idx])
                 old_idx += 1
             # then print all inserts
-            elif new_idx not in lcs_indexes_new:
+            elif new_idx not in lcs_indexes_new and new_idx < len(new_file.file_contents):
                 print("+ " + new_file.file_contents[new_idx])
                 new_idx += 1
             else:
@@ -103,6 +103,8 @@ class TextFile(File):
                 print(self.file_contents[old_idx])
                 old_idx += 1
                 new_idx += 1
+
+        
 
 
     def insert_line(self, line_number, line_contents):
