@@ -93,8 +93,6 @@ class TextFile(File):
             raise Exception("Can only get operations on the same files")
 
         lcs_indexes_old, lcs_indexes_new = self.get_lcs_indexes(new_file)
-        #lcs_indexes_old = [-1] + lcs_indexes_old + [len(lcs_indexes_old)]
-        #lcs_indexes_new = [-1] + lcs_indexes_new + [len(lcs_indexes_new)]
         print("Old : {}".format(lcs_indexes_old))
         print("New : {}".format(lcs_indexes_new))
 
@@ -134,6 +132,11 @@ class TextFile(File):
         new_idx = 0
         print("File diff: {}".format(self.file_name))
         while old_idx < len(self.file_contents) or new_idx < len(new_file.file_contents):
+            # first check if it's a change
+            #if not (old_idx + 1 not in lcs_indexes_old and old_idx + 1 < len(self.file_contents)) and new_idx not in lcs_indexes_new and new_idx < len(new_file.file_contents):
+            #    print(self.file_contents[old_idx] + " -> " + new_file.file_contents[new_idx])
+            #    old_idx += 1
+            #    new_idx += 1
             # first print all the deletes
             if old_idx not in lcs_indexes_old and old_idx < len(self.file_contents):
                 print("- " + self.file_contents[old_idx])
