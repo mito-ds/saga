@@ -2,3 +2,5 @@ venv/
 temp/
 .vcs
 .vscode/
+*.pyc
+*.pyo

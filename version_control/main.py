@@ -37,11 +37,11 @@ def main():
     elif args.action == "add":
         add_file(cwd, args.file, curr_state)
     elif args.action == "diff":
-        diff(vcs_path, args.file, curr_state)
+        diff(vcs_path, args.file)
     else:
         print("Error: usage {init | add | commit | diff}")
 
-def get_curr_state(vcs_path):
+def get_curr_state(vcs_path, include_working_commit=True):
     branch = Branch()
 
     for patch_file_name in os.listdir(vcs_path + "/branch"):
@@ -50,14 +50,15 @@ def get_curr_state(vcs_path):
         f.close()
         patch = Patch.from_string(patch_file_text)
         branch.add_patch(patch)
-
-    f = open(vcs_path + "/curr_commit", "r")
-    patch_file_text = f.read().strip()
-    f.close()
-    if patch_file_text == "":
-        return branch.curr_state()
-    patch = Patch.from_string(patch_file_text)
-    branch.add_patch(patch)
+        
+    if include_working_commit:
+        f = open(vcs_path + "/curr_commit", "r")
+        patch_file_text = f.read().strip()
+        f.close()
+        if patch_file_text == "":
+            return branch.curr_state()
+        patch = Patch.from_string(patch_file_text)
+        branch.add_patch(patch)
 
     return branch.curr_state()
 
@@ -121,8 +122,9 @@ def commit(vcs_path):
     f = open(vcs_path + "/curr_commit", "w+")
     f.close()
 
-def diff(vcs_path, file_name, curr_state):
+def diff(vcs_path, file_name):
     # if the file didn't exist
+    curr_state = get_curr_state(vcs_path, include_working_commit=False)
     if file_name not in curr_state:
         if not os.path.exists(file_name):
             print("Error: no diff as file does not/didn't exist")

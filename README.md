@@ -2,9 +2,14 @@
 
 ## Instructions
 
-### Installation
+### Usage
 
-To install the software on your computer: TODO (it's a hack, currently)
+To download and setup the software:
+
+~~~~
+git clone 
+
+~~~~
 
 ### Running Tests
 
