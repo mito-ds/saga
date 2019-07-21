@@ -4,6 +4,7 @@ from version_control.file_types.file.FileOpAdd import FileOpAdd
 from version_control.file_types.text_file.TextFile import TextFile
 from version_control.file_types.text_file.TextOpInsertLine import TextOpInsertLine
 from version_control.file_types.text_file.TextOpDeleteLine import TextOpDeleteLine
+from version_control.file_types.text_file.TextOpChangeLine import TextOpChangeLine
 from version_control.Patch import Patch
 from version_control.Branch import Branch
 
@@ -81,18 +82,15 @@ def test_get_operations_delete_line():
     assert operations[0].file_name == "filename"
     assert operations[0].line_number == 0
 
-def test_get_operations_delete_insert_line():
+def test_get_operations_change_line():
     text_file1 = TextFile("filename", [""])
     text_file2 = TextFile("filename", ["123"])
     operations = text_file1.get_operations(text_file2)
-    assert len(operations) == 2
-    assert isinstance(operations[0], TextOpDeleteLine)
+    assert len(operations) == 1
+    assert isinstance(operations[0], TextOpChangeLine)
     assert operations[0].file_name == "filename"
     assert operations[0].line_number == 0
-    assert isinstance(operations[1], TextOpInsertLine)
-    assert operations[1].file_name == "filename"
-    assert operations[1].line_number == 0
-    assert operations[1].line_contents == "123"
+    assert operations[0].line_contents == "123"
 
 
 def test_get_operations_complex_changes():
@@ -100,16 +98,16 @@ def test_get_operations_complex_changes():
     text_file2 = TextFile("filename", ["a", "k", "b", "e"])
     operations = text_file1.get_operations(text_file2)
     assert len(operations) == 3
-    assert isinstance(operations[0], TextOpDeleteLine)
+    assert isinstance(operations[0], TextOpInsertLine)
     assert operations[0].file_name == "filename"
-    assert operations[0].line_number == 2
+    assert operations[0].line_number == 1
+    assert operations[0].line_contents == "k"
     assert isinstance(operations[1], TextOpDeleteLine)
     assert operations[1].file_name == "filename"
-    assert operations[1].line_number == 2
-    assert isinstance(operations[2], TextOpInsertLine)
+    assert operations[1].line_number == 3
+    assert isinstance(operations[2], TextOpDeleteLine)
     assert operations[2].file_name == "filename"
-    assert operations[2].line_number == 1
-    assert operations[2].line_contents == "k"
+    assert operations[2].line_number == 3
 
 def test_to_from_string():
     text_file = TextFile("text", ["this", "is", "a", "file"])

@@ -2,6 +2,7 @@ from copy import deepcopy
 from version_control.file_types.file.File import File
 from version_control.file_types.text_file.TextOpDeleteLine import TextOpDeleteLine
 from version_control.file_types.text_file.TextOpInsertLine import TextOpInsertLine
+from version_control.file_types.text_file.TextOpChangeLine import TextOpChangeLine
 
 
 class TextFile(File):
@@ -60,24 +61,68 @@ class TextFile(File):
 
         return (lcs_indexes_old, lcs_indexes_new)
 
+
+    def operations_from_range(self, new_file, old_start, old_end, new_start, new_end, num_deleted):
+        print("A: {} - {}".format(old_start, old_end))
+        print("B: {} - {}".format(new_start, new_end))
+        A = self.file_contents[old_start: old_end]
+        B = new_file.file_contents[new_start: new_end]
+        print("A : {}".format(A))
+        print("B : {}".format(B))
+
+        patches = []
+        for a_idx, _ in enumerate(A):
+            line_number = new_start + a_idx - num_deleted
+            if a_idx < len(B):
+                patches.append(TextOpChangeLine(self.file_name, line_number, B[a_idx]))
+            else:
+                patches.append(TextOpDeleteLine(self.file_name, line_number))
+                num_deleted += 1
+
+        for b_idx, b in enumerate(B):
+            if b_idx < len(A):
+                continue
+            else:
+                line_number = new_start + b_idx - num_deleted
+                patches.append(TextOpInsertLine(self.file_name, line_number, b))
+
+        return patches, num_deleted
+
     def get_operations(self, new_file):
         if new_file.file_name != self.file_name:
             raise Exception("Can only get operations on the same files")
 
         lcs_indexes_old, lcs_indexes_new = self.get_lcs_indexes(new_file)
+        #lcs_indexes_old = [-1] + lcs_indexes_old + [len(lcs_indexes_old)]
+        #lcs_indexes_new = [-1] + lcs_indexes_new + [len(lcs_indexes_new)]
+        print("Old : {}".format(lcs_indexes_old))
+        print("New : {}".format(lcs_indexes_new))
 
-        delete_patches = []
-        for line_number in range(len(self.file_contents)):
-            if line_number not in lcs_indexes_old:
-                relative_line_num = line_number - len(delete_patches) # get the relative number, accounting for lines deleted before
-                delete_patches.append(TextOpDeleteLine(self.file_name, relative_line_num))
+        patches = []
+        num_deleted = 0
+        for i in range(len(lcs_indexes_old) - 1):
+            new_patches, num_deleted = self.operations_from_range(
+                new_file, 
+                lcs_indexes_old[i] + 1, 
+                lcs_indexes_old[i + 1], 
+                lcs_indexes_new[i] + 1, 
+                lcs_indexes_new[i + 1],
+                num_deleted
+            )
+            patches += new_patches
 
-        insert_patches = []
-        for line_number in range(len(new_file.file_contents)):
-            if line_number not in lcs_indexes_new:
-                insert_patches.append(TextOpInsertLine(self.file_name, line_number, new_file.file_contents[line_number]))
+        if len(lcs_indexes_old) == 0:
+            new_patches, num_deleted = self.operations_from_range(
+                new_file, 
+                0, 
+                len(self.file_contents), 
+                0, 
+                len(new_file.file_contents),
+                0
+            )
+            patches += new_patches
 
-        return delete_patches + insert_patches
+        return patches
 
     def print_changes(self, new_file):
         if new_file.file_name != self.file_name:
@@ -104,8 +149,8 @@ class TextFile(File):
                 old_idx += 1
                 new_idx += 1
 
-        
-
+    def change_line(self, line_number, line_contents):
+        self.file_contents[line_number] = line_contents
 
     def insert_line(self, line_number, line_contents):
         self.file_contents.insert(line_number, line_contents)
