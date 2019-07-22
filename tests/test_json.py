@@ -141,5 +141,6 @@ def test_get_operations_disjoint_keys():
     assert operations[1].path[0] == "list2"
     assert operations[1].new_value == ["a", "k", "b", "e"]
     # TODO: note, we might be able to do better just by doing a git line
-    # diff, and seeing what results in bigger changes here. There's some heuristic...
+    # diff, and seeing what results in bigger changes here. There's some heuristic..
+    # sounds like a future research problem!
 
