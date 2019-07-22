@@ -4,6 +4,8 @@ This is a list of open reasearch problems for generalized version control.
 
 ## Longest Common Subsequence with a Change Operation - and a Distance Metric
 
+EDIT: I think it might be this algorithm: https://en.wikipedia.org/wiki/Hirschberg%27s_algorithm, or at least something close!
+
 The longest common subsequence between two strings A= a1, a2, ... an, B=b1, b2, .. bm is a set of characters LCS = l1, l2, ... li where all characters in LCS appear, in order (but not necessarily contigiously) in both A and B, and they are the longest possible sequence that satisfied this constraint. 
 
 This is clearly a useful notion for a version control system; for any list that undergoes changes, the LCS of the old list with the new list can be thought of as the things that do not change. 
@@ -40,3 +42,12 @@ However, in certain cases, we note that there may have just been a delete and an
 Two notes on the above:
 - Github already does this, somehow (e.g. https://github.com/ethereum/eth2.0-specs/pull/1308/files). I suspect when they notice an delete and then insert on the same line, they just find where the lines differ. This is a less robust version of my proposal, I think.
 - Github has a bunch of examples we can use to find nice heuristics!
+
+
+
+## Give type definitions of version control functions
+
+For a given file type F, we have a function get_operations(F, F'), which returns a list of operations (on file F) that get form F to F'.
+
+etc etc
+
