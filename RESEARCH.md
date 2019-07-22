@@ -34,6 +34,7 @@ However, in certain cases, we note that there may have just been a delete and an
 ### Problem Goals
 - Given a difference metric, define an efficient algorithm for computing the pairs that have the maximal sum, as mentioned above.
 - In the above algorithm, include a "cutoff" value (e.g. pairs can only before formed if they are this close).
+- Define a nice metric for strings, JSON objects, etc!
 - Do testing to find nice values for these numbers in certain known cases (e.g. with text lines). 
 
 Two notes on the above:
