@@ -2,6 +2,7 @@ import pytest
 import os
 from version_control.file_types.file.FileOpAdd import FileOpAdd
 from version_control.file_types.text_file.TextFile import TextFile
+from version_control.file_types.text_file.text_utils import string_distance, lcs_close
 from version_control.file_types.text_file.TextOpInsertLine import TextOpInsertLine
 from version_control.file_types.text_file.TextOpDeleteLine import TextOpDeleteLine
 from version_control.Patch import Patch
@@ -139,3 +140,37 @@ def test_to_from_file():
     text_file1 = TextFile.from_file(os.getcwd() + "/temp/text")
     assert text_file1.file_name == os.getcwd() + "/temp/text"
     assert text_file1.file_contents == ["hi", "yo"]
+
+def test_edit_difference_match():
+    list1 = ["def"]
+    list2 = ["HAHAHA", "defi"]
+    lcs_indexes_old, lcs_indexes_new = lcs_close(list1, list2)
+    assert lcs_indexes_old[0] == 0
+    assert lcs_indexes_new[0] == 1
+
+
+def test_edit_difference_match_large():
+
+    list1 = [
+        "for (int i = 0; i < 100; i++ ) {",
+        "System.out.println(i * 2);",
+        "int temp = i * 1000;",
+        "if (temp < i) {",
+        "System.out.println(temp, i);",
+        "}",
+        "}",
+    ]
+    list2 = [
+        "for (int j = 0; j < 100; j++ ) {",
+        "int temp1 = j * 1000;",
+        "if (temp1 < j) {",
+        "System.out.println(temp1, j);",
+        "}",
+        "}",
+    ]
+
+    lcs_indexes_old, lcs_indexes_new = lcs_close(list1, list2)
+    assert len(lcs_indexes_old) == 6
+    assert lcs_indexes_old == [0, 2, 3, 4, 5, 6]
+    assert lcs_indexes_new == [0, 1, 2, 3, 4, 5]
+
