@@ -1,5 +1,6 @@
 from copy import deepcopy
 from version_control.file_types.file.File import File
+from version_control.file_types.text_file.text_utils import lcs
 from version_control.file_types.text_file.TextOpDeleteLine import TextOpDeleteLine
 from version_control.file_types.text_file.TextOpInsertLine import TextOpInsertLine
 
@@ -9,62 +10,13 @@ class TextFile(File):
     # A text file is a map from line number to text data
     def __init__(self, file_name, file_contents):
         File.__init__(self, file_name)
-        self.file_contents = file_contents
-
-    def get_lcs_indexes(self, new_file):
-        # adapated from geeksforgeeks
-        m = len(self.file_contents) 
-        n = len(new_file.file_contents) 
-
-        # L[i][j] is the length of the longest common subsequece up to indexes i, j
-        L = [[None]*(n + 1) for i in range(m + 1)] 
-        for i in range(m + 1): 
-            for j in range(n + 1): 
-                if i == 0 or j == 0 : 
-                    L[i][j] = 0
-                elif self.file_contents[i-1] == new_file.file_contents[j-1]: 
-                    L[i][j] = L[i-1][j-1]+1
-                else: 
-                    L[i][j] = max(L[i-1][j], L[i][j-1]) 
-
-        if L[m][n] == len(self.file_contents) and L[m][n] == len(new_file.file_contents):
-            # the files are the same, in this case
-            return ([i for i in range(L[m][n])], [i for i in range(L[m][n])])
-    
-        # Create an array to store indexes of common subsequence
-        lcs_indexes_old = [0] * (L[m][n]) 
-        lcs_indexes_new = [0] * (L[m][n])
-        index = L[m][n] - 1
-    
-        # Start from the right-most-bottom-most corner and 
-        # one by one store characters in lcs[] 
-        i = m 
-        j = n 
-        while i > 0 and j > 0: 
-    
-            # If current character in X[] and Y are same, then 
-            # current character is part of LCS 
-            if self.file_contents[i-1] == new_file.file_contents[j-1]: 
-                lcs_indexes_old[index] = i-1 
-                lcs_indexes_new[index] = j-1 
-                i-=1
-                j-=1
-                index-=1
-    
-            # If not same, then find the larger of two and 
-            # go in the direction of larger value 
-            elif L[i-1][j] > L[i][j-1]: 
-                i-=1
-            else: 
-                j-=1
-
-        return (lcs_indexes_old, lcs_indexes_new)
+        self.file_contents = file_contents        
 
     def get_operations(self, new_file):
         if new_file.file_name != self.file_name:
             raise Exception("Can only get operations on the same files")
 
-        lcs_indexes_old, lcs_indexes_new = self.get_lcs_indexes(new_file)
+        lcs_indexes_old, lcs_indexes_new = lcs(self.file_contents, new_file.file_contents)
 
         delete_patches = []
         for line_number in range(len(self.file_contents)):

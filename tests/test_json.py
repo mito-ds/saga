@@ -1,11 +1,6 @@
 import pytest
 import os
 import json
-from version_control.file_types.json_file.JSONOpListDelete import JSONOpListDelete
-from version_control.file_types.json_file.JSONOpListInsert import JSONOpListInsert
-from version_control.file_types.json_file.JSONOpDictAdd import JSONOpDictAdd
-from version_control.file_types.json_file.JSONOpDictDelete import JSONOpDictDelete
-from version_control.file_types.json_file.JSONOpPrimitiveChange import JSONOpPrimitiveChange
 from version_control.file_types.json_file.JSONFile import JSONFile
 from version_control.file_types.file.FileOpAdd import FileOpAdd
 from version_control.Patch import Patch
@@ -23,6 +18,7 @@ def test_create():
     assert branch.states[-1].files["filename"] == json_file
 
 
+"""
 def test_add_dict():
     branch = Branch()
     json_file = JSONFile("filename", {})
@@ -93,22 +89,13 @@ def test_get_operations():
     assert operations[0].path[0] == "key"
     assert operations[0].new_value == 123
 
-
+"""
 def test_get_operations_list():
-    json_file1 = JSONFile("filename", {"list": ["a", "b", "c", "d", "e"]})
-    json_file2 = JSONFile("filename", {"list": ["a", "k", "b", "e"]})
+    json_file1 = JSONFile("filename", {"letters": ["a", "b", "c", "d", "e"]})
+    json_file2 = JSONFile("filename", {"letters": ["a", "k", "b", "e"]})
     operations = json_file1.get_operations(json_file2)
-    assert len(operations) == 3
-    assert isinstance(operations[0], JSONOpListInsert)
-    assert operations[0].file_name == "filename"
-    assert operations[0].path[1] == "1"
-    assert operations[0].new_value == "k"
-    assert isinstance(operations[1], JSONOpListDelete)
-    assert operations[1].file_name == "filename"
-    assert operations[1].path[1] == "3"
-    assert isinstance(operations[2], JSONOpListDelete)
-    assert operations[2].file_name == "filename"
-    assert operations[2].path[1] == "3"
+    
+"""
 
 def test_get_operations_complex_object():
     json_file1 = JSONFile("filename", {"list": ["a", "b", "c", "d", "e"], "obj": {"key": 122}})
@@ -143,4 +130,4 @@ def test_get_operations_disjoint_keys():
     # TODO: note, we might be able to do better just by doing a git line
     # diff, and seeing what results in bigger changes here. There's some heuristic..
     # sounds like a future research problem!
-
+"""
