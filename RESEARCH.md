@@ -47,6 +47,47 @@ Two notes on the above:
 
 ## Give type definitions of version control functions
 
+We note that the following operation are useful, for a given file type F, and two versions of that file:
+
+~~~~
+get_operations(file, file') = list of operations to change file to file'
+merge_operations(file, file', least_common_ancestor_version) = none if changes cannot be merged, otherwise the operations that can be merged
+~~~~
+
+## Give an LCS algorithm for 2D (and more) data
+
+The LCS algorithm takes two lists, and finds the longest common subsequnce between the two lists. For example, in the lists:
+
+~~~~
+list1 = [1, 2, 3, 4, 5]
+list2 = [0, 1, 0, 2, 0, 3, 0, 4, 0, 5]
+~~~~
+
+The LCS would be 1, 2, 3, 4, 5. Clearly, this is useful for version control; we can thus infer that 0's were inserted into the new list. 
+
+How do we think about the LCS algorithm in the context of 2d, or more, data? For example consider a CSV file with the following data:
+
+~~~~
+NAME, EMAIL
+nate, nate@gmail.com
+jim, jim@gmail.com
+tim, tim@gmail.com
+~~~~
+
+Now, how do we do LCS between this data and another piece of data? A first attempt might be to essentially turn the above into the following list:
+
+~~~~
+list = [["NAME", "EMAIL"], ["nate", "nate@gmail.com"], ["jim", "jim@gmail.com"], ["tim", "tim@gmail.com"]]
+~~~~
+
+But 
+
+
+
+You might just 
+
+
+
 For a given file type F, we have a function get_operations(F, F'), which returns a list of operations (on file F) that get form F to F'.
 
 etc etc
