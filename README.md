@@ -11,10 +11,10 @@ Make sure git, python3, pip and virtualenv are installed on your computer.
 To download and setup the software:
 
 ~~~~
-git clone https://github.com/naterush/version-control.git
-cd version-control
-virtualenv venv
-pip install -r requirements.txt
+git clone https://github.com/naterush/version-control.git;
+cd version-control;
+virtualenv venv;
+pip install -r requirements.txt;
 ~~~~
 
 ### Running Tests
