@@ -6,7 +6,7 @@
 
 Make sure git, python3, pip and virtualenv are installed on your computer. 
 
-### Usage
+### Setup
 
 To download and setup the software:
 
@@ -17,9 +17,17 @@ virtualenv venv;
 pip install -r requirements.txt;
 ~~~~
 
+### Using saga
+
+Coming soon!
+
 ### Running Tests
 
-To run the software: TODO (it's a hack, currently)
+When inside of the python virtual enviorment:
+~~~~
+python -m pytest
+~~~~
+
 
 ## SPECIFICATION
 
