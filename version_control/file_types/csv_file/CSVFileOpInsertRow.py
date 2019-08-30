@@ -2,7 +2,7 @@ import copy
 from version_control.State import State
 from version_control.Operation import Operation
 
-class CSVFileOpAddRow(Operation):
+class CSVFileOpInsertRow(Operation):
 
     def __init__(self, file_name, index, value):
         self.file_name = file_name
@@ -19,7 +19,7 @@ class CSVFileOpAddRow(Operation):
         return State(files)
 
     def apply_operation_to_file(self, file):
-        file.add_row(self.index, self.value)
+        file.insert_row(self.index, self.value)
 
     def valid_operation(self, state):
         if self.file_name not in state.files:
@@ -27,9 +27,9 @@ class CSVFileOpAddRow(Operation):
         return True
 
     def to_string(self):
-        return "CSVFileAddRow\t{}\t{}\t{}".format(self.file_name, self.index, self.value)
+        return "CSVFileInsertRow\t{}\t{}\t{}".format(self.file_name, self.index, self.value)
 
     @staticmethod
     def from_string(operation_string):
         operation = operation_string.split("\t")
-        return CSVFileOpAddRow(operation[1], operation[2], int(operation[3]))
+        return CSVFileOpInsertRow(operation[1], operation[2], int(operation[3]))
