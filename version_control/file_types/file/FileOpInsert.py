@@ -3,7 +3,7 @@ from version_control.State import State
 from version_control.Operation import Operation
 from version_control.file_utils import parse_file
 
-class FileOpAdd(Operation):
+class FileOpInsert(Operation):
 
     def __init__(self, file_name, file):
         # TODO: maybe should take in File type, and create a new empty file of that sort? 
@@ -23,11 +23,11 @@ class FileOpAdd(Operation):
         return self.file_name not in state.files
     
     def to_string(self):
-        return "FileOpAdd\t{}\t{}".format(self.file_name, self.file.to_string())
+        return "FileOpInsert\t{}\t{}".format(self.file_name, self.file.to_string())
 
     @staticmethod
     def from_string(operation_string):
         operation = operation_string.split("\t")
         file_string = "\t".join(operation[2:])
         file_obj = parse_file(file_string)
-        return FileOpAdd(operation[1], file_obj)
+        return FileOpInsert(operation[1], file_obj)

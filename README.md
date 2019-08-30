@@ -13,8 +13,8 @@ To download and setup the software:
 ~~~~
 git clone https://github.com/naterush/version-control.git;
 cd version-control;
-virtualenv venv;
-source venv/bin/activate;
+python3 -m venv ~/.virtualenvs/myvenv;
+source ~/.virtualenvs/myvenv/bin/activate;
 pip install -r requirements.txt;
 ~~~~
 

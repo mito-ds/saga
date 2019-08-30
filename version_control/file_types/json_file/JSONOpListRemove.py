@@ -2,12 +2,11 @@ import copy
 from version_control.State import State
 from version_control.Operation import Operation
 
-class CSVFileOpAddRow(Operation):
+class JSONOpListRemove(Operation):
 
-    def __init__(self, file_name, index, value):
+    def __init__(self, file_name, path):
         self.file_name = file_name
-        self.index = index
-        self.value = value
+        self.path = path
 
     def apply_operation(self, state):
         if not self.valid_operation(state):
@@ -19,17 +18,22 @@ class CSVFileOpAddRow(Operation):
         return State(files)
 
     def apply_operation_to_file(self, file):
-        file.add_row(self.index, self.value)
+        file.remove(self.path)
 
     def valid_operation(self, state):
-        if self.file_name not in state.files:
+        try:
+            curr_obj = state.files[self.file_name].file_contents
+            for step in self.path[:-1]:
+                curr_obj = curr_obj[step]
+            line_number = int(self.path[-1])
+            return line_number >= 0 and len(curr_obj) > line_number
+        except:
             return False
         return True
 
     def to_string(self):
-        return "CSVFileAddRow\t{}\t{}\t{}".format(self.file_name, self.index, self.value)
+        pass
 
     @staticmethod
     def from_string(operation_string):
-        operation = operation_string.split("\t")
-        return CSVFileOpAddRow(operation[1], operation[2], int(operation[3]))
+        pass

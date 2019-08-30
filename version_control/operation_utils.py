@@ -1,15 +1,15 @@
-from version_control.file_types.file.FileOpAdd import FileOpAdd
+from version_control.file_types.file.FileOpInsert import FileOpInsert
 from version_control.file_types.file.FileOpRemove import FileOpRemove
 from version_control.file_types.binary_file.BinaryOpChangeContents import BinaryOpChangeContents
 from version_control.file_types.text_file.TextOpInsertLine import TextOpInsertLine
-from version_control.file_types.text_file.TextOpDeleteLine import TextOpDeleteLine
+from version_control.file_types.text_file.TextOpRemoveLine import TextOpRemoveLine
 
 OPERATION_DICT = {
-    "FileOpAdd": FileOpAdd,
+    "FileOpInsert": FileOpInsert,
     "FileOpRemove": FileOpRemove,
     "BinaryOpChangeContents": BinaryOpChangeContents,
     "TextOpInsertLine": TextOpInsertLine,
-    "TextOpDeleteLine": TextOpDeleteLine
+    "TextOpRemoveLine": TextOpRemoveLine
 }
 
 def parse_operation(operation_string):

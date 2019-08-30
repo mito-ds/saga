@@ -4,9 +4,9 @@ import json
 from version_control.Patch import Patch
 from version_control.Branch import Branch
 from version_control.file_types.csv_file.CSVFile import CSVFile
-from version_control.file_types.csv_file.CSVFileOpAddRow import CSVFileOpAddRow
+from version_control.file_types.csv_file.CSVFileOpInsertRow import CSVFileOpInsertRow
 from version_control.file_types.csv_file.CSVFileOpRemoveRow import CSVFileOpRemoveRow
-from version_control.file_types.csv_file.CSVFileOpAddColumn import CSVFileOpAddColumn
+from version_control.file_types.csv_file.CSVFileOpInsertColumn import CSVFileOpInsertColumn
 from version_control.file_types.csv_file.CSVFileOpRemoveColumn import CSVFileOpRemoveColumn
 from version_control.file_types.csv_file.CSVFileOpChangeValue import CSVFileOpChangeValue
 
@@ -19,18 +19,18 @@ def test_delete_row():
     assert isinstance(csv_old.get_operations(csv_new)[0], CSVFileOpRemoveRow)
 
 
-def test_add_row():
+def test_insert_row():
     csv_old = CSVFile("filename", [["a", "b"]])
     csv_new = CSVFile("filename", [["a", "b"], ["c", "d"]])
 
     assert csv_old.get_operations(csv_new)[0].index == 1
     assert csv_old.get_operations(csv_new)[0].value[0] == "c"
     assert csv_old.get_operations(csv_new)[0].value[1] == "d"
-    assert isinstance(csv_old.get_operations(csv_new)[0], CSVFileOpAddRow)
+    assert isinstance(csv_old.get_operations(csv_new)[0], CSVFileOpInsertRow)
 
 
 
-def test_add_and_deleterow():
+def test_insert_and_deleterow():
     csv_old = CSVFile("filename", [["a", "b"], ["c", "d"]])
     csv_new = CSVFile("filename", [["a", "b"], ["e", "f"]])
 
@@ -38,7 +38,7 @@ def test_add_and_deleterow():
     assert isinstance(csv_old.get_operations(csv_new)[0], CSVFileOpRemoveRow)
     assert csv_old.get_operations(csv_new)[1].value[0] == "e"
     assert csv_old.get_operations(csv_new)[1].value[1] == "f"
-    assert isinstance(csv_old.get_operations(csv_new)[1], CSVFileOpAddRow)
+    assert isinstance(csv_old.get_operations(csv_new)[1], CSVFileOpInsertRow)
 
 
 def test_delete_column():
@@ -48,14 +48,14 @@ def test_delete_column():
     assert csv_old.get_operations(csv_new)[0].index == 1
     assert isinstance(csv_old.get_operations(csv_new)[0], CSVFileOpRemoveColumn)
 
-def test_add_column():
+def test_insert_column():
     csv_old = CSVFile("filename", [["a"], ["c"]])
     csv_new = CSVFile("filename", [["a", "b"], ["c", "d"]])
 
     assert csv_old.get_operations(csv_new)[0].index == 1
     assert csv_old.get_operations(csv_new)[0].value[0] == "b"
     assert csv_old.get_operations(csv_new)[0].value[1] == "d"
-    assert isinstance(csv_old.get_operations(csv_new)[0], CSVFileOpAddColumn)
+    assert isinstance(csv_old.get_operations(csv_new)[0], CSVFileOpInsertColumn)
 
 
 def test_delete_column_and_row():
@@ -79,7 +79,7 @@ def test_delete_row_insert_col_delete_row_insert_col():
     assert csv_old.get_operations(csv_new)[1].index == 2
     assert csv_old.get_operations(csv_new)[1].value[0] == "z"
     assert csv_old.get_operations(csv_new)[1].value[1] == "y"
-    assert isinstance(csv_old.get_operations(csv_new)[1], CSVFileOpAddRow)
+    assert isinstance(csv_old.get_operations(csv_new)[1], CSVFileOpInsertRow)
 
     op = csv_old.get_operations(csv_new)[2].index
     assert csv_old.get_operations(csv_new)[2].index == 2

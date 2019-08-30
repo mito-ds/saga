@@ -1,20 +1,20 @@
 import pytest
 import os
-from version_control.file_types.file.FileOpAdd import FileOpAdd
+from version_control.file_types.file.FileOpInsert import FileOpInsert
 from version_control.file_types.text_file.TextFile import TextFile
 from version_control.file_types.text_file.text_utils import string_distance, lcs_close
 from version_control.file_types.text_file.TextOpInsertLine import TextOpInsertLine
-from version_control.file_types.text_file.TextOpDeleteLine import TextOpDeleteLine
+from version_control.file_types.text_file.TextOpRemoveLine import TextOpRemoveLine
 from version_control.Patch import Patch
 from version_control.Branch import Branch
 
 
-def test_add():
+def test_insert():
     branch = Branch()
     text_file = TextFile("filename", [""])
-    addOp = FileOpAdd("filename", text_file)
-    patch = Patch([addOp])
-    branch.add_patch(patch)
+    insertOp = FileOpInsert("filename", text_file)
+    patch = Patch([insertOp])
+    branch.insert_patch(patch)
 
     assert len(branch.states[-1].files) == 1
     assert branch.states[-1].files["filename"] == text_file
@@ -23,29 +23,29 @@ def test_add():
 def test_insert_line():
     branch = Branch()
     text_file = TextFile("filename", ["", ""])
-    addOp = FileOpAdd("filename", text_file)
-    patch = Patch([addOp])
-    branch.add_patch(patch)
+    insertOp = FileOpInsert("filename", text_file)
+    patch = Patch([insertOp])
+    branch.insert_patch(patch)
 
     appendOp = TextOpInsertLine("filename", 1, "new_line")
     patch = Patch([appendOp])
-    branch.add_patch(patch)
+    branch.insert_patch(patch)
 
     assert len(branch.states[-1].files["filename"].file_contents) == 3
     assert branch.states[-1].files["filename"].file_contents[1] == "new_line"
 
 
 
-def test_delete_line():
+def test_remove_line():
     branch = Branch()
     text_file = TextFile("filename", ["new_line"])
-    addOp = FileOpAdd("filename", text_file)
-    patch = Patch([addOp])
-    branch.add_patch(patch)
+    insertOp = FileOpInsert("filename", text_file)
+    patch = Patch([insertOp])
+    branch.insert_patch(patch)
 
-    appendOp = TextOpDeleteLine("filename", 0)
+    appendOp = TextOpRemoveLine("filename", 0)
     patch = Patch([appendOp])
-    branch.add_patch(patch)
+    branch.insert_patch(patch)
 
     assert len(branch.states[-1].files) == 1
     assert len(branch.states[-1].files["filename"].file_contents) == 0
@@ -73,21 +73,21 @@ def test_get_operations_insert_line():
     assert operations[0].line_contents == "123"
 
 
-def test_get_operations_delete_line():
+def test_get_operations_remove_line():
     text_file1 = TextFile("filename", ["123"])
     text_file2 = TextFile("filename", [])
     operations = text_file1.get_operations(text_file2)
     assert len(operations) == 1
-    assert isinstance(operations[0], TextOpDeleteLine)
+    assert isinstance(operations[0], TextOpRemoveLine)
     assert operations[0].file_name == "filename"
     assert operations[0].line_number == 0
 
-def test_get_operations_delete_insert_line():
+def test_get_operations_remove_insert_line():
     text_file1 = TextFile("filename", [""])
     text_file2 = TextFile("filename", ["123"])
     operations = text_file1.get_operations(text_file2)
     assert len(operations) == 2
-    assert isinstance(operations[0], TextOpDeleteLine)
+    assert isinstance(operations[0], TextOpRemoveLine)
     assert operations[0].file_name == "filename"
     assert operations[0].line_number == 0
     assert isinstance(operations[1], TextOpInsertLine)
@@ -101,10 +101,10 @@ def test_get_operations_complex_changes():
     text_file2 = TextFile("filename", ["a", "k", "b", "e"])
     operations = text_file1.get_operations(text_file2)
     assert len(operations) == 3
-    assert isinstance(operations[0], TextOpDeleteLine)
+    assert isinstance(operations[0], TextOpRemoveLine)
     assert operations[0].file_name == "filename"
     assert operations[0].line_number == 2
-    assert isinstance(operations[1], TextOpDeleteLine)
+    assert isinstance(operations[1], TextOpRemoveLine)
     assert operations[1].file_name == "filename"
     assert operations[1].line_number == 2
     assert isinstance(operations[2], TextOpInsertLine)
@@ -127,12 +127,12 @@ def test_to_from_string_insert():
     assert insert_op.line_number == insert_op1.line_number
     assert insert_op.line_contents == insert_op1.line_contents
 
-def test_to_from_string_delete():
-    delete_op = TextOpDeleteLine("binary", 0)
-    delete_op_string = delete_op.to_string()
-    delete_op1 = TextOpDeleteLine.from_string(delete_op_string)
-    assert delete_op.file_name == delete_op1.file_name
-    assert delete_op.line_number == delete_op1.line_number
+def test_to_from_string_remove():
+    remove_op = TextOpRemoveLine("binary", 0)
+    remove_op_string = remove_op.to_string()
+    remove_op1 = TextOpRemoveLine.from_string(remove_op_string)
+    assert remove_op.file_name == remove_op1.file_name
+    assert remove_op.line_number == remove_op1.line_number
 
 def test_to_from_file():
     text_file = TextFile(os.getcwd() + "/temp/text", ["hi", "yo"])

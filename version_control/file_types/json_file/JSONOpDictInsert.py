@@ -2,11 +2,12 @@ import copy
 from version_control.State import State
 from version_control.Operation import Operation
 
-class JSONOpListDelete(Operation):
+class JSONOpDictInsert(Operation):
 
-    def __init__(self, file_name, path):
+    def __init__(self, file_name, path, new_value):
         self.file_name = file_name
         self.path = path
+        self.new_value = new_value
 
     def apply_operation(self, state):
         if not self.valid_operation(state):
@@ -18,15 +19,14 @@ class JSONOpListDelete(Operation):
         return State(files)
 
     def apply_operation_to_file(self, file):
-        file.delete(self.path)
+        file.set_path(self.path, self.new_value)
 
     def valid_operation(self, state):
         try:
             curr_obj = state.files[self.file_name].file_contents
             for step in self.path[:-1]:
+                print("STEP: {}".format(step))
                 curr_obj = curr_obj[step]
-            line_number = int(self.path[-1])
-            return line_number >= 0 and len(curr_obj) > line_number
         except:
             return False
         return True
