@@ -1,10 +1,10 @@
 from copy import deepcopy
 import json
 from version_control.file_types.file.File import File
-from version_control.file_types.json_file.JSONOpListDelete import JSONOpListDelete
+from version_control.file_types.json_file.JSONOpListRemove import JSONOpListRemove
 from version_control.file_types.json_file.JSONOpListInsert import JSONOpListInsert
-from version_control.file_types.json_file.JSONOpDictAdd import JSONOpDictAdd
-from version_control.file_types.json_file.JSONOpDictDelete import JSONOpDictDelete
+from version_control.file_types.json_file.JSONOpDictInsert import JSONOpDictInsert
+from version_control.file_types.json_file.JSONOpDictRemove import JSONOpDictRemove
 from version_control.file_types.json_file.JSONOpPrimitiveChange import JSONOpPrimitiveChange
 from version_control.file_types.json_file.JSON_utils import get_lcs_indexes, json_equals, PRIMITIVES
 
@@ -22,18 +22,18 @@ class JSONFile(File):
             return []
         elif isinstance(old_obj, dict):
             removed_keys = set(old_obj) - set(new_obj)
-            added_keys = set(new_obj) - set(old_obj)
+            inserted_keys = set(new_obj) - set(old_obj)
             changed_keys = []
             for key in old_obj:
                 if key in new_obj and not json_equals(old_obj[key], new_obj[key]):
                     changed_keys.append(key)
 
             for key in removed_keys:
-                delete_op = JSONOpDictDelete(self.file_name, path + [key])
-                operations.append(delete_op)
-            for key in added_keys:
-                add_op = JSONOpDictAdd(self.file_name, path + [key], deepcopy(new_obj[key]))
-                operations.append(add_op)
+                remove_op = JSONOpDictRemove(self.file_name, path + [key])
+                operations.append(remove_op)
+            for key in inserted_keys:
+                insert_op = JSONOpDictInsert(self.file_name, path + [key], deepcopy(new_obj[key]))
+                operations.append(insert_op)
             for key in changed_keys:
                 # we only use change operations on primitive elements
                 if type(new_obj[key]) in PRIMITIVES:
@@ -46,13 +46,13 @@ class JSONFile(File):
 
             old_idx = 0
             new_idx = 0
-            num_deleted = 0
+            num_removed = 0
             num_inserted = 0
             while old_idx < len(old_obj) or new_idx < len(new_obj):
                 if old_idx not in lcs_indexes_old and old_idx < len(old_obj):
-                    delete_op = JSONOpListDelete(self.file_name, path + [str(old_idx - num_deleted + num_inserted)])
-                    operations.append(delete_op)
-                    num_deleted += 1
+                    remove_op = JSONOpListRemove(self.file_name, path + [str(old_idx - num_removed + num_inserted)])
+                    operations.append(remove_op)
+                    num_removed += 1
                     old_idx += 1
                 elif new_idx not in lcs_indexes_new and new_idx < len(new_obj):
                     insert_op = JSONOpListInsert(self.file_name, path + [str(new_idx)], deepcopy(new_obj[new_idx]))
@@ -78,7 +78,7 @@ class JSONFile(File):
             curr_obj = curr_obj[step]
         curr_obj[path[-1]] = new_value
     
-    def delete(self, path):
+    def remove(self, path):
         curr_obj = self.file_contents
         print(path)
         for step in path[:-1]:

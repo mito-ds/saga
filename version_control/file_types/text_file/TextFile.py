@@ -1,6 +1,6 @@
 from copy import deepcopy
 from version_control.file_types.file.File import File
-from version_control.file_types.text_file.TextOpDeleteLine import TextOpDeleteLine
+from version_control.file_types.text_file.TextOpRemoveLine import TextOpRemoveLine
 from version_control.file_types.text_file.TextOpInsertLine import TextOpInsertLine
 
 
@@ -66,18 +66,18 @@ class TextFile(File):
 
         lcs_indexes_old, lcs_indexes_new = self.get_lcs_indexes(new_file)
 
-        delete_patches = []
+        remove_patches = []
         for line_number in range(len(self.file_contents)):
             if line_number not in lcs_indexes_old:
-                relative_line_num = line_number - len(delete_patches) # get the relative number, accounting for lines deleted before
-                delete_patches.append(TextOpDeleteLine(self.file_name, relative_line_num))
+                relative_line_num = line_number - len(remove_patches) # get the relative number, accounting for lines removed before
+                remove_patches.append(TextOpRemoveLine(self.file_name, relative_line_num))
 
         insert_patches = []
         for line_number in range(len(new_file.file_contents)):
             if line_number not in lcs_indexes_new:
                 insert_patches.append(TextOpInsertLine(self.file_name, line_number, new_file.file_contents[line_number]))
 
-        return delete_patches + insert_patches
+        return remove_patches + insert_patches
 
     def print_changes(self, new_file):
         if new_file.file_name != self.file_name:
@@ -89,7 +89,7 @@ class TextFile(File):
         new_idx = 0
         print("File diff: {}".format(self.file_name))
         while old_idx < len(self.file_contents) or new_idx < len(new_file.file_contents):
-            # first print all the deletes
+            # first print all the removes
             if old_idx not in lcs_indexes_old and old_idx < len(self.file_contents):
                 print("- " + self.file_contents[old_idx])
                 old_idx += 1
@@ -110,7 +110,7 @@ class TextFile(File):
     def insert_line(self, line_number, line_contents):
         self.file_contents.insert(line_number, line_contents)
 
-    def delete_line(self, line_number):
+    def remove_line(self, line_number):
         # line numbers are the numbers in the current file
         del self.file_contents[line_number]
 
