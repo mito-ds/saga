@@ -2,12 +2,11 @@ import copy
 from version_control.State import State
 from version_control.Operation import Operation
 
-class JSONOpDictAdd(Operation):
+class JSONOpDictRemove(Operation):
 
-    def __init__(self, file_name, path, new_value):
+    def __init__(self, file_name, path):
         self.file_name = file_name
         self.path = path
-        self.new_value = new_value
 
     def apply_operation(self, state):
         if not self.valid_operation(state):
@@ -19,17 +18,12 @@ class JSONOpDictAdd(Operation):
         return State(files)
 
     def apply_operation_to_file(self, file):
-        file.set_path(self.path, self.new_value)
+        file.remove(self.path)
 
     def valid_operation(self, state):
-        try:
-            curr_obj = state.files[self.file_name].file_contents
-            for step in self.path[:-1]:
-                print("STEP: {}".format(step))
-                curr_obj = curr_obj[step]
-        except:
+        if self.file_name not in state.files:
             return False
-        return True
+        return True # TODO: check if path is in jawn
 
     def to_string(self):
         pass

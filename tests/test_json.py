@@ -1,10 +1,10 @@
 import pytest
 import os
 import json
-from version_control.file_types.json_file.JSONOpListDelete import JSONOpListDelete
+from version_control.file_types.json_file.JSONOpListRemove import JSONOpListRemove
 from version_control.file_types.json_file.JSONOpListInsert import JSONOpListInsert
-from version_control.file_types.json_file.JSONOpDictAdd import JSONOpDictAdd
-from version_control.file_types.json_file.JSONOpDictDelete import JSONOpDictDelete
+from version_control.file_types.json_file.JSONOpDictInsert import JSONOpDictInsert
+from version_control.file_types.json_file.JSONOpDictRemove import JSONOpDictRemove
 from version_control.file_types.json_file.JSONOpPrimitiveChange import JSONOpPrimitiveChange
 from version_control.file_types.json_file.JSONFile import JSONFile
 from version_control.file_types.file.FileOpAdd import FileOpAdd
@@ -27,7 +27,7 @@ def test_add_dict():
     branch = Branch()
     json_file = JSONFile("filename", {})
     add_op = FileOpAdd("filename", json_file)
-    add_dict_op = JSONOpDictAdd("filename", ["key"], 123)
+    add_dict_op = JSONOpDictInsert("filename", ["key"], 123)
     patch = Patch([add_op, add_dict_op])
     branch.add_patch(patch)
 
@@ -39,7 +39,7 @@ def test_remove_dict():
     branch = Branch()
     json_file = JSONFile("filename", {'key': 123})
     add_op = FileOpAdd("filename", json_file)
-    del_dict_op = JSONOpDictDelete("filename", ["key"])
+    del_dict_op = JSONOpDictRemove("filename", ["key"])
     patch = Patch([add_op, del_dict_op])
     branch.add_patch(patch)
 
@@ -58,11 +58,11 @@ def test_primitive_change():
     assert len(branch.states[-1].files["filename"].file_contents) == 1
     assert branch.states[-1].files["filename"].file_contents['key'] == 124
 
-def test_list_delete():
+def test_list_remove():
     branch = Branch()
     json_file = JSONFile("filename", [1])
     add_op = FileOpAdd("filename", json_file)
-    op = JSONOpListDelete("filename", ["0"])
+    op = JSONOpListRemove("filename", ["0"])
     patch = Patch([add_op, op])
     branch.add_patch(patch)
 
@@ -88,7 +88,7 @@ def test_get_operations():
 
     operations = json_file1.get_operations(json_file2)
     assert len(operations) == 1
-    assert isinstance(operations[0], JSONOpDictAdd)
+    assert isinstance(operations[0], JSONOpDictInsert)
     assert len(operations[0].path) == 1
     assert operations[0].path[0] == "key"
     assert operations[0].new_value == 123
@@ -103,10 +103,10 @@ def test_get_operations_list():
     assert operations[0].file_name == "filename"
     assert operations[0].path[1] == "1"
     assert operations[0].new_value == "k"
-    assert isinstance(operations[1], JSONOpListDelete)
+    assert isinstance(operations[1], JSONOpListRemove)
     assert operations[1].file_name == "filename"
     assert operations[1].path[1] == "3"
-    assert isinstance(operations[2], JSONOpListDelete)
+    assert isinstance(operations[2], JSONOpListRemove)
     assert operations[2].file_name == "filename"
     assert operations[2].path[1] == "3"
 
@@ -119,10 +119,10 @@ def test_get_operations_complex_object():
     assert operations[0].file_name == "filename"
     assert operations[0].path[1] == "1"
     assert operations[0].new_value == "k"
-    assert isinstance(operations[1], JSONOpListDelete)
+    assert isinstance(operations[1], JSONOpListRemove)
     assert operations[1].file_name == "filename"
     assert operations[1].path[1] == "3"
-    assert isinstance(operations[2], JSONOpListDelete)
+    assert isinstance(operations[2], JSONOpListRemove)
     assert operations[2].file_name == "filename"
     assert operations[2].path[1] == "3"
     assert isinstance(operations[3], JSONOpPrimitiveChange)
@@ -133,10 +133,10 @@ def test_get_operations_disjoint_keys():
     json_file2 = JSONFile("filename", {"list2": ["a", "k", "b", "e"]})
     operations = json_file1.get_operations(json_file2)
     assert len(operations) == 2
-    assert isinstance(operations[0], JSONOpDictDelete)
+    assert isinstance(operations[0], JSONOpDictRemove)
     assert operations[0].file_name == "filename"
     assert operations[0].path[0] == "list1"
-    assert isinstance(operations[1], JSONOpDictAdd)
+    assert isinstance(operations[1], JSONOpDictInsert)
     assert operations[1].file_name == "filename"
     assert operations[1].path[0] == "list2"
     assert operations[1].new_value == ["a", "k", "b", "e"]
