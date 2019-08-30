@@ -1,52 +1,52 @@
 import pytest
-from version_control.file_types.file.FileOpAdd import FileOpAdd
+from version_control.file_types.file.FileOpInsert import FileOpInsert
 from version_control.file_types.file.FileOpRemove import FileOpRemove
 from version_control.Patch import Patch
 from version_control.Branch import Branch
 from version_control.file_types.binary_file.BinaryFile import BinaryFile
 
-def test_add():
+def test_insert():
     branch = Branch()
-    add_op = FileOpAdd("filename", "DATA")
-    patch = Patch(set([add_op]))
-    branch.add_patch(patch)
+    insert_op = FileOpInsert("filename", "DATA")
+    patch = Patch(set([insert_op]))
+    branch.insert_patch(patch)
 
     assert len(branch.states[-1].files) == 1
     assert branch.states[-1].files["filename"] == "DATA"
 
-def test_add_twice_fails():
+def test_insert_twice_fails():
     branch = Branch()
-    add_op1 = FileOpAdd("filename", "DATA")
-    add_op2 = FileOpAdd("filename", "DATA1")
-    patch = Patch([add_op1, add_op2])
+    insert_op1 = FileOpInsert("filename", "DATA")
+    insert_op2 = FileOpInsert("filename", "DATA1")
+    patch = Patch([insert_op1, insert_op2])
     with pytest.raises(Exception):
-        branch.add_patch(patch)
+        branch.insert_patch(patch)
 
 def test_remove():
     branch = Branch()
-    add_op = FileOpAdd("filename", "DATA")
-    patch = Patch([add_op])
-    branch.add_patch(patch)
+    insert_op = FileOpInsert("filename", "DATA")
+    patch = Patch([insert_op])
+    branch.insert_patch(patch)
 
     remove_op = FileOpRemove("filename")
     patch = Patch([remove_op])
-    branch.add_patch(patch)
+    branch.insert_patch(patch)
 
 def test_remove_not_exist_fails():
     branch = Branch()
     remove_op = FileOpRemove("filename")
     patch = Patch([remove_op])
     with pytest.raises(Exception):
-        branch.add_patch(patch)
+        branch.insert_patch(patch)
 
-def test_to_from_string_add_file():
+def test_to_from_string_insert_file():
     binary_file = BinaryFile("binary", "0101")
-    add_op = FileOpAdd("binary", binary_file)
-    add_op_string = add_op.to_string()
-    add_op1 = FileOpAdd.from_string(add_op_string)
-    assert add_op.file_name == add_op1.file_name
-    assert add_op.file.file_name == add_op1.file.file_name
-    assert add_op.file.file_contents == add_op1.file.file_contents
+    insert_op = FileOpInsert("binary", binary_file)
+    insert_op_string = insert_op.to_string()
+    insert_op1 = FileOpInsert.from_string(insert_op_string)
+    assert insert_op.file_name == insert_op1.file_name
+    assert insert_op.file.file_name == insert_op1.file.file_name
+    assert insert_op.file.file_contents == insert_op1.file.file_contents
 
 def test_to_from_string_remove_file():
     remove_op = FileOpRemove("binary")

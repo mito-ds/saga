@@ -1,6 +1,6 @@
 import pytest
 import os
-from version_control.file_types.file.FileOpAdd import FileOpAdd
+from version_control.file_types.file.FileOpInsert import FileOpInsert
 from version_control.file_types.text_file.TextFile import TextFile
 from version_control.file_types.text_file.text_utils import string_distance, lcs_close
 from version_control.file_types.text_file.TextOpInsertLine import TextOpInsertLine
@@ -9,12 +9,12 @@ from version_control.Patch import Patch
 from version_control.Branch import Branch
 
 
-def test_add():
+def test_insert():
     branch = Branch()
     text_file = TextFile("filename", [""])
-    addOp = FileOpAdd("filename", text_file)
-    patch = Patch([addOp])
-    branch.add_patch(patch)
+    insertOp = FileOpInsert("filename", text_file)
+    patch = Patch([insertOp])
+    branch.insert_patch(patch)
 
     assert len(branch.states[-1].files) == 1
     assert branch.states[-1].files["filename"] == text_file
@@ -23,13 +23,13 @@ def test_add():
 def test_insert_line():
     branch = Branch()
     text_file = TextFile("filename", ["", ""])
-    addOp = FileOpAdd("filename", text_file)
-    patch = Patch([addOp])
-    branch.add_patch(patch)
+    insertOp = FileOpInsert("filename", text_file)
+    patch = Patch([insertOp])
+    branch.insert_patch(patch)
 
     appendOp = TextOpInsertLine("filename", 1, "new_line")
     patch = Patch([appendOp])
-    branch.add_patch(patch)
+    branch.insert_patch(patch)
 
     assert len(branch.states[-1].files["filename"].file_contents) == 3
     assert branch.states[-1].files["filename"].file_contents[1] == "new_line"
@@ -39,13 +39,13 @@ def test_insert_line():
 def test_remove_line():
     branch = Branch()
     text_file = TextFile("filename", ["new_line"])
-    addOp = FileOpAdd("filename", text_file)
-    patch = Patch([addOp])
-    branch.add_patch(patch)
+    insertOp = FileOpInsert("filename", text_file)
+    patch = Patch([insertOp])
+    branch.insert_patch(patch)
 
     appendOp = TextOpRemoveLine("filename", 0)
     patch = Patch([appendOp])
-    branch.add_patch(patch)
+    branch.insert_patch(patch)
 
     assert len(branch.states[-1].files) == 1
     assert len(branch.states[-1].files["filename"].file_contents) == 0

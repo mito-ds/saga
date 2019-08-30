@@ -7,7 +7,7 @@ from version_control.file_types.json_file.JSONOpDictInsert import JSONOpDictInse
 from version_control.file_types.json_file.JSONOpDictRemove import JSONOpDictRemove
 from version_control.file_types.json_file.JSONOpPrimitiveChange import JSONOpPrimitiveChange
 from version_control.file_types.json_file.JSONFile import JSONFile
-from version_control.file_types.file.FileOpAdd import FileOpAdd
+from version_control.file_types.file.FileOpInsert import FileOpInsert
 from version_control.Patch import Patch
 from version_control.Branch import Branch
 
@@ -15,21 +15,21 @@ from version_control.Branch import Branch
 def test_create():
     branch = Branch()
     json_file = JSONFile("filename", dict())
-    add_op = FileOpAdd("filename", json_file)
-    patch = Patch([add_op])
-    branch.add_patch(patch)
+    insert_op = FileOpInsert("filename", json_file)
+    patch = Patch([insert_op])
+    branch.insert_patch(patch)
 
     assert len(branch.states[-1].files) == 1
     assert branch.states[-1].files["filename"] == json_file
 
 
-def test_add_dict():
+def test_insert_dict():
     branch = Branch()
     json_file = JSONFile("filename", {})
-    add_op = FileOpAdd("filename", json_file)
-    add_dict_op = JSONOpDictInsert("filename", ["key"], 123)
-    patch = Patch([add_op, add_dict_op])
-    branch.add_patch(patch)
+    insert_op = FileOpInsert("filename", json_file)
+    insert_dict_op = JSONOpDictInsert("filename", ["key"], 123)
+    patch = Patch([insert_op, insert_dict_op])
+    branch.insert_patch(patch)
 
     assert len(branch.states[-1].files) == 1
     assert len(branch.states[-1].files["filename"].file_contents) == 1
@@ -38,10 +38,10 @@ def test_add_dict():
 def test_remove_dict():
     branch = Branch()
     json_file = JSONFile("filename", {'key': 123})
-    add_op = FileOpAdd("filename", json_file)
+    insert_op = FileOpInsert("filename", json_file)
     del_dict_op = JSONOpDictRemove("filename", ["key"])
-    patch = Patch([add_op, del_dict_op])
-    branch.add_patch(patch)
+    patch = Patch([insert_op, del_dict_op])
+    branch.insert_patch(patch)
 
     assert len(branch.states[-1].files) == 1
     assert len(branch.states[-1].files["filename"].file_contents) == 0
@@ -49,10 +49,10 @@ def test_remove_dict():
 def test_primitive_change():
     branch = Branch()
     json_file = JSONFile("filename", {'key': 123})
-    add_op = FileOpAdd("filename", json_file)
+    insert_op = FileOpInsert("filename", json_file)
     op = JSONOpPrimitiveChange("filename", ["key"], 124)
-    patch = Patch([add_op, op])
-    branch.add_patch(patch)
+    patch = Patch([insert_op, op])
+    branch.insert_patch(patch)
 
     assert len(branch.states[-1].files) == 1
     assert len(branch.states[-1].files["filename"].file_contents) == 1
@@ -61,10 +61,10 @@ def test_primitive_change():
 def test_list_remove():
     branch = Branch()
     json_file = JSONFile("filename", [1])
-    add_op = FileOpAdd("filename", json_file)
+    insert_op = FileOpInsert("filename", json_file)
     op = JSONOpListRemove("filename", ["0"])
-    patch = Patch([add_op, op])
-    branch.add_patch(patch)
+    patch = Patch([insert_op, op])
+    branch.insert_patch(patch)
 
     assert len(branch.states[-1].files) == 1
     assert len(branch.states[-1].files["filename"].file_contents) == 0
@@ -72,10 +72,10 @@ def test_list_remove():
 def test_list_insert():
     branch = Branch()
     json_file = JSONFile("filename", [1])
-    add_op = FileOpAdd("filename", json_file)
+    insert_op = FileOpInsert("filename", json_file)
     op = JSONOpListInsert("filename", ["1"], 2)
-    patch = Patch([add_op, op])
-    branch.add_patch(patch)
+    patch = Patch([insert_op, op])
+    branch.insert_patch(patch)
 
     assert len(branch.states[-1].files) == 1
     assert len(branch.states[-1].files["filename"].file_contents) == 2

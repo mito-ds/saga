@@ -14,8 +14,8 @@ class Patch():
 
         return curr_state
 
-    def add_operation(self, operation):
-        self.operations.add(operation)
+    def insert_operation(self, operation):
+        self.operations.insert(operation)
 
     def to_string(self):
         operation_strings = []
