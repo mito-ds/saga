@@ -8,13 +8,13 @@ Make sure git, python3, pip and virtualenv are installed on your computer.
 
 ### Setup
 
-To download and setup the software:
+To download and setup the software on macOS and Linux:
 
 ~~~~
 git clone https://github.com/naterush/version-control.git;
 cd version-control;
-python3 -m venv ~/.virtualenvs/myvenv;
-source ~/.virtualenvs/myvenv/bin/activate;
+python3 -m venv env;
+source env/bin/activate;
 pip install -r requirements.txt;
 ~~~~
 
