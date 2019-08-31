@@ -1,10 +1,9 @@
 """
-Helper functions for computing longest-common-subsequences:
-with a similarity function and without.
+A set of functions for computing longest-common subsequences between lists.
 """
 
 
-
+# Standard LCS
 def lcs(A, B):
     def equal(a, b):
         if a == b:
@@ -13,6 +12,7 @@ def lcs(A, B):
 
     return lcs_similarity(A, B, equal)
 
+# LCS with a similarity function. 
 def lcs_similarity(A, B, similarity_function):
     m = len(A) 
     n = len(B) 
@@ -31,8 +31,7 @@ def lcs_similarity(A, B, similarity_function):
                 )
 
     # Create an array to store indexes of close common subsequence
-    lcs_indexes_old = []
-    lcs_indexes_new = []
+    matches = []
 
     # Start from the right-most-bottom-most corner and 
     # one by one store characters in lcs[] 
@@ -43,8 +42,7 @@ def lcs_similarity(A, B, similarity_function):
         # If current character in X[] and Y are same, then 
         # current character is part of LCS 
         if similarity_function(A[i - 1], B[j - 1]) + L[i - 1][j - 1] > max(L[i - 1][j], L[i][j - 1]): 
-            lcs_indexes_old.append(i - 1) 
-            lcs_indexes_new.append(j - 1)
+            matches.append(([i - 1], [j - 1], similarity_function(A[i - 1], B[j - 1])))
             i-=1
             j-=1
 
@@ -55,9 +53,7 @@ def lcs_similarity(A, B, similarity_function):
         else: 
             j-=1
 
-    lcs_indexes_old.reverse()
-    lcs_indexes_new.reverse()
-    return (lcs_indexes_old, lcs_indexes_new)
+    return matches
 
 
 def arr_equals(A, B):
@@ -70,16 +66,47 @@ def arr_equals(A, B):
             return False
     return True
 
+def list_from_path(matrix, path):
+    curr = matrix
+    for step in path:
+        curr = curr[step]
+    return curr
+
+def list_similiarity_function(A, B):
+    if len(A) == 0 and len(B) == 0:
+        return 1
+
+    indexes = lcs(A, B)
+    if any(indexes):
+        return len(indexes) / max(len(A), len(B))
+    return 0
+
 # returns a mapping from "dimension down" to "matches at that level"
-def lcs_multi_dim(A, B, dim, similarity_function):
+def lcs_multi_dimension(A, B, dimension):    
+    dimension_matches = {i : [] for i in range(1, dimension + 1)}
 
-    if dim == 1:
-        return lcs_similarity(A, B, similarity_function)
-    return None
+    dimension_matches[1] = lcs_similarity(A, B, list_similiarity_function)
 
-    
+    for dimension_down in range(1, dimension):
+        for path_a, path_b, _ in dimension_matches[dimension_down]:
+            list_a = list_from_path(A, path_a)
+            list_b = list_from_path(B, path_b)
+
+            matches = lcs_similarity(list_a, list_b, list_similiarity_function)
+            for idx_a, idx_b, sim in matches:
+                dimension_matches[dimension_down + 1].append((path_a + idx_a, path_b + idx_b, sim))
+
+    return dimension_matches
 
 
-
+def path_matched(dim_matches, first_list, path):
+    for path_a, path_b, sim in dim_matches[len(path)]:
+        if first_list:
+            if path_a == path:
+                return True
+        else:
+            if path_b == path:
+                return True
+    return False
 
 

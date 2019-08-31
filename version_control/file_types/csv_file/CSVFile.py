@@ -5,7 +5,7 @@ from version_control.file_types.csv_file.CSVFileOpInsertRow import CSVFileOpInse
 from version_control.file_types.csv_file.CSVFileOpRemoveColumn import CSVFileOpRemoveColumn
 from version_control.file_types.csv_file.CSVFileOpInsertColumn import CSVFileOpInsertColumn
 from version_control.file_types.csv_file.CSVFileOpChangeValue import CSVFileOpChangeValue
-from version_control.file_types.csv_file.csv_utils import lcs, lcs_similarity, arr_equals, string_distance
+from version_control.lcs import lcs_multi_dimension
 
 class CSVFile(File):
 
@@ -38,28 +38,13 @@ class CSVFile(File):
         self.file_contents[row][column] = value
 
     def get_operations(self, new_file):
-        dim_matches = dict()
-        def similiarity_function(a, b):
-            indexes = lcs(a, b)
-            if any(indexes):
-                return len(indexes) / max(len(a), len(b))
-            return 0
-        
-        dim_matches[1] = lcs_similarity(self.file_contents, new_file.file_contents, similiarity_function)
-
-        dim_matches[2] = []
-        for idx_a, idx_b, sim in dim_matches[1]:
-            matches = lcs_similarity(self.file_contents[idx_a], new_file.file_contents[idx_b], string_distance)
-            for x, y, sim in matches:
-                dim_matches[2].append(((idx_a, x), (idx_b, y), sim))
-
-        # well, we can run the same algorithm as before to "delete row" and "insert row"
+        dim_matches = lcs_multi_dimension(self.file_contents, new_file.file_contents, 2)
 
         delete_patches_row = []
         for line_number in range(len(self.file_contents)):
             matched = False
             for old, _, _ in dim_matches[1]:
-                if old == line_number:
+                if old[0] == line_number:
                     matched = True
 
             if not matched:
@@ -70,7 +55,7 @@ class CSVFile(File):
         for line_number in range(len(new_file.file_contents)):
             matched = False
             for _, new, sim in dim_matches[1]:
-                if new == line_number:
+                if new[0] == line_number:
                     matched = True
                     break
 
@@ -82,8 +67,8 @@ class CSVFile(File):
         delete_patches_col = []
         for line_number in range(len(self.file_contents[0])):
             matched = False
-            for (_, old_col), _, _ in dim_matches[2]:
-                if old_col == line_number:
+            for path, _, _ in dim_matches[2]:
+                if path[1] == line_number:
                     matched = True
                     break
 
@@ -92,18 +77,18 @@ class CSVFile(File):
                 delete_patches_col.append(CSVFileOpRemoveColumn(self.file_name, relative_line_num))
 
         insert_patches_col = []
-        inserted_columns = set()
+        added_columns = set()
         for line_number in range(len(new_file.file_contents[0])):
             matched = False
-            for _, (_, new_col), _ in dim_matches[2]:
-                if new_col == line_number:
+            for _, path, _ in dim_matches[2]:
+                if path[1] == line_number:
                     matched = True
 
             if not matched:
                 column = []
                 for row in new_file.file_contents:
                     column.append(row[line_number])
-                inserted_columns.add(line_number)
+                added_columns.add(line_number)
                 insert_patches_col.append(CSVFileOpInsertColumn(self.file_name, line_number, column))
 
         change_patches = []
@@ -111,13 +96,14 @@ class CSVFile(File):
         # and an element in a column is not matched and also is not in a column
         # that has been inserted
         for _, row_new, sim in dim_matches[1]:
+            row_new = row_new[0]
             if sim < 1:
                 for idx, ele in enumerate(new_file.file_contents[row_new]):
-                    if idx not in inserted_columns:
+                    if idx not in added_columns:
                         # if it was not matched with similarity 1, then it was changed
                         changed = True
-                        for _, (row, col), sim in dim_matches[2]:
-                            if row == row_new and idx == col and sim == 1:
+                        for _, path, sim in dim_matches[2]:
+                            if path[0] == row_new and idx == path[1] and sim == 1:
                                 changed = False
 
                         if changed:
@@ -141,4 +127,7 @@ class CSVFile(File):
         pass
 
     def print_changes(self, new_file):
-        pass
+        ops = self.get_operations(new_file)
+        print(ops)
+
+            
