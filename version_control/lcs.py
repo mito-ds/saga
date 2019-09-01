@@ -123,14 +123,14 @@ def path_matched(dim_matches, first_list, path):
 
 
 def inserted_paths(A, B, dim_matches):
-    return inserted_paths_rec(A, B, dim_matches, [])
+    return inserted_paths_rec(A, B, dim_matches, False, [])
 
 """
 Returns a tuple of (inserted rows, inserted columns):
 inserted rows is a list of raw paths (also just lists)
 the last index in an inserted column is not the row that was inserted but the column
 """
-def inserted_paths_rec(A, B, dim_matches, base_path):
+def inserted_paths_rec(A, B, dim_matches, first_list, base_path):
     if len(base_path) == max(dim_matches):
         return ([], [])
 
@@ -140,9 +140,9 @@ def inserted_paths_rec(A, B, dim_matches, base_path):
     add_curr_list = True
     for idx in range(len(B)):
         # if a path is matched, then things may have been inserted below it
-        matching_path = path_matched(dim_matches, False, base_path + [idx])
+        matching_path = path_matched(dim_matches, first_list, base_path + [idx])
         if matching_path:
-            inserted_rows, inserted_cols = inserted_paths_rec(A[matching_path[-1]], B[idx], dim_matches, base_path + [idx])
+            inserted_rows, inserted_cols = inserted_paths_rec(A[matching_path[-1]], B[idx], dim_matches, False, base_path + [idx])
             lower_level_inserted_rows.extend(inserted_rows)
             lower_level_inserted_cols.extend(inserted_cols)
             add_curr_list = False
@@ -187,25 +187,8 @@ def inserted_paths_rec(A, B, dim_matches, base_path):
 
 
 def removed_paths(A, B, dim_matches):
-    return removed_paths_rec(A, B, dim_matches, [])
-
-
-# TODO: make a find_shortest_unique_paths, which unifies two recursive implementations
-def removed_paths_rec(A, B, dim_matches, base_path):
-    lower_level_removed_paths = []
-    remove_curr_list = True
-    for idx in range(len(A)):
-        # if a path is matched, then things may have been inserted below it
-        matching_path = path_matched(dim_matches, True, base_path + [idx])
-        if matching_path:
-            lower_level_removed_paths.extend(inserted_paths_rec(A[matching_path[-1]], B[idx], dim_matches, base_path + [idx]))
-            remove_curr_list = False
-
-    # if every list in the dimension immediatly below is inserted, then this list is also inserted
-    if remove_curr_list:
-        return [base_path]
-    else:
-        return lower_level_removed_paths
+    # A deleted path is also a path that was added from the new list to the old list
+    return inserted_paths_rec(B, A, dim_matches, True, [])
 
 def changed_paths(A, B, dim_matches):
     return 
