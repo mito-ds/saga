@@ -15,6 +15,7 @@ def test_delete_row():
     csv_old = CSVFile("filename", [["a", "b"], ["c", "d"]])
     csv_new = CSVFile("filename", [["a", "b"]])
 
+    csv_old.get_operations(csv_new)
     assert csv_old.get_operations(csv_new)[0].index == 1
     assert isinstance(csv_old.get_operations(csv_new)[0], CSVFileOpRemoveRow)
 

@@ -1,7 +1,7 @@
 """
 A set of functions for computing longest-common subsequences between lists.
 """
-
+from copy import deepcopy
 
 # Standard LCS
 def lcs(A, B):
@@ -75,10 +75,22 @@ def list_from_path(matrix, path):
 def list_similiarity_function(A, B):
     if len(A) == 0 and len(B) == 0:
         return 1
+    
+    if type(A) in (int, float, bool) and type(B) in (int, float, bool):
+        if A == B:
+            return 1
+        else:
+            return 0
+    elif type(A) == str and type(B) == str:
+        indexes = lcs(A, B)
+        if any(indexes):
+            return len(indexes) / max(len(A), len(B))
+        return 0
 
-    indexes = lcs(A, B)
+    indexes = lcs_similarity(A, B, list_similiarity_function)
     if any(indexes):
-        return len(indexes) / max(len(A), len(B))
+        total = sum(sim for _, _, sim in indexes)
+        return total / max(len(A), len(B))
     return 0
 
 # returns a mapping from "dimension down" to "matches at that level"
@@ -103,10 +115,98 @@ def path_matched(dim_matches, first_list, path):
     for path_a, path_b, sim in dim_matches[len(path)]:
         if first_list:
             if path_a == path:
-                return True
+                return path_b
         else:
             if path_b == path:
-                return True
+                return path_a
     return False
 
+
+def inserted_paths(A, B, dim_matches):
+    return inserted_paths_rec(A, B, dim_matches, [])
+
+"""
+Returns a tuple of (inserted rows, inserted columns):
+inserted rows is a list of raw paths (also just lists)
+the last index in an inserted column is not the row that was inserted but the column
+"""
+def inserted_paths_rec(A, B, dim_matches, base_path):
+    if len(base_path) == max(dim_matches):
+        return ([], [])
+
+    # if this current thing was inserted
+    lower_level_inserted_rows = []
+    lower_level_inserted_cols = []
+    add_curr_list = True
+    for idx in range(len(B)):
+        # if a path is matched, then things may have been inserted below it
+        matching_path = path_matched(dim_matches, False, base_path + [idx])
+        if matching_path:
+            inserted_rows, inserted_cols = inserted_paths_rec(A[matching_path[-1]], B[idx], dim_matches, base_path + [idx])
+            lower_level_inserted_rows.extend(inserted_rows)
+            lower_level_inserted_cols.extend(inserted_cols)
+            add_curr_list = False
+        else:
+            lower_level_inserted_rows.append(base_path + [idx])
+
+    if add_curr_list:
+        # we don't need to add anything below it, we can just add it as a whole
+        return ([base_path], [])
+    else:
+        # now we try and see if these rows have a new column being created (happens at the bottom)
+        next_level_insertions = [x for x in lower_level_inserted_rows if len(x) == len(base_path) + 2]
+        num_inserted_in_column = {path[-1] : 0 for path in next_level_insertions} 
+        for path in next_level_insertions:
+            num_inserted_in_column[path[-1]] += 1
+        
+        for column in num_inserted_in_column:
+            # if something was inserted in this column in every row, the column was inserted
+            if num_inserted_in_column[column] == len(B): # we assume it's rectangular, for now
+                lower_level_inserted_cols.append(base_path + ["_", column])
+                # clear insertions from rows
+                for path in next_level_insertions:
+                    if path[-1] == column:
+                        lower_level_inserted_rows.remove(path)
+
+        # and then we see if there are any columns we can unify
+        to_delete = []
+        for path in lower_level_inserted_cols:
+            if len(path) >= len(base_path) + 2 and path[len(base_path) + 1] == "_":
+                to_delete.append(path)
+
+        if len(to_delete) == len(B):
+            # we can unify 
+            new_path = deepcopy(to_delete[0])
+            new_path[len(base_path)] = "_"
+            lower_level_inserted_cols.append(new_path)
+
+            for path in to_delete:
+                lower_level_inserted_cols.remove(path)
+
+        return (lower_level_inserted_rows, lower_level_inserted_cols)
+
+
+def removed_paths(A, B, dim_matches):
+    return removed_paths_rec(A, B, dim_matches, [])
+
+
+# TODO: make a find_shortest_unique_paths, which unifies two recursive implementations
+def removed_paths_rec(A, B, dim_matches, base_path):
+    lower_level_removed_paths = []
+    remove_curr_list = True
+    for idx in range(len(A)):
+        # if a path is matched, then things may have been inserted below it
+        matching_path = path_matched(dim_matches, True, base_path + [idx])
+        if matching_path:
+            lower_level_removed_paths.extend(inserted_paths_rec(A[matching_path[-1]], B[idx], dim_matches, base_path + [idx]))
+            remove_curr_list = False
+
+    # if every list in the dimension immediatly below is inserted, then this list is also inserted
+    if remove_curr_list:
+        return [base_path]
+    else:
+        return lower_level_removed_paths
+
+def changed_paths(A, B, dim_matches):
+    return 
 
