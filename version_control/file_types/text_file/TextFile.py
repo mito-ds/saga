@@ -20,12 +20,14 @@ class TextFile(File):
 
         remove_patches = []
         for line_number in reversed(range(len(self.file_contents))):
-            if not path_matched(dim_matches, True, [line_number]):
+            match, _ = path_matched(dim_matches, True, [line_number])
+            if not match:
                 remove_patches.append(TextOpRemoveLine(self.file_name, line_number))
 
         insert_patches = []
         for line_number in range(len(new_file.file_contents)):
-            if not path_matched(dim_matches, False, [line_number]):
+            match, _ = path_matched(dim_matches, False, [line_number])
+            if not match:
                 insert_patches.append(TextOpInsertLine(self.file_name, line_number, new_file.file_contents[line_number]))
 
         return remove_patches + insert_patches

@@ -1,5 +1,5 @@
 import pytest
-from version_control.lcs import lcs_multi_dimension, inserted_paths, removed_paths
+from version_control.lcs import lcs_multi_dimension, inserted_paths, removed_paths, changed_paths
 
 
 def test_basic_col_add():
@@ -71,3 +71,41 @@ def test_column_remove_unification():
     assert len(removed_rows) == 0
     assert len(removed_cols) == 1
     assert removed_cols[0] == ["_", "_", 1]
+
+
+def test_change_value_total():
+    # a total change is a remove then an insert
+    A = [["A", "B"], ["C", "D"]]
+    B = [["A", "B"], ["C", "E"]]
+
+    dim_matches = lcs_multi_dimension(A, B, 2)
+    paths = changed_paths(A, B, dim_matches)
+    removed_rows, removed_cols = removed_paths(A, B, dim_matches)
+    inserted_rows, inserted_cols = inserted_paths(A, B, dim_matches)
+
+    assert len(paths) == 0 
+    assert len(removed_rows) == 1
+    assert len(removed_cols) == 0
+    assert len(inserted_rows) == 1
+    assert len(inserted_cols) == 0
+    assert removed_rows[0] == [1, 1]
+    assert inserted_rows[0] == [1, 1]
+
+
+
+def test_change_value_partial():
+    # a partial change is just a change
+    A = [["A", "B"], ["C", "DE"]]
+    B = [["A", "B"], ["C", "E"]]
+
+    dim_matches = lcs_multi_dimension(A, B, 2)
+    paths = changed_paths(A, B, dim_matches)
+    removed_rows, removed_cols = removed_paths(A, B, dim_matches)
+    inserted_rows, inserted_cols = inserted_paths(A, B, dim_matches)
+
+    assert len(paths) == 1
+    assert paths[0] == [1, 1]
+    assert len(removed_rows) == 0
+    assert len(removed_cols) == 0
+    assert len(inserted_rows) == 0
+    assert len(inserted_cols) == 0

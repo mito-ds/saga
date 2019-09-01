@@ -115,11 +115,11 @@ def path_matched(dim_matches, first_list, path):
     for path_a, path_b, sim in dim_matches[len(path)]:
         if first_list:
             if path_a == path:
-                return path_b
+                return path_b, sim
         else:
             if path_b == path:
-                return path_a
-    return False
+                return path_a, sim
+    return False, None
 
 
 def inserted_paths(A, B, dim_matches):
@@ -140,7 +140,7 @@ def inserted_paths_rec(A, B, dim_matches, first_list, base_path):
     add_curr_list = True
     for idx in range(len(B)):
         # if a path is matched, then things may have been inserted below it
-        matching_path = path_matched(dim_matches, first_list, base_path + [idx])
+        matching_path, _ = path_matched(dim_matches, first_list, base_path + [idx])
         if matching_path:
             inserted_rows, inserted_cols = inserted_paths_rec(A[matching_path[-1]], B[idx], dim_matches, False, base_path + [idx])
             lower_level_inserted_rows.extend(inserted_rows)
@@ -191,5 +191,27 @@ def removed_paths(A, B, dim_matches):
     return inserted_paths_rec(B, A, dim_matches, True, [])
 
 def changed_paths(A, B, dim_matches):
-    return 
+    changed = []
+    for path in lowest_dim_paths(B, max(dim_matches), []):
+        matching_path, sim = path_matched(dim_matches, False, path)
+        if matching_path and sim < 1:
+            changed.append(path)
+
+    return changed
+
+
+def lowest_dim_paths(B, dim, base_path):
+    if dim == 1:
+        return [base_path + [idx] for idx in range(len(B))]
+    
+    paths = []
+    for idx in range(len(B)):
+        paths.extend(lowest_dim_paths(B[idx], dim - 1, base_path + [idx]))
+    return paths
+
+
+
+
+
+    
 
