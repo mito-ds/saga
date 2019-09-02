@@ -3,6 +3,7 @@ A set of functions for computing longest-common subsequences between lists.
 """
 from copy import deepcopy
 
+
 # Standard LCS
 def lcs(A, B):
     def equal(a, b):
