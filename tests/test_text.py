@@ -6,6 +6,7 @@ from version_control.file_types.text_file.TextOpInsertLine import TextOpInsertLi
 from version_control.file_types.text_file.TextOpRemoveLine import TextOpRemoveLine
 from version_control.Patch import Patch
 from version_control.Branch import Branch
+from version_control.merge import diff3_merge_Text_File
 
 
 def test_insert():
@@ -115,8 +116,8 @@ def test_to_from_string():
     text_file = TextFile("text", ["this", "is", "a", "file"])
     text_file_string = text_file.to_string()
     text_file1 = TextFile.from_string(text_file_string)
-    assert text_file.file_name == text_file1.file_name 
-    assert text_file.file_contents == text_file1.file_contents 
+    assert text_file.file_name == text_file1.file_name
+    assert text_file.file_contents == text_file1.file_contents
 
 def test_to_from_string_insert():
     insert_op = TextOpInsertLine("binary", 0, "100")
@@ -139,6 +140,38 @@ def test_to_from_file():
     text_file1 = TextFile.from_file(os.getcwd() + "/temp/text")
     assert text_file1.file_name == os.getcwd() + "/temp/text"
     assert text_file1.file_contents == ["hi", "yo"]
+
+def test_diff3_no_merge_conflicts():
+    O = TextFile("filename", ["hi"])
+    A = TextFile("filename", ["hi"])
+    B = TextFile("filename", ["hi"])
+
+    result = diff3_merge_Text_File(A, O, B)
+    assert result == True
+
+def test_diff3_with_conflict():
+    O = TextFile("filename", ["hi"])
+    A = TextFile("filename", ["Aaron"])
+    B = TextFile("filename", ["Nate"])
+
+    result = diff3_merge_Text_File(A, O, B)
+    assert result == False
+
+def test_diff3_no_conflict_insert_column():
+    O = TextFile("filename", ["hi"])
+    A = TextFile("filename", ["hi", "Aaron"])
+    B = TextFile("filename", ["hi"])
+
+    result = diff3_merge_Text_File(A, O, B)
+    assert result == True
+
+def test_diff3__conflict_insert_different_columns():
+    O = TextFile("filename", ["hi"])
+    A = TextFile("filename", ["hi", "Aaron"])
+    B = TextFile("filename", ["hi", "Nate"])
+
+    result = diff3_merge_Text_File(A, O, B)
+    assert result == False
 
 
 """
