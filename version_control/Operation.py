@@ -1,15 +1,18 @@
+from copy import deepcopy
 
 class Operation():
 
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, op_name, file_id):
+        self.op_name = op_name
+        self.file_id = file_id
 
     def apply_operation(self, state):
-        """
-        Returns the new state if the operation is valid on the state.
-        Otherwise returns None
-        """
-        raise NotImplementedError("Must be implemented by specific operation")
+        try:
+            file = state[self.file_id]
+            self.apply_operation_to_file(file)
+            return copy.deepcopy(state)
+        except:
+            return None 
 
     def apply_operation_to_file(self, file):
         """
@@ -18,12 +21,14 @@ class Operation():
         raise NotImplementedError("Must be implemented by specific operation")
 
 
-    def valid_operation(self, state):
+    def inverse(self):
         """
-        Returns True if the operation is valid on the state.
-        Otherwise returns False
+        Returns an operation that when applied after this operation will result in the
+        initial state
         """
         raise NotImplementedError("Must be implemented by specific operation")
+
+    # TODO: come up some some way of storing these data blobs, maybe lik git does. 
 
     def to_string(self):
         """
