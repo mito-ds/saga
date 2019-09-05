@@ -11,7 +11,7 @@ class OP_MDL_Remove(Operation):
         if self.file_id != file.file_id:
             raise ValueError("Wrong file provided")
 
-        file.file_contents.remove_path(self.path, self.value)
+        file.file_contents.remove_path(self.path)
         return file
 
     def inverse(self):

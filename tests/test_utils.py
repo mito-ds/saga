@@ -109,3 +109,55 @@ def test_change_value_partial():
     assert len(removed_cols) == 0
     assert len(inserted_rows) == 0
     assert len(inserted_cols) == 0
+
+
+def test_delete_non_rectangular():
+    A = [["A", "B"], ["C", "E"]]
+    B = [["A"], ["C", "E"]]
+
+    dim_matches = lcs_multi_dimension(A, B, 2)
+    paths = changed_paths(A, B, dim_matches)
+    removed_rows, removed_cols = removed_paths(A, B, dim_matches)
+    inserted_rows, inserted_cols = inserted_paths(A, B, dim_matches)
+
+    assert len(paths) == 0
+    assert len(removed_rows) == 1
+    assert removed_rows[0] == [0, 1]
+    assert len(removed_cols) == 0
+    assert len(inserted_rows) == 0
+    assert len(inserted_cols) == 0
+
+
+def test_delete_non_rectangular_col():
+    A = [["A", "B"], ["C"]]
+    B = [["A"], ["C"]]
+
+    dim_matches = lcs_multi_dimension(A, B, 2)
+    paths = changed_paths(A, B, dim_matches)
+    removed_rows, removed_cols = removed_paths(A, B, dim_matches)
+    inserted_rows, inserted_cols = inserted_paths(A, B, dim_matches)
+
+    assert len(paths) == 0
+    assert len(removed_rows) == 0
+    assert len(removed_cols) == 1
+    assert removed_cols[0] == ["_", 1]
+    assert len(inserted_rows) == 0
+    assert len(inserted_cols) == 0
+
+
+def test_add_row_and_column():
+    A = [["A"], ["C"]]
+    B = [["A", "B"], ["C", "D"], ["E", "F"]]
+
+    dim_matches = lcs_multi_dimension(A, B, 2)
+    paths = changed_paths(A, B, dim_matches)
+    removed_rows, removed_cols = removed_paths(A, B, dim_matches)
+    inserted_rows, inserted_cols = inserted_paths(A, B, dim_matches)
+
+    assert len(paths) == 0
+    assert len(removed_rows) == 0
+    assert len(removed_cols) == 0
+    assert len(inserted_rows) == 1
+    assert len(inserted_cols) == 1
+
+    

@@ -12,7 +12,7 @@ class OP_MDL_Insert(Operation):
         if self.file_id != file.file_id:
             raise ValueError("Wrong file provided")
 
-        file.file_contents.insert(self.path, self.value)
+        file.file_contents.insert_path(self.path, self.value)
         return file
 
     def inverse(self):
