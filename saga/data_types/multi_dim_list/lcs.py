@@ -161,7 +161,7 @@ def inserted_paths_rec(A, B, dim_matches, first_list, base_path):
             num_inserted_in_column[path[-1]] += 1
 
         # if we also inserted a whole row, then we inserted all elements of that column a well
-        
+        # TODO
         
         for column in num_inserted_in_column:
             # if something was inserted in this column in every row, the column was inserted
