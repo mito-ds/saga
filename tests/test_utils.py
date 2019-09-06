@@ -1,5 +1,5 @@
 import pytest
-from version_control.lcs import lcs_multi_dimension, inserted_paths, removed_paths, changed_paths
+from saga.data_types.multi_dim_list.lcs import lcs_multi_dimension, inserted_paths, removed_paths, changed_paths
 
 
 def test_basic_col_add():

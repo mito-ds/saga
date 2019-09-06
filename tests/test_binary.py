@@ -1,68 +1,44 @@
 import pytest
 import os
-from version_control.file_types.file.FileOpInsert import FileOpInsert
-from version_control.file_types.binary_file.BinaryFile import BinaryFile
-from version_control.file_types.binary_file.BinaryOpChangeContents import BinaryOpChangeContents
-from version_control.Patch import Patch
-from version_control.Branch import Branch
+from saga.base_file.File import File
+from saga.file_types.binary_file import parse_binary_file, write_binary_file
+from saga.data_types.multi_dim_list.OP_MDL_Change import OP_MDL_Change
 
+def create_binary_file(name, contents):
+    if os.path.isfile(name):
+        os.remove(name)
+    f = open(name, 'w+b')
+    f.write(bytearray(contents, 'utf-8'))
+    f.close()
 
-def test_insert():
-    branch = Branch()
-    binary_file = BinaryFile("filename", "")
-    insertOp = FileOpInsert("filename", binary_file)
-    patch = Patch([insertOp])
-    branch.insert_patch(patch)
+@pytest.fixture()
+def setup_binary_files():
+    if not os.path.isdir("temp"):
+        os.mkdir('temp')
+    create_binary_file("temp/binary0", "12345")
 
-    assert len(branch.states[-1].files) == 1
-    assert branch.states[-1].files["filename"] == binary_file
+def test_create(setup_binary_files):
+    binary_file = parse_binary_file("temp/binary0")
+    assert binary_file.file_name == "temp/binary0"
+    assert binary_file.file_contents.multi_dim_list[0] == '12345'
 
-def test_change_contents():
-    branch = Branch()
-    binary_file = BinaryFile("filename", "")
-    insertOp = FileOpInsert("filename", binary_file)
-    patch = Patch([insertOp])
-    branch.insert_patch(patch)
+def test_create_then_write(setup_binary_files):
+    binary_file = parse_binary_file("temp/binary0")
+    write_binary_file(binary_file)
+    f = open('temp/binary0', 'rb')
+    assert f.read() == b'12345'
 
-    changeOp = BinaryOpChangeContents("filename", "new_data")
-    patch = Patch([changeOp])
-    branch.insert_patch(patch)
+def test_get_operations_no_changechange(setup_binary_files):
+    binary_file0 = parse_binary_file("temp/binary0")
+    binary_file1 = parse_binary_file("temp/binary0")
+    ops = binary_file0.get_operations(binary_file1)
+    assert len(ops) == 0
 
-    assert len(branch.states[-1].files) == 1
-    assert branch.states[-1].files["filename"].file_contents == "new_data"
-
-def test_get_operations_change():
-    binary_file1 = BinaryFile("filename", "")
-    binary_file2 = BinaryFile("filename", "stuff")
-    operations = binary_file1.get_operations(binary_file2)
-    assert len(operations) == 1
-    assert operations[0].file_name == "filename"
-    assert operations[0].file_contents == "stuff"
-
-def test_get_operations_no_change():
-    binary_file1 = BinaryFile("filename", "")
-    binary_file2 = BinaryFile("filename", "")
-    operations = binary_file1.get_operations(binary_file2)
-    assert len(operations) == 0
-
-def test_to_from_string():
-    binary_file = BinaryFile("binary", "010101")
-    binary_file_string = binary_file.to_string()
-    binary_file1 = BinaryFile.from_string(binary_file_string)
-    assert binary_file.file_name == binary_file1.file_name
-    assert binary_file.file_contents == binary_file1.file_contents
-
-def test_to_from_string_change():
-    change_op = BinaryOpChangeContents("binary", "0101")
-    change_op_string = change_op.to_string()
-    change_op1 = BinaryOpChangeContents.from_string(change_op_string)
-    assert change_op.file_name == change_op1.file_name
-    assert change_op.file_contents == change_op1.file_contents
-
-def test_to_from_file():
-    binary_file = BinaryFile(os.getcwd() + "/temp/binary", "0101")
-    binary_file.to_file(os.getcwd() + "/temp/binary")
-    binary_file1 = BinaryFile.from_file(os.getcwd() + "/temp/binary")
-    assert binary_file1.file_name == os.getcwd() + "/temp/binary"
-    assert binary_file1.file_contents == "0101"
+def test_get_operations_change(setup_binary_files):
+    binary_file0 = parse_binary_file("temp/binary0")
+    create_binary_file("temp/binary0", "54321")
+    binary_file1 = parse_binary_file("temp/binary0")
+    ops = binary_file0.get_operations(binary_file1)
+    assert len(ops) == 1
+    assert isinstance(ops[0], OP_MDL_Change)
 
