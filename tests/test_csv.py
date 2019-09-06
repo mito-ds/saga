@@ -56,9 +56,6 @@ def test_get_operations_insert_column(setup_csv_files):
     assert ops[0].path == ["_", 2]
     assert ops[0].value == ["height", "6"]
 
-
-"""
-
 def test_get_operations_insert_rows_and_column(setup_csv_files):
     csv_file0 = parse_csv_file("temp/csv0")
     create_csv_file("temp/csv0", "name,email,height\ntest,test@gmail.com,6\nharry,harry@gmail.com,7")
@@ -73,4 +70,3 @@ def test_get_operations_insert_rows_and_column(setup_csv_files):
     assert ops[1].path == ["_", 2]
     assert ops[1].value == ["height", "6", "7"]
 
-"""

@@ -155,20 +155,28 @@ def inserted_paths_rec(A, B, dim_matches, first_list, base_path):
         return ([base_path], [])
     else:
         # now we try and see if these rows have a new column being created (happens at the bottom)
-        next_level_insertions = [x for x in lower_level_inserted_rows if len(x) == len(base_path) + 2]
-        num_inserted_in_column = {path[-1] : 0 for path in next_level_insertions} 
-        for path in next_level_insertions:
+        two_deep_insertions = [x for x in lower_level_inserted_rows if len(x) == len(base_path) + 2]
+        num_inserted_in_column = {path[-1] : 0 for path in two_deep_insertions} 
+        for path in two_deep_insertions:
             num_inserted_in_column[path[-1]] += 1
 
         # if we also inserted a whole row, then we inserted all elements of that column a well
-        # TODO
+        one_deep_insertions = [x for x in lower_level_inserted_rows if len(x) == len(base_path) + 1]
+        for path in one_deep_insertions:
+            if len(path) < max(dim_matches):
+                for col in range(len(B[path[-1]])):
+                    if col not in num_inserted_in_column:
+                        num_inserted_in_column[col] = 0
+                    num_inserted_in_column[col] += 1
         
         for column in num_inserted_in_column:
-            # if something was inserted in this column in every row, the column was inserted
-            if num_inserted_in_column[column] == len(B): # we assume it's rectangular, for now
+            # find the number of rows that contain this column, as the lists are not rectangular
+            column_length = sum(1 for row in B if column < len(row))
+
+            if num_inserted_in_column[column] == column_length:
                 lower_level_inserted_cols.append(base_path + ["_", column])
                 # clear insertions from rows
-                for path in next_level_insertions:
+                for path in two_deep_insertions:
                     if path[-1] == column:
                         lower_level_inserted_rows.remove(path)
 

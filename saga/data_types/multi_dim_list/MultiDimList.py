@@ -27,8 +27,9 @@ class MultiDimList(object):
         self._remove_path_rec(self.multi_dim_list, path)
 
     def _remove_path_rec(self, arr, path):
-        assert len(path) >= 1
-
+        if len(path) == 0:
+            arr.clear()
+            return
         if len(path) == 1:
             del arr[path[0]]
         elif path[0] == "_":
@@ -38,19 +39,22 @@ class MultiDimList(object):
             self._remove_path_rec(arr[path[0]], path[1:])
         
     def insert_path(self, path, value):
-        self._insert_path_rec(self.multi_dim_list, path, value) 
+        self.multi_dim_list = self._insert_path_rec(self.multi_dim_list, path, value) 
 
     def _insert_path_rec(self, arr, path, value):
+        if len(path) == 0:
+            return value
+
         if len(path) == 1:
             arr.insert(path[0], value[0])
         elif path[0] == "_":
-            step = len(value) / len(arr) 
+            step = int(len(value) / len(arr)) 
             for idx, sublist in enumerate(arr):
-                self._insert_path_rec(sublist, path[1:], value[idx * step: idx * step + step])
-
+                arr[idx] = self._insert_path_rec(sublist, path[1:], value[idx * step: idx * step + step])
         else:
-            self._insert_path_rec(arr[path[0]], path[1:], value)
+            arr[path[0]] = self._insert_path_rec(arr[path[0]], path[1:], value)
         
+        return arr
 
     def change_value(self, path, value):
         self._change_value_rec(self.multi_dim_list, path, value)
@@ -71,16 +75,16 @@ class MultiDimList(object):
 
         removed_rows, removed_cols = removed_paths(A, B, dimension_matches)
         for path in removed_rows + removed_cols:
-            operations.append(OP_MDL_Remove("temp", path, value_at_path(A, path)))
+            operations.append(OP_MDL_Remove("id", path, value_at_path(A, path)))
 
         inserted_rows, inserted_cols = inserted_paths(A, B, dimension_matches)
         for path in inserted_rows + inserted_cols:
-            operations.append(OP_MDL_Insert("temp", path, value_at_path(B, path)))
+            operations.append(OP_MDL_Insert("id", path, value_at_path(B, path)))
 
         changed = changed_paths(A, B, dimension_matches)
         for path in changed:
             a_path, _ = get_matching_path(dimension_matches, False, path)
-            operations.append(OP_MDL_Change("temp", path, value_at_path(A, a_path), value_at_path(B, path)))
+            operations.append(OP_MDL_Change("id", path, value_at_path(A, a_path), value_at_path(B, path)))
         
         return operations
 
