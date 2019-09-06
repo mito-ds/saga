@@ -6,7 +6,8 @@ from version_control.file_types.text_file.TextOpInsertLine import TextOpInsertLi
 from version_control.file_types.text_file.TextOpRemoveLine import TextOpRemoveLine
 from version_control.Patch import Patch
 from version_control.Branch import Branch
-from version_control.merge import diff3_merge_Text_File
+from version_control.merge import diff3
+
 
 
 def test_insert():
@@ -134,13 +135,18 @@ def test_to_from_string_remove():
     assert remove_op.file_name == remove_op1.file_name
     assert remove_op.line_number == remove_op1.line_number
 
-def test_to_from_file():
-    text_file = TextFile(os.getcwd() + "/temp/text", ["hi", "yo"])
-    text_file.to_file(os.getcwd() + "/temp/text")
-    text_file1 = TextFile.from_file(os.getcwd() + "/temp/text")
-    assert text_file1.file_name == os.getcwd() + "/temp/text"
-    assert text_file1.file_contents == ["hi", "yo"]
 
+
+def test_diff3_from_paper():
+    A = [1,4,5,2,3,6]
+    O = [1,2,3,4,5,6]
+    B = [1,2,4,5,3,6]
+
+    result = diff3(A, O, B)
+    print(result)
+    assert result == [([1], [1], [1]), ([4, 5], [4, 5], [4, 5]), ([2], [2], [2]), ([3], [3, 4, 5], [4, 5, 3]), ([6], [6], [6])]
+
+"""
 def test_diff3_no_merge_conflicts():
     O = TextFile("filename", ["hi"])
     A = TextFile("filename", ["hi"])
@@ -172,7 +178,7 @@ def test_diff3__conflict_insert_different_columns():
 
     result = diff3_merge_Text_File(A, O, B)
     assert result == False
-
+"""
 
 """
 def test_edit_difference_match():

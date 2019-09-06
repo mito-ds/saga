@@ -58,11 +58,3 @@ def test_to_from_string_change():
     change_op1 = BinaryOpChangeContents.from_string(change_op_string)
     assert change_op.file_name == change_op1.file_name
     assert change_op.file_contents == change_op1.file_contents
-
-def test_to_from_file():
-    binary_file = BinaryFile(os.getcwd() + "/temp/binary", "0101")
-    binary_file.to_file(os.getcwd() + "/temp/binary")
-    binary_file1 = BinaryFile.from_file(os.getcwd() + "/temp/binary")
-    assert binary_file1.file_name == os.getcwd() + "/temp/binary"
-    assert binary_file1.file_contents == "0101"
-
