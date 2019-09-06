@@ -5,7 +5,7 @@ class Branch():
     def __init__(self):
         self.patches = []
         # Set the initial state to be the empty state
-        self.states = [State(dict())]
+        self.states = [State(dict(), None)]
 
     def insert_patch(self, patch):
         old_state = self.states[-1]
@@ -18,3 +18,13 @@ class Branch():
     @property
     def curr_state(self):
         return self.states[-1]
+
+
+    def least_common_ancestor(self, other_branch):
+        for state in reversed(self.states):
+            for other_state in reversed(other_branch.states):
+                if state.get_hash() == other_state.get_hash():
+                    return state
+        return None
+
+

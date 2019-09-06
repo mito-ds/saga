@@ -1,3 +1,6 @@
+import pickle
+import hashlib
+from copy import deepcopy
 from saga.operation_utils import parse_operation
 
 class Patch():
@@ -6,7 +9,8 @@ class Patch():
         self.operations = operations # set of operation objects
 
     def apply_patch(self, state):
-        curr_state = state
+        curr_state = deepcopy(state)
+        curr_state.prev_state_hash = state.get_hash()
         for operation in self.operations:
             curr_state = operation.apply_operation(curr_state)
             if curr_state is None:
@@ -17,17 +21,14 @@ class Patch():
     def insert_operation(self, operation):
         self.operations.insert(operation)
 
+    def get_hash(self):
+        m = hashlib.sha256()
+        m.update(bytearray(self.to_string()))
+        return m.hexdigest()
+
     def to_string(self):
-        operation_strings = []
-        for operation in self.operations:
-            operation_strings.append(operation.to_string())
-        return "\n".join(operation_strings)
+        return pickle.dumps(self)
 
     @staticmethod
-    def from_string(patch_string):
-        operation_strings = patch_string.split("\n")
-        operations = []
-        for operation_string in operation_strings:
-            operation = parse_operation(operation_string)
-            operations.append(operation)
-        return Patch(operations)
+    def from_string(patch_str):
+        return pickle.loads(patch_str)
