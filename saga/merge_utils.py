@@ -54,12 +54,18 @@ def get_chunks(A, O, B, matchings_A, matchings_B):
 
 def create_merged_file(chunks):
     merged_file = []
-    for chunk in chunks:
+    conflicting_chunks = []
+    for i, chunk in enumerate(chunks):
         (s_A, s_O, s_B) = chunk
         if not s_A == s_B:
-            return False
-        merged_file.extend(s_A)
-    return merged_file
+            conflicting_chunks.append((i, chunk))
+        else:
+            merged_file.extend(s_A)
+
+    if conflicting_chunks == []:
+        return ("merged", merged_file)
+    
+    return ("conflicting", conflicting_chunks)
 
 def chunks_to_output(A, O, B, matchings_A, matchings_B, chunks):
     calculated_ouput = []

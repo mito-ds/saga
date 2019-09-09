@@ -8,7 +8,7 @@ def test_diff3_from_paper_merge_conflict():
 
     result = diff3(A, O, B)
     print(result)
-    assert result == False
+    assert result == ("conflicting", [(3, ([3], [3,4,5], [4,5,3]))])
 
 def test_diff3_successful_merge():
     A = [1,4,5,2,6]
@@ -17,4 +17,4 @@ def test_diff3_successful_merge():
 
     result = diff3(A, O, B)
     print(result)
-    assert result == [1, 4, 5, 2, 6]
+    assert result == ("merged", [1, 4, 5, 2, 6])
