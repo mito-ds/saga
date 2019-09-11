@@ -117,7 +117,6 @@ def test_get_remove_single_multiple_dims():
     mdd = MultiDimDict(dic, 3)
     mdd.remove_path(["key_one_dim_one", "key_one_dim_two"])
     expected_result = {"key_one_dim_one" : {"key_should_remain" : "val_should_remain"}}
-    print(mdd.multi_dim_dict)
     assert mdd.multi_dim_dict == expected_result
 
 def test_insert_and_remove():
@@ -127,6 +126,24 @@ def test_insert_and_remove():
     mdd.remove_path(["key_two_dim_two"])
     assert mdd.multi_dim_dict == {"key_one_dim_two" : "val_one_dim_two"}
 
+def test_change_single_value():
+    dic = {"key_one_dim_one" : "val_one_dim_one"}
+    mdd = MultiDimDict(dic, 1)
+    mdd.change_value(["key_one_dim_one"], "new_value")
+    assert mdd.multi_dim_dict == {"key_one_dim_one" : "new_value"}
+
+def test_change_single_value_to_dict():
+    dic = {"key_one_dim_one" : "val_one_dim_one"}
+    mdd = MultiDimDict(dic, 1)
+    mdd.change_value(["key_one_dim_one"], {"key_one_dim_two" : "val_one_dim_two"})
+    assert mdd.multi_dim_dict == {"key_one_dim_one" : {"key_one_dim_two" : "val_one_dim_two"}}
+
+def test_change_dim_two():
+    dic = {"key_one_dim_one" : {"key_one_dim_two" : "val_one_dim_two", "key_two_dim_two" : "val_two_dim_two"}}
+    mdd = MultiDimDict(dic, 1)
+    mdd.change_value(["key_one_dim_one", "key_one_dim_two"], {"key_one_dim_three" : "val_one_dim_three"})
+    print(mdd.multi_dim_dict)
+    assert mdd.multi_dim_dict == {"key_one_dim_one" : {"key_one_dim_two" : {"key_one_dim_three" : "val_one_dim_three"}, "key_two_dim_two" : "val_two_dim_two"}}
     
 """
 def test_get_remove_and_insert():

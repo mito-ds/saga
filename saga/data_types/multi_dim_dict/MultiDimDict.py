@@ -51,7 +51,7 @@ class MultiDimDict(object):
         return arr
 
     def change_value(self, path, value):
-        self._change_value_rec(self.multi_dim_list, path, value)
+        self._change_value_rec(self.multi_dim_dict, path, value)
 
     def _change_value_rec(self, arr, path, value):
         if len(path) == 1:
