@@ -1,3 +1,0 @@
-[console_scripts]
-saga = saga.main:main
-
