@@ -97,28 +97,38 @@ def test_get_insert_op_single_key_value():
     print(mdd.multi_dim_dict)
     assert mdd.multi_dim_dict == {"key_one_dim_one" : {"key_one_dim_two" : "val_one_dim_two", "key_two_dim_two" : "val_two_dim_two"}}
 
+
+def test_get_remove_all_from_single_dim():
+    dic = {"key_one_dim_one" : "val_one_dim_one"}
+    mdd = MultiDimDict(dic, 1)
+    mdd.remove_path(["key_one_dim_one"])
+    expected_result = {}
+    assert mdd.multi_dim_dict == expected_result
+
+def test_get_remove_all_two_dim():
+    dic = {"key_one_dim_one" : {"key_one_dim_two" : "val_one_dim_two", "key_two_dim_two" : "val_two_dim_two"}}
+    mdd = MultiDimDict(dic, 2)
+    mdd.remove_path(["key_one_dim_one"])
+    expected_result = {}
+    assert mdd.multi_dim_dict == expected_result
+
+def test_get_remove_single_multiple_dims():
+    dic = {"key_one_dim_one" : {"key_one_dim_two" : {"key_one_dim_three" : "val_one_dim_three", "key_two_dim_three" : "val_two_dim_three", "A" : "B"}, "key_should_remain" : "val_should_remain"}}
+    mdd = MultiDimDict(dic, 3)
+    mdd.remove_path(["key_one_dim_one", "key_one_dim_two"])
+    expected_result = {"key_one_dim_one" : {"key_should_remain" : "val_should_remain"}}
+    print(mdd.multi_dim_dict)
+    assert mdd.multi_dim_dict == expected_result
+
+def test_insert_and_remove():
+    dic = {}
+    mdd = MultiDimDict(dic, 1)
+    mdd.insert_path([], {"key_one_dim_two" : "val_one_dim_two", "key_two_dim_two" : "val_two_dim_two"})
+    mdd.remove_path(["key_two_dim_two"])
+    assert mdd.multi_dim_dict == {"key_one_dim_two" : "val_one_dim_two"}
+
+    
 """
-def test_get_insert_op_col():
-    assert applies_ops_correctly([["A"], ["C"]], [["A", "B"], ["C", "D"]], 2)
-
-def test_get_insert_op_row_and_col():
-    assert applies_ops_correctly([["A", "B"], ["C", "D"]], [["A", "B", "X"], ["C", "D", "Y"], ["E", "F", "Z"]], 2)
-
-def test_get_remove_op():
-    assert applies_ops_correctly(["A", "B"], ["A"], 1)
-
-def test_get_remove_op_multiple():
-    assert applies_ops_correctly(["X", "A", "B", "C", "D"], ["A"], 1)
-
-def test_get_remove_op_row():
-    assert applies_ops_correctly([["A", "B"], ["C", "D"]], [["A", "B"]], 2)
-
-def test_get_remove_op_col():
-    assert applies_ops_correctly([["A", "B"], ["C", "D"]], [["A"], ["C"]], 2)
-
-def test_get_remove_op_row_and_col():
-    assert applies_ops_correctly([["A", "B"], ["C", "D"]], [["A"]], 2)
-
 def test_get_remove_and_insert():
     assert applies_ops_correctly([["A", "B"], ["C", "D"]], [["A", "B"], ["C"], ["F"]], 2)
 

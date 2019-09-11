@@ -46,14 +46,8 @@ class MultiDimDict(object):
         if len(path) == 0:
             arr.update(value)
             return arr
-
-        elif path[0] == "_":
-            step = int(len(value) / len(arr)) 
-            for idx, sublist in enumerate(arr):
-                arr[idx] = self._insert_path_rec(sublist, path[1:], value[idx * step: idx * step + step])
         else:
             arr[path[0]] = self._insert_path_rec(arr[path[0]], path[1:], value)
-        
         return arr
 
     def change_value(self, path, value):
