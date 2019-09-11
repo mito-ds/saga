@@ -7,3 +7,6 @@ temp/
 *.pyo
 version_control/data_types/
 file_types/photoshop_file/
+build/
+dist/
+saga_vcs.egg-info/
