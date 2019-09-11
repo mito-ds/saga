@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 import argparse
 import os
-from version_control.Patch import Patch
-from version_control.Branch import Branch
-from version_control.file_types.file.FileOpAdd import FileOpAdd
-from version_control.file_types.file.FileOpRemove import FileOpRemove
-from version_control.file_types.text_file.TextFile import TextFile
-from version_control.file_types.binary_file.BinaryFile import BinaryFile
+import pickle
+from saga.Patch import Patch
+from saga.Branch import Branch
+
+
 
 def main():
     parser = argparse.ArgumentParser(description='Do version control on some files')
@@ -41,27 +40,6 @@ def main():
     else:
         print("Error: usage {init | add | commit | diff}")
 
-def get_curr_state(vcs_path, include_working_commit=True):
-    branch = Branch()
-
-    for patch_file_name in os.listdir(vcs_path + "/branch"):
-        f = open(vcs_path + "/branch/" + patch_file_name, "r")
-        patch_file_text = f.read().strip()
-        f.close()
-        patch = Patch.from_string(patch_file_text)
-        branch.add_patch(patch)
-        
-    if include_working_commit:
-        f = open(vcs_path + "/curr_commit", "r")
-        patch_file_text = f.read().strip()
-        f.close()
-        if patch_file_text == "":
-            return branch.curr_state()
-        patch = Patch.from_string(patch_file_text)
-        branch.add_patch(patch)
-
-    return branch.curr_state()
-
 def get_vcs_path(cwd):
     path = cwd
     while path != "/":
@@ -74,9 +52,11 @@ def get_vcs_path(cwd):
 def init_vcs_folder(cwd):
     os.mkdir(cwd + "/.vcs")
     os.mkdir(cwd + "/.vcs/branch")
-    f = open(cwd + "/.vcs/curr_commit", "w+")
-    f.close()
     return cwd + "/.vcs"
+
+def commit(vcs_path):
+    
+
 
 def add_file(cwd, file_name, curr_state):
     # if the file existed before
