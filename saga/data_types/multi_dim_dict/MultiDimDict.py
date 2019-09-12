@@ -1,4 +1,3 @@
-from saga.data_types.multi_dim_dict.lcs import changed_paths, inserted_paths, removed_paths, lcs_multi_dimension, get_matching_path
 from saga.data_types.multi_dim_dict.OP_MDD_Change import OP_MDD_Change
 from saga.data_types.multi_dim_dict.OP_MDD_Insert import OP_MDD_Insert
 from saga.data_types.multi_dim_dict.OP_MDD_Remove import OP_MDD_Remove
@@ -60,26 +59,55 @@ class MultiDimDict(object):
             self._change_value_rec(arr[path[0]], path[1:], value)
 
     def get_operations(self, multi_dim_obj):
-        A = self.multi_dim_list
-        B = multi_dim_obj.multi_dim_list
+        new_file = self.multi_dim_dict
+        old_file = multi_dim_obj.multi_dim_dict
 
-        dimension_matches = lcs_multi_dimension(A, B, self.dimension)
-
-        operations = []
-
-        removed_rows, removed_cols = removed_paths(A, B, dimension_matches)
-        for path in removed_rows + removed_cols:
-            operations.append(OP_MDL_Remove("id", path, value_at_path(A, path)))
-
-        inserted_rows, inserted_cols = inserted_paths(A, B, dimension_matches)
-        for path in inserted_rows + inserted_cols:
-            operations.append(OP_MDL_Insert("id", path, value_at_path(B, path)))
-
-        changed = changed_paths(A, B, dimension_matches)
-        for path in changed:
-            a_path, _ = get_matching_path(dimension_matches, False, path)
-            operations.append(OP_MDL_Change("id", path, value_at_path(A, a_path), value_at_path(B, path)))
-        
+        operations = self._find_operations_rec(old_file, new_file, [], [])[0]
         return operations
 
+
+    def _find_operations_rec(self, old, new, path, operations):
+        old_type, new_type = type(new), type(old)
+
+        # if both old and new are dictionaries
+        if old_type == dict and new_type == dict:
+            all_keys, all_unique_keys = [], []
+            all_keys.extend(new.keys())
+            all_keys.extend(old.keys())
+
+            for key in all_keys:
+                if not key in all_unique_keys:
+                    all_unique_keys.append(key)
+
+            for key in all_unique_keys:
+                if key in new.keys() and not key in old.keys():
+                    operations.append(OP_MDD_Insert("id", path, {key : new[key]}))
+                elif key in old.keys() and key not in new.keys():
+                    path.append(key)
+                    operations.append(OP_MDD_Remove("id", path, {key : old[key]}))
+                    path = path[:-1]
+                else:
+                    path.append(key)
+                    (operations, path) = self._find_operations_rec(old[key], new[key], path, operations)
+            path = path[:-1]        
+            return (operations, path)
+
+        # if neither are dictionaries
+        if not old_type == dict and not new_type == dict:
+            # change of value
+            if not old == new:
+                # value changed 
+                operations.append(OP_MDD_Change("id", path, old, new))
+                path = path[:-1]
+                return (operations, path)
+            # no change
+            else:
+                path = path[:-1]
+                return (operations, path)
+
+        # if one is a dictionary
+        else: 
+            operations.append(OP_MDD_Change("id", path, old, new))
+            path = path[:-1]
+            return (operations, path)
     

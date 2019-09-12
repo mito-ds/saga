@@ -4,7 +4,7 @@ from saga.Operation import Operation
 class OP_MDD_Insert(Operation):
 
     def __init__(self, file_id, path, value):
-        Operation.__init__(self, "OP_MDL_Insert", file_id)
+        Operation.__init__(self, "OP_MDD_Insert", file_id)
         self.path = path
         self.value = value
 
@@ -16,7 +16,7 @@ class OP_MDD_Insert(Operation):
         return file
 
     def inverse(self):
-        from saga.data_types.multi_dim_list.OP_MDL_Remove import OP_MDL_Remove 
-        return OP_MDL_Remove(self.file_id, self.path, self.value)
+        from saga.data_types.multi_dim_dict.OP_MDL_Remove import OP_MDL_Remove 
+        return OP_MDD_Remove(self.file_id, self.path, self.value)
 
     
