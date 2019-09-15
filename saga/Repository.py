@@ -7,7 +7,7 @@ import filecmp
 import glob
 from os.path import join, isfile
 from saga.Commit import Commit
-from saga.file_types.file_utils import parse_file
+from saga.file_types.file_utils import parse_file, write_file
 
 class Repository(object):
 
@@ -147,7 +147,7 @@ class Repository(object):
 
     def changed_files(self, dir1, dir2):
         previous_state = self._paths_in_dir(dir1)
-        current_state = self._paths_in_dir(dir2, [".saga", "env"])
+        current_state = self._paths_in_dir(dir2)
 
         removed_paths, changed_paths, inserted_paths  = set(), set(), set()
         for path in previous_state:
@@ -223,34 +223,46 @@ class Repository(object):
                 print("Branch {} is a subbranch of {}".format(other_branch, self.head))
         else:
 
-            
-            state_dir_old = join(self.state_directory, self.state_hash())
+            state_dir_old = join(self.state_directory, self.get_commit(lca).state_hash)
             state_dir_newA = join(self.state_directory, self.state_hash())
             state_dir_newB = join(self.state_directory, self.get_commit(self.branches[other_branch]).state_hash)
 
             removed_paths_A, changed_paths_A, inserted_paths_A = self.changed_files(state_dir_old, state_dir_newA)
             removed_paths_B, changed_paths_B, inserted_paths_B = self.changed_files(state_dir_old, state_dir_newB)
 
-            possibly_mergable = set()
+            possibly_mergable = set() 
+            print(inserted_paths_A)
+            print(inserted_paths_B)
             for path in removed_paths_A.intersection(changed_paths_B):
                 print("Confict as {} was removed in {} and modified in {}".format(path, self.head, other_branch))
             for path in removed_paths_B.intersection(changed_paths_A):
                 print("Confict as {} was removed in {} and modified in {}".format(path, self.head, other_branch))
             for path in changed_paths_A.intersection(changed_paths_B):
                 possibly_mergable.add(path)
-                print("Conflict as {} was modified in both {} and {}".format(path, self.head, other_branch))
+                #print("Conflict as {} was modified in both {} and {}".format(path, self.head, other_branch))
             for path in inserted_paths_A.intersection(inserted_paths_B):
                 print("Conflict as {} was inserted in both {} and {}".format(path, self.head, other_branch))
 
+            files_to_write = [] # we only write the files if there are no merge conflicts in any of them
             for path in possibly_mergable:
+                if path not in self.file_ids[self.head]: # we aren't tracking it
+                    continue
+
                 file_id = self.file_ids[self.head][path]
                 file_o = parse_file(file_id, path, join(state_dir_old, path))
                 file_a = parse_file(file_id, path, join(state_dir_newA, path))
                 file_b = parse_file(file_id, path, join(state_dir_newB, path))
 
-                
-
-
+                merge_file = file_o.merge(file_a, file_b)
+                if merge_file is None:
+                    print("Merge conflict for file {}".format(file_o.file_name))
+                    return
+                else:
+                    print("Successfully merged file {}".format(file_o.file_name))
+                    files_to_write.append(merge_file)
+            for f in files_to_write:
+                write_file(f)
+            self.commit("Merged {} into branch {}".format(other_branch, self.head))
 
     def least_common_ancestor(self, branch_1, branch_2):
         branch_1_commits = self.commits[branch_1]
@@ -265,20 +277,14 @@ class Repository(object):
         
         raise Exception("No common ancestor")
 
-
-
-
     def _backup_state_to_db(self):
-        print("backing up state")
         # copies all files that are being tracked to the
         dst = self.state_directory + self.index_hash() 
         if not os.path.exists(dst):
             os.mkdir(dst)
             for file_name in self.index[self.head]:
-                print("NAME", file_name)
                 # make new directories if we need to 
                 if isfile(file_name):
-                    print("ADDING FILE")
                     if file_name not in self.file_ids[self.head]:
                         self.file_ids[self.head][file_name] = self.get_new_file_id()
                     # we need to make directories down to this one

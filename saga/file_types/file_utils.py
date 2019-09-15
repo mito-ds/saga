@@ -25,7 +25,7 @@ def parse_file(file_id, file_name, file_path):
 def write_file(file):
     if file.file_type == "csv":
         write_csv_file(file)
-    elif file.file_type == "txt":
+    elif file.file_type == "text":
         write_text_file(file)
     elif file.file_type == "binary":
         write_binary_file(file)
