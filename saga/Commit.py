@@ -19,3 +19,5 @@ class Commit(object):
     @staticmethod
     def from_bytes(commit_bytes):
         return pickle.loads(commit_bytes)
+
+

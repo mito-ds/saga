@@ -248,6 +248,8 @@ class Repository(object):
                 file_a = parse_file(file_id, path, join(state_dir_newA, path))
                 file_b = parse_file(file_id, path, join(state_dir_newB, path))
 
+                
+
 
 
     def least_common_ancestor(self, branch_1, branch_2):
