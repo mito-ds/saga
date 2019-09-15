@@ -2,6 +2,7 @@ from saga.data_types.multi_dim_list.lcs import changed_paths, inserted_paths, re
 from saga.data_types.multi_dim_list.OP_MDL_Change import OP_MDL_Change
 from saga.data_types.multi_dim_list.OP_MDL_Insert import OP_MDL_Insert
 from saga.data_types.multi_dim_list.OP_MDL_Remove import OP_MDL_Remove
+from saga.data_types.multi_dim_list.mdl_merge_utils import diff3
 
 def value_at_path(arr, path):
     if len(path) == 0:
@@ -87,5 +88,12 @@ class MultiDimList(object):
             operations.append(OP_MDL_Change("id", path, value_at_path(A, a_path), value_at_path(B, path)))
         
         return operations
+
+    def merge(self, a_mdl, b_mdl):
+        merge_res = diff3(a_mdl.multi_dim_list, self.multi_dim_list, b_mdl.multi_dim_list)
+        if merge_res is None:
+            return None
+
+        return MultiDimList(merge_res, self.dimension)
 
     
