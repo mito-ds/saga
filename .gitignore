@@ -3,6 +3,7 @@ env/
 temp/
 .saga
 .vscode/
+.saga
 *.pyc
 *.pyo
 version_control/data_types/
