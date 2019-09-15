@@ -1,6 +1,4 @@
 from saga.data_types.multi_dim_list.lcs import lcs
-from copy import deepcopy
-
 
 # diff3 merge
 def diff3(A, O, B):
@@ -62,10 +60,9 @@ def create_merged_file(chunks):
         else:
             merged_file.extend(s_A)
 
-    if conflicting_chunks == []:
-        return ("merged", merged_file)
-    
-    return ("conflicting", conflicting_chunks)
+    if not any(conflicting_chunks):
+        return merged_file
+    return None
 
 def chunks_to_output(A, O, B, matchings_A, matchings_B, chunks):
     calculated_ouput = []
