@@ -74,14 +74,13 @@ def list_from_path(matrix, path):
     return curr
 
 def list_similiarity_function(A, B):
-    if len(A) == 0 and len(B) == 0:
-        return 1
-    
     if type(A) in (int, float, bool) and type(B) in (int, float, bool):
         if A == B:
             return 1
         else:
             return 0
+    elif len(A) == 0 and len(B) == 0:
+        return 1
     elif type(A) == str and type(B) == str:
         indexes = lcs(A, B)
         if any(indexes):

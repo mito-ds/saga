@@ -1,136 +1,103 @@
 #!/usr/bin/env python3
 import argparse
 import os
-import pickle
-from saga.Patch import Patch
-from saga.Branch import Branch
-
-
+from saga.Repository import Repository
 
 def main():
-    parser = argparse.ArgumentParser(description='Do version control on some files')
-    parser.add_argument('action', type=str, help='')
-    parser.add_argument('file', type=str, help='', nargs='?')
+    # create the top-level saga parser
+    parser = argparse.ArgumentParser(prog='saga')
+    subparsers = parser.add_subparsers(help='sub-command help')
+    
+    # create the parser for the "init" command
+    parser_init = subparsers.add_parser('init', help='creates a new saga project in the current directory')
+    parser_init.set_defaults(func=init)
+
+    # create the parser for the "add" command
+    parser_add = subparsers.add_parser('add', help='adds a path to the current index')
+    parser_add.add_argument('path', type=str, help='the path to add to the index')
+    parser_add.set_defaults(func=add)
+
+    # create the parser for the "commit" command
+    parser_commit = subparsers.add_parser('commit', help='adds a path to the current index')
+    parser_commit.add_argument('-m', type=str, help='commit string')
+    parser_commit.set_defaults(func=commit)
+
+    # create the parser for the "status" command
+    parser_status = subparsers.add_parser('status', help='displays info about the current working index')
+    parser_status.set_defaults(func=status)
+
+    # create the parser for the "diff" command
+    parser_diff = subparsers.add_parser('diff', help='check the diff of the current index')
+    parser_diff.set_defaults(func=diff)
+
+    # create the parser for the "branch" command
+    parser_status = subparsers.add_parser('branch', help='commands for managing branches')
+    parser_status.set_defaults(func=branch)
+
+    # create the parser for the "checkout" command
+    parser_checkout = subparsers.add_parser('checkout', help='command for switching head branch')
+    parser_checkout.add_argument('-b', help='flag to create a new branch', action='store_true')
+    parser_checkout.add_argument('branch', type=str, help='branch name')
+    parser_checkout.set_defaults(func=checkout)
+
+    # create the parser for the "merge" command
+    parser_merge = subparsers.add_parser('merge', help='command to merge head branch with some other branch')
+    parser_merge.add_argument('branch', type=str, help='name of branch to merge')
+    parser_merge.set_defaults(func=merge)
 
     args = parser.parse_args()
-    cwd = os.getcwd()
-    # First, we find out if this folder is the part of an existing .vcs project
-    vcs_path = get_vcs_path(cwd)
+    parser.parse_args()
+    args.func(args)
 
-    # Handle the case where the project has not been started; the only option is to create it
-    if vcs_path is None:
-        if args.action == "init":
-            init_vcs_folder(cwd)
-        else:
-            print("Error: must create a vcs project using init before running other commands")
-        return
-
-    curr_state = get_curr_state(vcs_path)
-
-    if args.action == "init":
-        print("Error: vcs project already exists at {}".format(vcs_path))
-    elif args.action == "commit":
-        commit(vcs_path)
-    elif args.file == None:
-        print("Error: must specify a file")
-    elif args.action == "add":
-        add_file(cwd, args.file, curr_state)
-    elif args.action == "diff":
-        diff(vcs_path, args.file)
+def init(args):
+    saga_repo = get_saga_repo()
+    if saga_repo is not None:
+        print("Error: saga project already exists at {}".format(saga_repo.base_directory))
     else:
-        print("Error: usage {init | add | commit | diff}")
+        repository = Repository.init(os.getcwd())
 
-def get_vcs_path(cwd):
-    path = cwd
+    repository.write()
+
+def add(args):
+    saga_repo = get_saga_repo()
+    saga_repo.add(args.path)
+    saga_repo.write()
+
+def commit(args):
+    saga_repo = get_saga_repo()
+    saga_repo.commit(args.m)
+    saga_repo.write()
+
+def status(args):
+    get_saga_repo().status()
+
+def diff(args):
+    get_saga_repo().get_diff()
+
+def branch(args):
+    saga_repo = get_saga_repo()
+    print("HEAD: {}".format(saga_repo.head))
+    print(saga_repo.branches)
+
+def checkout(args):
+    saga_repo = get_saga_repo()
+    if args.b:
+        saga_repo.create_branch(args.branch)
+    saga_repo.switch_to_branch(args.branch)
+    saga_repo.write()
+
+def merge(args):
+    saga_repo = get_saga_repo()
+    saga_repo.merge(args.branch)
+    saga_repo.write()
+
+def get_saga_repo():
+    path = os.getcwd()
     while path != "/":
         # check if there is a
-        if os.path.isdir(path + "/.vcs"):
-            return path + "/.vcs"
+        if os.path.isdir(path + "/.saga"):
+            return Repository.read(path) 
         path = os.path.dirname(path)
     return None
-
-def init_vcs_folder(cwd):
-    os.mkdir(cwd + "/.vcs")
-    os.mkdir(cwd + "/.vcs/branch")
-    return cwd + "/.vcs"
-
-def commit(vcs_path):
-    
-
-
-def add_file(cwd, file_name, curr_state):
-    # if the file existed before
-    if file_name in curr_state:
-        if not os.path.exists(file_name):
-            # we are either deleting it
-            add_op_to_curr_commit(FileOpRemove(file_name))
-        else:
-            # or we are changing it
-            prev_file = curr_state.files[file_name]
-            file_class = type(prev_file)
-            new_file = file_class.from_file(file_name)
-            change_operations = prev_file.get_operations(new_file)
-
-            # write them to current commit
-            for operation in change_operations:
-                add_op_to_curr_commit(operation)
-    else:
-        # otherwise, it didn't exist before, so we are adding it
-        if file_name.endswith(".txt"):
-            file_obj = TextFile.from_file(file_name)
-        else:
-            file_obj = BinaryFile.from_file(file_name)
-        add_op_to_curr_commit(FileOpAdd(file_name, file_obj))
-
-def commit(vcs_path):
-    # check that the current commit isn't empty:
-    curr_commit = open(vcs_path + "/curr_commit", "r+")
-    text = curr_commit.read()
-    curr_commit.close()
-    if text == "":
-        print("Error: nothing to commit")
-        return
-    # this is a new file
-    patch_file_name = "0"
-    for patch_file_name in os.listdir(vcs_path + "/branch"):
-        pass
-    last = int(patch_file_name)
-    new = last + 1
-    # commit the current commit
-    os.rename(vcs_path + "/curr_commit", vcs_path + "/branch/" + str(new))
-    # make a new current commit
-    f = open(vcs_path + "/curr_commit", "w+")
-    f.close()
-
-def diff(vcs_path, file_name):
-    # if the file didn't exist
-    curr_state = get_curr_state(vcs_path, include_working_commit=False)
-    if file_name not in curr_state:
-        if not os.path.exists(file_name):
-            print("Error: no diff as file does not/didn't exist")
-        else:
-            if file_name.endswith(".txt"):
-                file_obj = TextFile.from_file(file_name)
-            else:
-                file_obj = BinaryFile.from_file(file_name)
-            print("File diff: {}".format(file_obj.file_name))
-            print("+" + file_obj.file_contents)
-    else:
-        if not os.path.exists(file_name):
-            file_obj = curr_state.files[file_name]
-            print("File diff: {}".format(file_name))
-            print("Deleted file")
-        else:
-            if file_name.endswith(".txt"):
-                file_obj = TextFile.from_file(file_name)
-            else:
-                file_obj = BinaryFile.from_file(file_name)
-            curr_state.files[file_name].print_changes(file_obj)
-
-def add_op_to_curr_commit(operation):
-    operation_string = operation.to_string()
-    f = open(os.getcwd() + "/.vcs/curr_commit", "a+")
-    f.write(operation_string + "\n")
-    f.close()
 
 main()
