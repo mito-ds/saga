@@ -1,71 +1,102 @@
 #!/usr/bin/env python3
 import argparse
 import os
-import pickle
 from saga.Repository import Repository
 
 def main():
-    parser = argparse.ArgumentParser(description='Do version control on some files')
-    parser.add_argument('action', type=str, help='')
-    parser.add_argument('file', type=str, help='', nargs='?')
-    parser.add_argument('message', type=str, help='', nargs='?')
+    # create the top-level saga parser
+    parser = argparse.ArgumentParser(prog='saga')
+    subparsers = parser.add_subparsers(help='sub-command help')
+    
+    # create the parser for the "init" command
+    parser_init = subparsers.add_parser('init', help='creates a new saga project in the current directory')
+    parser_init.set_defaults(func=init)
+
+    # create the parser for the "add" command
+    parser_add = subparsers.add_parser('add', help='adds a path to the current index')
+    parser_add.add_argument('path', type=str, help='the path to add to the index')
+    parser_add.set_defaults(func=add)
+
+    # create the parser for the "commit" command
+    parser_commit = subparsers.add_parser('commit', help='adds a path to the current index')
+    parser_commit.add_argument('-m', type=str, help='commit string')
+    parser_commit.set_defaults(func=commit)
+
+    # create the parser for the "status" command
+    parser_status = subparsers.add_parser('status', help='displays info about the current working index')
+    parser_status.set_defaults(func=status)
+
+    # create the parser for the "diff" command
+    parser_diff = subparsers.add_parser('diff', help='check the diff of the current index')
+    parser_diff.set_defaults(func=diff)
+
+    # create the parser for the "branch" command
+    parser_status = subparsers.add_parser('branch', help='commands for managing branches')
+    parser_status.set_defaults(func=branch)
+
+    # create the parser for the "checkout" command
+    parser_checkout = subparsers.add_parser('checkout', help='command for switching head branch')
+    parser_checkout.add_argument('-b', help='flag to create a new branch', action='store_true')
+    parser_checkout.add_argument('branch', type=str, help='branch name')
+    parser_checkout.set_defaults(func=checkout)
+
+    # create the parser for the "merge" command
+    parser_merge = subparsers.add_parser('merge', help='command to merge head branch with some other branch')
+    parser_merge.add_argument('branch', type=str, help='name of branch to merge')
+    parser_merge.set_defaults(func=merge)
 
     args = parser.parse_args()
-    cwd = os.getcwd()
-    # First, we find out if this folder is the part of an existing .vcs project
-    vcs_base_path = get_vcs_base_path(cwd)
+    parser.parse_args()
+    args.func(args)
 
-    # Handle the case where the project has not been started; the only option is to create it
-    repository = None
-
-    if args.action == "init":
-        if vcs_base_path is None:
-            repository = Repository.init(cwd)
-            vcs_base_path = cwd
-            print("Saga project created at {}".format(vcs_base_path))
-        else:
-            print("Error: saga project already exists at {}".format(vcs_base_path))
-            return
+def init(args):
+    saga_repo = get_saga_repo()
+    if saga_repo is not None:
+        print("Error: saga project already exists at {}".format(saga_repo.base_directory))
     else:
-        if vcs_base_path is None:
-            print("Error: must create saga project before using it")
-            return
-        repository = Repository.read(vcs_base_path) 
-
-    if args.action == "diff":
-        repository.get_diff()
-    elif args.action == "add":
-        repository.add(args.file)
-        print(repository.index)
-    elif args.action == "commit":
-        repository.commit(args.message)
-    elif args.action == "branch":
-        print("HEAD: {}".format(repository.head))
-        print(repository.branches)
-    elif args.action == "status":
-        repository.status() 
-    elif args.action == "newbranch":
-        repository.create_branch(args.message)
-    elif args.action == "switchbranch":
-        repository.switch_to_branch(args.message)
-    elif args.action == "init":
-        pass # we handle this above
-    elif args.action == "index":
-        print(repository.index)
-        print(repository.file_ids)
-    elif args.action == "merge":
-        repository.merge(args.message)
-    else:
-        print("Error: usage {init | add | commit | diff}")
+        repository = Repository.init(os.getcwd())
 
     repository.write()
 
-def get_vcs_base_path(cwd):
-    path = cwd
+def add(args):
+    saga_repo = get_saga_repo()
+    saga_repo.add(args.path)
+    saga_repo.write()
+
+def commit(args):
+    saga_repo = get_saga_repo()
+    saga_repo.commit(args.m)
+    saga_repo.write()
+
+def status(args):
+    get_saga_repo().status()
+
+def diff(args):
+    get_saga_repo().get_diff()
+
+def branch(args):
+    saga_repo = get_saga_repo()
+    print("HEAD: {}".format(saga_repo.head))
+    print(saga_repo.branches)
+
+def checkout(args):
+    saga_repo = get_saga_repo()
+    if args.b:
+        saga_repo.create_branch(args.branch)
+    saga_repo.switch_to_branch(args.branch)
+    saga_repo.write()
+
+def merge(args):
+    saga_repo = get_saga_repo()
+    saga_repo.merge(args.branch)
+    saga_repo.write()
+
+def get_saga_repo():
+    path = os.getcwd()
     while path != "/":
         # check if there is a
         if os.path.isdir(path + "/.saga"):
-            return path
+            return Repository.read(path) 
         path = os.path.dirname(path)
     return None
 
