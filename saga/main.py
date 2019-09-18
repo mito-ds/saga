@@ -50,7 +50,7 @@ def main():
     args.func(args)
 
 def init(args):
-    saga_repo = get_saga_repo()
+    saga_repo = get_saga_repo_maybe()
     if saga_repo is not None:
         print("Error: saga project already exists at {}".format(saga_repo.base_directory))
     else:
@@ -64,7 +64,11 @@ def add(args):
 
 def commit(args):
     saga_repo = get_saga_repo()
-    saga_repo.commit(args.m)
+    if args.m is None:
+        commit_message = input("Please enter a commit message: ")
+        saga_repo.commit(commit_message)
+    else:
+        saga_repo.commit(args.m)
     saga_repo.write()
 
 def status(args):
@@ -92,6 +96,14 @@ def merge(args):
     saga_repo.write()
 
 def get_saga_repo():
+    saga_repo = get_saga_repo_maybe()
+    if saga_repo is None:
+        print("Error: command cannot run as no saga repo exists")
+        exit(1)
+    else:
+        return saga_repo
+
+def get_saga_repo_maybe():
     path = os.getcwd()
     while path != "/":
         # check if there is a

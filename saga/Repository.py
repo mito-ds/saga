@@ -70,15 +70,16 @@ class Repository(object):
 
     def index_hash(self):
         file_hashes = []
-        for file_path in sorted([f for f in self.index[self.head]]):
-            if os.path.exists(file_path):
-                f = open(file_path, "rb")
+        # we sort to have the same files every time
+        for file_name in sorted(self._relative_paths_in_dir(self.index_directory)):
+            index_file_name = join(self.index_directory, file_name)
+            if os.path.isfile(index_file_name):
+                f = open(index_file_name, "rb")
                 file_bytes = f.read()
                 m = hashlib.sha256()
-                m.update(file_bytes)
+                m.update(file_bytes) # we encode the file contents
+                m.update(file_name.encode("utf-8")) # and we encode the file path
                 file_hashes.append(m.hexdigest())
-            else:
-                self.index[self.head].remove(file_path) # we don't keep around dead files anymore
         m = hashlib.sha256()
         #TODO: this should be a merkle tree eventually 
         # (or maybe an merkel-mountain-range), to reap the benefits
@@ -93,18 +94,19 @@ class Repository(object):
     def add(self, path):
         if not os.path.exists(path):
             print("Error: path {} does not exist".format(path))
-        
-        if path[-1] == "/":
-            path = path[:-1]
-        
+
         self._try_create_file_ids([path])
-             
-        if os.path.isdir(path):
+
+        if os.path.isfile(path):
+            self._copy_file_to_dir(path, self.index_directory)
+        else:
+            assert os.path.isdir(path)
+            # make ids for all files in directory
             files_in_path = self._relative_paths_in_dir(path)
             files_in_path = [join(path, f) for f in files_in_path]
             self._try_create_file_ids(files_in_path)
-
-        self._copy_path_to_dir(path, self.index_directory)
+            # copy directory to index
+            self._copy_dir_to_dir(path, join(self.index_directory, path))
 
     def _try_create_file_ids(self, file_paths):
         for path in file_paths:
@@ -302,43 +304,62 @@ class Repository(object):
     def _backup_index_to_db(self):
         # copies all files that are being tracked to a state hash directory
         dst = join(self.state_directory, self.index_hash())
-        if not os.path.exists(dst):
+        if not os.path.isdir(dst):
             os.mkdir(dst)
-
-        self._copy_path_to_dir(self.index_directory, dst)
+            # TODO: make this work when the cwd isn't the base repository
+            self._copy_dir_to_dir(".saga/index/", dst)
+        
 
     def _restore_state(self, state_hash):
-        self._copy_path_to_dir(os.getcwd(), join(self.state_directory, state_hash))
+        self._copy_path_to_dir(".", join(self.state_directory, state_hash))
 
-    def _copy_path_to_dir(self, src, dst):
+    def _copy_subpaths_to_dir(self, src, dst):
+        if not os.path.isdir(src):
+            raise Exception("Can only _copy_subpaths_to_dir of dir, which {} is not".format(path))
+
+        for path in os.listdir(src):
+            self._copy_path_to_dir(path)
+
+    def _copy_dir_to_dir(self, src, dst):
         """
-        src is a relative path to the current working directory. It may be a file or a folder. 
-        dst is an absolute path. It must be a directory that exists.
+        src is a relative path. It must be a folder that exists.
+        dst is an absolute path. It will be created if it does not exist.
+
+        If a path = src/file_name, then this will be copied to dst/file_name
         """
+        if src[-1] == "/":
+            src = src[:-1]
 
-        # if it is a file, we can just copy it over, making sure the directories it's in exist
-        if isfile(src):
-            directory = join(dst, os.path.dirname(src))
-            if not os.path.exists(directory):
-                os.makedirs(directory)
-            # get directory that this file will exist in 
-            shutil.copyfile(src, join(dst, src))
-            return
-
+        if not os.path.exists(dst):
+                os.makedirs(dst)
 
         # otherwise, we recursively expore the directory and copy it over
         for root, dirs, files in os.walk(src):
-            if not os.path.exists(join(dst, root)):
-                os.makedirs(join(dst, root))
+            relative_root = root[len(src) + 1:]
 
             # first we copy the directories
             for directory in dirs:
                 # if the directory doesn't exist, we make it
-                path = join(dst, root, directory)
+                path = join(dst, relative_root, directory)
                 if not os.path.isdir(path):
                     os.mkdir(path)
 
             # and then the files
             for file_name in files:
-                path = join(dst, root, file_name)
+                path = join(dst, relative_root, file_name)
                 shutil.copyfile(join(root, file_name), path)
+
+    def _copy_file_to_dir(self, src, dst):
+        """
+        src is a relative path of a file. 
+        dst is an absolute path of a folder. 
+
+        src will eixst at join(dst, src)
+        """
+
+        dirname = join(dst, os.path.dirname(src))
+        print(dirname)
+        if not os.path.isdir(dirname):
+            os.makedirs(dirname)
+
+        shutil.copyfile(src, join(dst, src))
