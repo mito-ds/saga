@@ -31,8 +31,9 @@ def main():
     parser_diff.set_defaults(func=diff)
 
     # create the parser for the "branch" command
-    parser_status = subparsers.add_parser('branch', help='commands for managing branches')
-    parser_status.set_defaults(func=branch)
+    parser_branch = subparsers.add_parser('branch', help='commands for managing branches')
+    parser_branch.add_argument('b', nargs="?", type=str, help='new branch to create')
+    parser_branch.set_defaults(func=branch)
 
     # create the parser for the "checkout" command
     parser_checkout = subparsers.add_parser('checkout', help='command for switching head branch')
@@ -80,8 +81,11 @@ def diff(args):
 
 def branch(args):
     saga_repo = get_saga_repo()
+    if args.b is not None:
+        saga_repo.create_branch(args.b)
     print("HEAD: {}".format(saga_repo.head))
     print(saga_repo.branches)
+    saga_repo.write()
 
 def checkout(args):
     saga_repo = get_saga_repo()

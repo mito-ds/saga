@@ -20,4 +20,4 @@ class OP_MDL_Insert(Operation):
         return OP_MDL_Remove(self.file_id, self.path, self.value)
 
     def __str__(self):
-        return "OP_MDL_Remove: at path {}, inserted {}".format(self.path, self.value)
+        return "OP_MDL_Insert: at path {}, inserted {}".format(self.path, self.value)
