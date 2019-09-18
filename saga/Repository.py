@@ -311,14 +311,9 @@ class Repository(object):
         
 
     def _restore_state(self, state_hash):
-        self._copy_path_to_dir(".", join(self.state_directory, state_hash))
+        print("HERE")
+        self._copy_dir_to_dir(join(".saga/states", state_hash), ".")
 
-    def _copy_subpaths_to_dir(self, src, dst):
-        if not os.path.isdir(src):
-            raise Exception("Can only _copy_subpaths_to_dir of dir, which {} is not".format(path))
-
-        for path in os.listdir(src):
-            self._copy_path_to_dir(path)
 
     def _copy_dir_to_dir(self, src, dst):
         """
