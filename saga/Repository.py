@@ -16,6 +16,7 @@ class Repository(object):
         self.saga_directory = self.base_directory + "/.saga/"
         self.commit_directory = self.base_directory + "/.saga/commits/"
         self.state_directory = self.base_directory + "/.saga/states/"
+        self.index_directory = self.base_directory + "/.saga/index/"
         self.repo_pickle = self.base_directory + "/.saga/repository"
         self.head = "master"
         self.branches = {"master" : None} # map from branch name -> commit hash
@@ -31,6 +32,7 @@ class Repository(object):
         os.mkdir(directory + "/.saga")
         os.mkdir(directory + "/.saga/commits")
         os.mkdir(directory + "/.saga/states")
+        os.mkdir(directory + "/.saga/index")
         repo = Repository(directory)
         repo.commit("Create repository") # we add this empty commit so we don't need special cases
         return repo
@@ -89,15 +91,25 @@ class Repository(object):
         return uuid.uuid4().hex
 
     def add(self, path):
-        if os.path.exists(path):
-            if os.path.isdir(path):
-                # if it's a directory, we recursively think about all the files below it
-                for f in [join(path, f) for f in os.listdir(path) if isfile(join(path, f))]:
-                    self.index[self.head].add(f)
-            else:
-                self.index[self.head].add(path)
-        else:
+        if not os.path.exists(path):
             print("Error: path {} does not exist".format(path))
+        
+        if path[-1] == "/":
+            path = path[:-1]
+        
+        self._try_create_file_ids([path])
+             
+        if os.path.isdir(path):
+            files_in_path = self._relative_paths_in_dir(path)
+            files_in_path = [join(path, f) for f in files_in_path]
+            self._try_create_file_ids(files_in_path)
+
+        self._copy_path_to_dir(path, self.index_directory)
+
+    def _try_create_file_ids(self, file_paths):
+        for path in file_paths:
+            if path not in self.file_ids[self.head]:
+                self.file_ids[self.head][path] = self.get_new_file_id()
 
     def commit(self, commit_message):
         state_hash = self.index_hash()
@@ -105,7 +117,7 @@ class Repository(object):
         commit = Commit(state_hash, [parent_commit_hash], commit_message)
         commit_hash = self._add_commit_to_db(commit)
         self.commits[self.head].append(commit_hash)
-        self._backup_state_to_db()
+        self._backup_index_to_db()
         # we need to add a save state 
 
         self.branches[self.head] = commit_hash
@@ -125,14 +137,17 @@ class Repository(object):
 
         self.head = branch_name
         commit = self.get_commit(self.branches[self.head])
-        self._restore_state(commit.state_hash)
+        self._restore_state(commit.state_hash)        
 
-    def _paths_in_dir(self, directory, ignore=None):    
+    def _relative_paths_in_dir(self, directory, ignore=None):    
         if ignore is None:
             ignore = []
 
-        prefix = len(directory)
-        paths = [path[prefix + 1:] for path in glob.glob(directory + '/**', recursive=True) if path[prefix + 1:] != ""]
+        # we make sure that the path does not start with a slash
+        if directory[-1] == "/":
+            paths = [path[len(directory):] for path in glob.glob(directory + '/**', recursive=True) if path[len(directory):] != ""]
+        else:
+            paths = [path[len(directory) + 1:] for path in glob.glob(directory + '/**', recursive=True) if path[len(directory) + 1:] != ""]
         def include_path(path):
             for ignore_path in ignore:
                 if path.startswith(ignore_path):
@@ -146,14 +161,16 @@ class Repository(object):
         return self.get_commit(self.branches[self.head]).state_hash
 
     def changed_files(self, dir1, dir2):
-        previous_state = self._paths_in_dir(dir1)
-        current_state = self._paths_in_dir(dir2)
+        previous_state = self._relative_paths_in_dir(dir1)
+        current_state = self._relative_paths_in_dir(dir2)
 
         removed_paths, changed_paths, inserted_paths  = set(), set(), set()
         for path in previous_state:
+            print(path)
             if path not in current_state:
                 removed_paths.add(path)
             elif not filecmp.cmp(join(dir1, path), join(dir2, path)):
+                print("HERE for {}".format(join(dir1, path)))
                 changed_paths.add(path)
         for path in current_state:
             if path not in previous_state:
@@ -187,22 +204,24 @@ class Repository(object):
                 print("\t\tinserted: {}".format(path))
 
 
-    def get_diff(self):
-        _, changed_paths, _ = self.changed_files(join(self.state_directory, self.state_hash()), self.base_directory)
+    def diff(self):
+        _, changed_paths, _ = self.changed_files(self.index_directory, self.base_directory)
 
         print("Git diff:")
         operations = []
         for path in changed_paths:
-            if path in self.index[self.head]:
+            if os.path.isfile(path):
                 print("\tFile:", path)
                 # we should read in the current file and the old file in this case
                 file_id = self.file_ids[self.head][path]
-                old_file = parse_file(file_id, path, join(self.state_directory, self.state_hash(), path))
+                old_file = parse_file(file_id, path, join(self.index_directory, path))
                 new_file = parse_file(file_id, path, join(self.base_directory, path))
                 ops = old_file.get_operations(new_file)
                 for op in ops:
                     print("\t\t:", op)
                 operations.extend(ops)
+            else:
+                print("\tDirectory:", path, "changed")
 
         return operations
 
@@ -277,38 +296,46 @@ class Repository(object):
         
         raise Exception("No common ancestor")
 
-    def _backup_state_to_db(self):
-        # copies all files that are being tracked to the
-        dst = self.state_directory + self.index_hash() 
+    def _backup_index_to_db(self):
+        # copies all files that are being tracked to a state hash directory
+        dst = join(self.state_directory, self.index_hash())
         if not os.path.exists(dst):
             os.mkdir(dst)
-            for file_name in self.index[self.head]:
-                # make new directories if we need to 
-                if isfile(file_name):
-                    if file_name not in self.file_ids[self.head]:
-                        self.file_ids[self.head][file_name] = self.get_new_file_id()
-                    # we need to make directories down to this one
-                    directory = "/".join(file_name.split("/")[:-1])
-                    if not os.path.exists(dst + "/" + directory):
-                        os.mkdir(dst + "/" + directory)
-                    shutil.copyfile(file_name, dst + "/" + file_name)
-                else:
-                    # must be a directory, and so we can just make the directory
-                    if not os.path.exists(dst + "/" + file_name):
-                        os.mkdir(dst + "/" + file_name)
 
+        self._copy_path_to_dir(self.index_directory, dst)
 
     def _restore_state(self, state_hash):
+        self._copy_path_to_dir(os.getcwd(), join(self.state_directory, state_hash))
 
-        for root, dirs, files in os.walk(self.state_directory + state_hash):
-            local_path = root.split(self.state_directory)[1][65:]
+    def _copy_path_to_dir(self, src, dst):
+        """
+        src is a relative path to the current working directory. It may be a file or a folder. 
+        dst is an absolute path. It must be a directory that exists.
+        """
+
+        # if it is a file, we can just copy it over, making sure the directories it's in exist
+        if isfile(src):
+            directory = join(dst, os.path.dirname(src))
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+            # get directory that this file will exist in 
+            shutil.copyfile(src, join(dst, src))
+            return
+
+
+        # otherwise, we recursively expore the directory and copy it over
+        for root, dirs, files in os.walk(src):
+            if not os.path.exists(join(dst, root)):
+                os.makedirs(join(dst, root))
+
+            # first we copy the directories
             for directory in dirs:
                 # if the directory doesn't exist, we make it
-                path = join(local_path, directory)
-                if not os.path.isdir(join(self.base_directory, path)):
-                    os.mkdir(join(self.base_directory, path))
+                path = join(dst, root, directory)
+                if not os.path.isdir(path):
+                    os.mkdir(path)
 
+            # and then the files
             for file_name in files:
-                path = join(local_path, file_name)
-                shutil.copyfile(join(self.state_directory, state_hash, path), join(self.base_directory, path))
-
+                path = join(dst, root, file_name)
+                shutil.copyfile(join(root, file_name), path)

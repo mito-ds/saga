@@ -20,3 +20,6 @@ class OP_File_ChangeName(Operation):
 
     def inverse(self):
         return OP_File_ChangeName(self.file_id, self.new_name, self.old_name)
+
+    def __str__(self):
+        return "OP_File_ChangeName: changed file {} to {}".format(self.old_name, self.new_name)

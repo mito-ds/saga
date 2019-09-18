@@ -55,8 +55,7 @@ def init(args):
         print("Error: saga project already exists at {}".format(saga_repo.base_directory))
     else:
         repository = Repository.init(os.getcwd())
-
-    repository.write()
+        repository.write()
 
 def add(args):
     saga_repo = get_saga_repo()
@@ -69,10 +68,12 @@ def commit(args):
     saga_repo.write()
 
 def status(args):
-    get_saga_repo().status()
+    saga_repo = get_saga_repo()
+    saga_repo.status()
+    print(saga_repo.file_ids[saga_repo.head])
 
 def diff(args):
-    get_saga_repo().get_diff()
+    get_saga_repo().diff()
 
 def branch(args):
     saga_repo = get_saga_repo()
