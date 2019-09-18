@@ -166,12 +166,15 @@ class Repository(object):
 
         removed_paths, changed_paths, inserted_paths  = set(), set(), set()
         for path in previous_state:
-            print(path)
             if path not in current_state:
                 removed_paths.add(path)
-            elif not filecmp.cmp(join(dir1, path), join(dir2, path)):
-                print("HERE for {}".format(join(dir1, path)))
-                changed_paths.add(path)
+            else:
+                path1 = join(dir1, path)
+                path2 = join(dir2, path)
+                if isfile(path1) and isfile(path2) and not filecmp.cmp(path1, path2):
+                    changed_paths.add(path)
+                elif (isfile(path1) and not isfile(path2)) or (not isfile(path1) and isfile(path2)):
+                    changed_paths.add(path)
         for path in current_state:
             if path not in previous_state:
                 inserted_paths.add(path)

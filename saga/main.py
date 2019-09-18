@@ -70,7 +70,6 @@ def commit(args):
 def status(args):
     saga_repo = get_saga_repo()
     saga_repo.status()
-    print(saga_repo.file_ids[saga_repo.head])
 
 def diff(args):
     get_saga_repo().diff()
