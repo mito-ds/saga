@@ -136,6 +136,11 @@ class Repository(object):
             print("Error: cannot switch to branch {} as it does not exist".format(branch_name))
             return
 
+        inserted, changed, removed = self.changed_files(self.curr_state_dir(), self.index_directory)
+        if any(inserted) or any(changed) or any(removed):
+            print("Error: please commit changes before switching branches")
+            return
+
         self.head = branch_name
         commit = self.get_commit(self.branches[self.head])
         self._restore_state(commit.state_hash)        
@@ -238,6 +243,13 @@ class Repository(object):
                 print("\tDirectory:", path, "changed")
 
         return operations
+
+    def branch(self):
+        for branch in self.branches:
+            if branch == self.head:
+                print("   * {}".format(branch))
+            else:
+                print("     {}".format(branch))
 
     def merge(self, other_branch):
         if other_branch not in self.branches:

@@ -92,8 +92,7 @@ def branch(args):
     saga_repo = get_saga_repo()
     if args.b is not None:
         saga_repo.create_branch(args.b)
-    print("HEAD: {}".format(saga_repo.head))
-    print(saga_repo.branches)
+    saga_repo.branch()
     saga_repo.write()
 
 def checkout(args):
