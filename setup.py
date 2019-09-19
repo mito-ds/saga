@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="saga-vcs",
-    version="0.0.2",
+    version="0.0.5",
     author="saga",
     author_email="narush@wharton.upenn.edu.com",
     description="saga is a set of tools for version control",
