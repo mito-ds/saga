@@ -162,6 +162,9 @@ class Repository(object):
     def state_hash(self):
         return self.get_commit(self.branches[self.head]).state_hash
 
+    def curr_state_dir(self):
+        return join(self.state_directory, self.get_commit(self.branches[self.head]).state_hash)
+
     def changed_files(self, dir1, dir2):
         previous_state = self._relative_paths_in_dir(dir1)
         current_state = self._relative_paths_in_dir(dir2)
@@ -182,31 +185,38 @@ class Repository(object):
                 inserted_paths.add(path)
 
         return removed_paths, changed_paths, inserted_paths
+
+    def log(self):
+
+        for commit_hash in reversed(self.commits[self.head]):
+            commit = self.get_commit(commit_hash)
+            print("commit: {}".format(commit_hash))
+            print("\t{}\n".format(commit.commit_message))
         
     def status(self):
-        removed_paths, changed_paths, inserted_paths = self.changed_files(join(self.state_directory, self.state_hash()), self.base_directory)
-        print("Status:")
-        print("\tChanges staged for commit:")
-        for path in removed_paths:
-            if path in self.index[self.head]:
-                print("\t\tremoved: {}".format(path))
-        for path in changed_paths:
-            if path in self.index[self.head]:
-                print("\t\tchanged: {}".format(path))
-        for path in inserted_paths:
-            if path in self.index[self.head]:
-                print("\t\tinserted: {}".format(path))
-        
-        print("\tChanges not staged for commit:")
-        for path in removed_paths:
-            if path not in self.index[self.head]:
-                print("\t\tremoved: {}".format(path))
-        for path in changed_paths:
-            if path not in self.index[self.head]:
-                print("\t\tchanged: {}".format(path))
-        for path in inserted_paths:
-            if path not in self.index[self.head]:
-                print("\t\tinserted: {}".format(path))
+        print("On branch {}".format(self.head))
+
+        rem_state_to_index, cha_state_to_index, ins_state_to_index = self.changed_files(self.curr_state_dir(), self.index_directory)
+        rem_index_to_curr, cha_index_to_curr, ins_index_to_curr = self.changed_files(self.index_directory, self.base_directory)
+
+        print("Changes staged for commit:")
+        for path in rem_state_to_index:
+            print("\tremoved: {}".format(path))
+        for path in ins_state_to_index:
+            print("\tinserted: {}".format(path))
+        for path in cha_state_to_index:
+            if path not in cha_index_to_curr and path not in rem_index_to_curr:
+                print("\tmodified: {}".format(path))
+
+        print("Change not staged for commit:")
+        for path in rem_index_to_curr:
+            print("\tremoved: {}".format(path))
+        for path in cha_index_to_curr:
+            print("\tmodified: {}".format(path))
+
+        print("Untracked files:")
+        for path in ins_index_to_curr:
+            print("\t{}".format(path))
 
 
     def diff(self):

@@ -26,6 +26,10 @@ def main():
     parser_status = subparsers.add_parser('status', help='displays info about the current working index')
     parser_status.set_defaults(func=status)
 
+    # create the parser for the "log" command
+    parser_log = subparsers.add_parser('log', help='displays most recent commits')
+    parser_log.set_defaults(func=log)
+
     # create the parser for the "diff" command
     parser_diff = subparsers.add_parser('diff', help='check the diff of the current index')
     parser_diff.set_defaults(func=diff)
@@ -57,6 +61,7 @@ def init(args):
     else:
         repository = Repository.init(os.getcwd())
         repository.write()
+        print("Initialized empty Git repository in {}".format(repository.saga_directory))
 
 def add(args):
     saga_repo = get_saga_repo()
@@ -75,6 +80,10 @@ def commit(args):
 def status(args):
     saga_repo = get_saga_repo()
     saga_repo.status()
+
+def log(args):
+    saga_repo = get_saga_repo()
+    saga_repo.log()
 
 def diff(args):
     get_saga_repo().diff()
