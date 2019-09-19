@@ -18,4 +18,7 @@ class OP_MDL_Change(Operation):
     def inverse(self):
         return OP_MDL_Change(self.file_id, self.path, self.new_value, self.old_value)
 
+    def __str__(self):
+        return "OP_MDL_Change: at path {}, changed {} to {}".format(self.path, self.old_value, self.new_value)
+
     

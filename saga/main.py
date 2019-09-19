@@ -31,8 +31,9 @@ def main():
     parser_diff.set_defaults(func=diff)
 
     # create the parser for the "branch" command
-    parser_status = subparsers.add_parser('branch', help='commands for managing branches')
-    parser_status.set_defaults(func=branch)
+    parser_branch = subparsers.add_parser('branch', help='commands for managing branches')
+    parser_branch.add_argument('b', nargs="?", type=str, help='new branch to create')
+    parser_branch.set_defaults(func=branch)
 
     # create the parser for the "checkout" command
     parser_checkout = subparsers.add_parser('checkout', help='command for switching head branch')
@@ -50,13 +51,12 @@ def main():
     args.func(args)
 
 def init(args):
-    saga_repo = get_saga_repo()
+    saga_repo = get_saga_repo_maybe()
     if saga_repo is not None:
         print("Error: saga project already exists at {}".format(saga_repo.base_directory))
     else:
         repository = Repository.init(os.getcwd())
-
-    repository.write()
+        repository.write()
 
 def add(args):
     saga_repo = get_saga_repo()
@@ -65,19 +65,27 @@ def add(args):
 
 def commit(args):
     saga_repo = get_saga_repo()
-    saga_repo.commit(args.m)
+    if args.m is None:
+        commit_message = input("Please enter a commit message: ")
+        saga_repo.commit(commit_message)
+    else:
+        saga_repo.commit(args.m)
     saga_repo.write()
 
 def status(args):
-    get_saga_repo().status()
+    saga_repo = get_saga_repo()
+    saga_repo.status()
 
 def diff(args):
-    get_saga_repo().get_diff()
+    get_saga_repo().diff()
 
 def branch(args):
     saga_repo = get_saga_repo()
+    if args.b is not None:
+        saga_repo.create_branch(args.b)
     print("HEAD: {}".format(saga_repo.head))
     print(saga_repo.branches)
+    saga_repo.write()
 
 def checkout(args):
     saga_repo = get_saga_repo()
@@ -92,6 +100,14 @@ def merge(args):
     saga_repo.write()
 
 def get_saga_repo():
+    saga_repo = get_saga_repo_maybe()
+    if saga_repo is None:
+        print("Error: command cannot run as no saga repo exists")
+        exit(1)
+    else:
+        return saga_repo
+
+def get_saga_repo_maybe():
     path = os.getcwd()
     while path != "/":
         # check if there is a

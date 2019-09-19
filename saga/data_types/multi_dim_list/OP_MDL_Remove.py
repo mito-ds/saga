@@ -17,3 +17,6 @@ class OP_MDL_Remove(Operation):
     def inverse(self):
         from saga.data_types.multi_dim_list.OP_MDL_Insert import OP_MDL_Insert 
         return OP_MDL_Insert(self.file_id, self.path, self.value)
+
+    def __str__(self):
+        return "OP_MDL_Remove: at path {}, removed {}".format(self.path, self.value)
