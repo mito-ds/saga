@@ -118,10 +118,9 @@ class Repository(object):
         parent_commit_hash = self.branches[self.head]
         commit = Commit(state_hash, [parent_commit_hash], commit_message)
         commit_hash = self._add_commit_to_db(commit)
+        print("[{}] {}".format(commit_hash[0:12], commit_message))
         self.commits[self.head].append(commit_hash)
         self._backup_index_to_db()
-        # we need to add a save state 
-
         self.branches[self.head] = commit_hash
 
     def create_branch(self, branch_name):
