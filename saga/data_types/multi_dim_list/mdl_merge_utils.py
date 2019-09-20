@@ -9,8 +9,8 @@ def diff3(A, O, B):
     matchings_B = lcs(B, O)
 
     # increment all the indexes by one
-    matchings_A = [([a + 1], [o + 1], sim) for ([a], [o], sim) in matchings_A]
-    matchings_B = [([b + 1], [o + 1], sim) for ([b], [o], sim) in matchings_B]
+    matchings_A = [([a + 1], [o + 1], sim) for ([a], [o], sim) in matchings_A if sim == 1]
+    matchings_B = [([b + 1], [o + 1], sim) for ([b], [o], sim) in matchings_B if sim == 1]
 
     chunks = get_chunks(A, O, B, matchings_A, matchings_B)
 

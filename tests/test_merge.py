@@ -16,3 +16,12 @@ def test_diff3_successful_merge():
 
     result = diff3(A, O, B)
     assert result == [1, 4, 5, 2, 6]
+
+
+def test_multi_dim_merge():
+    A = [[1, 2], [3, 4]]
+    O = [[1, 2, 3], [3, 4]]
+    B = [[1, 2], [3, 4]]
+
+    result = diff3(A, O, B)
+    assert result == [[1, 2, 3], [3, 4]]
