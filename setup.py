@@ -5,10 +5,10 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="saga-vcs",
-    version="0.0.6",
+    version="0.0.9",
     author="saga",
     author_email="narush@wharton.upenn.edu.com",
-    description="saga is a set of tools for version control",
+    description="saga is a version control CLI that handles many file formats",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/naterush/saga",

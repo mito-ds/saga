@@ -2,6 +2,7 @@ import csv
 from saga.file_types.binary_file import parse_binary_file, write_binary_file
 from saga.file_types.text_file import parse_text_file, write_text_file
 from saga.file_types.csv_file import parse_csv_file, write_csv_file
+from saga.file_types.excel_file import parse_excel_file, write_excel_file
 
 def is_csv(file_path):
     csv_fileh = open(file_path, 'r')
@@ -16,6 +17,8 @@ def is_csv(file_path):
 def parse_file(file_id, file_name, file_path):
     if file_path.endswith(".txt"):
         return parse_text_file(file_id, file_name, file_path)
+    elif file_path.ends_with(".xlsx"):
+        return parse_excel_file(file_id, file_name, file_path)
     elif is_csv(file_path):
         return parse_csv_file(file_id, file_name, file_path)
     else:
@@ -29,5 +32,7 @@ def write_file(file):
         write_text_file(file)
     elif file.file_type == "binary":
         write_binary_file(file)
+    elif file.file_type == "excel":
+        write_excel_file(file)
     else:
         print("Error: file type {} does not exist".format(file.file_type))

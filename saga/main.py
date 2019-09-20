@@ -61,7 +61,7 @@ def init(args):
     else:
         repository = Repository.init(os.getcwd())
         repository.write()
-        print("Initialized empty Git repository in {}".format(repository.saga_directory))
+        print("Initialized empty saga repository in {}".format(repository.saga_directory))
 
 def add(args):
     saga_repo = get_saga_repo()
@@ -123,5 +123,3 @@ def get_saga_repo_maybe():
             return Repository.read(path) 
         path = os.path.dirname(path)
     return None
-
-main()
