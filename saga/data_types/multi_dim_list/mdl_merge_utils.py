@@ -2,6 +2,9 @@ from saga.data_types.multi_dim_list.lcs import lcs
 
 # diff3 merge
 def diff3(A, O, B):
+    print(A)
+    print(O)
+    print(B)
     matchings_A = lcs(A, O)
     matchings_B = lcs(B, O)
 
@@ -19,9 +22,11 @@ def get_chunks(A, O, B, matchings_A, matchings_B):
     chunks = []
     idx_A, idx_O, idx_B = 0, 0, 0
     max_idx_A, max_idx_O, max_idx_B = len(A), len(O), len(B)
+    print("{}, {}, {}".format(len(A), len(O), len(B)))
 
     i = 1
     while not (i + idx_A > max_idx_A or i + idx_O > max_idx_O or i + idx_B > max_idx_B):
+        #print(i, idx_A, idx_O, idx_B)
         if not is_matching(matchings_A, idx_A + i, idx_O + i) or not is_matching(matchings_B, idx_B + i, idx_O + i):
             # unstable 
             if i == 1:
@@ -29,6 +34,7 @@ def get_chunks(A, O, B, matchings_A, matchings_B):
                 for j in range(idx_O + 1, max_idx_O + 1):
                     last_indexes = is_stable_index(matchings_A, matchings_B, j)
                     if last_indexes:
+                        found = True
                         # found last index of unstable chunk
                         (end_A, end_O, end_B) = last_indexes
                         unstable_chunk = ((idx_A + 1, end_A - 1), (idx_O + 1, end_O - 1), (idx_B + 1, end_B - 1))

@@ -17,7 +17,7 @@ def is_csv(file_path):
 def parse_file(file_id, file_name, file_path):
     if file_path.endswith(".txt"):
         return parse_text_file(file_id, file_name, file_path)
-    elif file_path.ends_with(".xlsx"):
+    elif file_path.endswith(".xlsx"):
         return parse_excel_file(file_id, file_name, file_path)
     elif is_csv(file_path):
         return parse_csv_file(file_id, file_name, file_path)
