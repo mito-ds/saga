@@ -123,5 +123,3 @@ def get_saga_repo_maybe():
             return Repository.read(path) 
         path = os.path.dirname(path)
     return None
-
-main()
