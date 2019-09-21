@@ -9,22 +9,15 @@ def only_complete_matches(matching):
             new_matchings.append((path1, path2, sim))
     return new_matchings
 
-    print(matching)
-
 
 # diff3 merge
-def diff3(A, O, B, dim, ignore_val=None):
-    print(A)
-    print(O)
-    print(B)
-    matchings_A = lcs_multi_dimension(A, O, dim, ignore_val=ignore_val)
-    matchings_B = lcs_multi_dimension(B, O, dim, ignore_val=ignore_val)
+def diff3(A, O, B, dim):
+    matchings_A = lcs_multi_dimension(A, O, dim)
+    matchings_B = lcs_multi_dimension(B, O, dim)
 
     # increment all the indexes by one, and only take the complete matches
     matchings_A = only_complete_matches(matchings_A[1])
     matchings_B = only_complete_matches(matchings_B[1])
-    print(matchings_A)
-    print(matchings_B)
 
     chunks = get_chunks(A, O, B, matchings_A, matchings_B)
 
