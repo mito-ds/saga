@@ -20,9 +20,10 @@ def value_at_path(arr, path):
 
 class MultiDimList(object):
 
-    def __init__(self, multi_dim_list, dimension):
+    def __init__(self, multi_dim_list, dimension, ignore_val=None):
         self.multi_dim_list = multi_dim_list
         self.dimension = dimension
+        self.ignore_val = ignore_val
 
     def remove_path(self, path):
         self._remove_path_rec(self.multi_dim_list, path)
@@ -90,7 +91,7 @@ class MultiDimList(object):
         return operations
 
     def merge(self, a_mdl, b_mdl):
-        merge_res = diff3(a_mdl.multi_dim_list, self.multi_dim_list, b_mdl.multi_dim_list)
+        merge_res = diff3(a_mdl.multi_dim_list, self.multi_dim_list, b_mdl.multi_dim_list, self.dimension, ignore_val=self.ignore_val)
         if merge_res is None:
             return None
 

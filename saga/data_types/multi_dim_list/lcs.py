@@ -73,7 +73,10 @@ def list_from_path(matrix, path):
         curr = curr[step]
     return curr
 
-def list_similiarity_function(A, B):
+
+def list_similiarity_function(A, B, ignore_val=None):
+    if type(A) != type(B):
+        return 0
     if type(A) in (int, float, bool) and type(B) in (int, float, bool):
         if A == B:
             return 1
@@ -87,24 +90,40 @@ def list_similiarity_function(A, B):
             return len(indexes) / max(len(A), len(B))
         return 0
 
+    if ignore_val is not None:
+        # we just want to check if they are directly equal
+        A = [a for a in A if a != ignore_val]
+        B = [b for b in B if b != ignore_val]
+
     indexes = lcs_similarity(A, B, list_similiarity_function)
     if any(indexes):
         total = sum(sim for _, _, sim in indexes)
         return total / max(len(A), len(B))
     return 0
 
+def get_list_similarity_function(ignore_val):
+    def wrapper(A, B):
+        list_similiarity_function(A, B, ignore_val=ignore_val)
+    return wrapper
+
+
 # returns a mapping from "dimension down" to "matches at that level"
-def lcs_multi_dimension(A, B, dimension):    
+def lcs_multi_dimension(A, B, dimension, ignore_val=None):    
     dimension_matches = {i : [] for i in range(1, dimension + 1)}
 
-    dimension_matches[1] = lcs_similarity(A, B, list_similiarity_function)
+    if ignore_val is not None:
+        lsf = get_list_similarity_function(ignore_val)
+    else:
+        lsf = list_similiarity_function
+
+    dimension_matches[1] = lcs_similarity(A, B, lsf)
 
     for dimension_down in range(1, dimension):
         for path_a, path_b, _ in dimension_matches[dimension_down]:
             list_a = list_from_path(A, path_a)
             list_b = list_from_path(B, path_b)
 
-            matches = lcs_similarity(list_a, list_b, list_similiarity_function)
+            matches = lcs_similarity(list_a, list_b, lsf)
             for idx_a, idx_b, sim in matches:
                 dimension_matches[dimension_down + 1].append((path_a + idx_a, path_b + idx_b, sim))
 

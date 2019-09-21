@@ -1,16 +1,30 @@
-from saga.data_types.multi_dim_list.lcs import lcs
+from saga.data_types.multi_dim_list.lcs import lcs, lcs_multi_dimension
+
+def only_complete_matches(matching):
+    new_matchings = []
+    for path1, path2, sim in matching:
+        path1 = [i + 1 for i in path1]
+        path2 = [i + 1 for i in path2]
+        if sim == 1:
+            new_matchings.append((path1, path2, sim))
+    return new_matchings
+
+    print(matching)
+
 
 # diff3 merge
-def diff3(A, O, B):
+def diff3(A, O, B, dim, ignore_val=None):
     print(A)
     print(O)
     print(B)
-    matchings_A = lcs(A, O)
-    matchings_B = lcs(B, O)
+    matchings_A = lcs_multi_dimension(A, O, dim, ignore_val=ignore_val)
+    matchings_B = lcs_multi_dimension(B, O, dim, ignore_val=ignore_val)
 
-    # increment all the indexes by one
-    matchings_A = [([a + 1], [o + 1], sim) for ([a], [o], sim) in matchings_A if sim == 1]
-    matchings_B = [([b + 1], [o + 1], sim) for ([b], [o], sim) in matchings_B if sim == 1]
+    # increment all the indexes by one, and only take the complete matches
+    matchings_A = only_complete_matches(matchings_A[1])
+    matchings_B = only_complete_matches(matchings_B[1])
+    print(matchings_A)
+    print(matchings_B)
 
     chunks = get_chunks(A, O, B, matchings_A, matchings_B)
 
@@ -22,15 +36,14 @@ def get_chunks(A, O, B, matchings_A, matchings_B):
     chunks = []
     idx_A, idx_O, idx_B = 0, 0, 0
     max_idx_A, max_idx_O, max_idx_B = len(A), len(O), len(B)
-    print("{}, {}, {}".format(len(A), len(O), len(B)))
 
     i = 1
     while not (i + idx_A > max_idx_A or i + idx_O > max_idx_O or i + idx_B > max_idx_B):
-        #print(i, idx_A, idx_O, idx_B)
         if not is_matching(matchings_A, idx_A + i, idx_O + i) or not is_matching(matchings_B, idx_B + i, idx_O + i):
             # unstable 
             if i == 1:
                 # find index end of unstable chunk
+                found = False
                 for j in range(idx_O + 1, max_idx_O + 1):
                     last_indexes = is_stable_index(matchings_A, matchings_B, j)
                     if last_indexes:
@@ -42,7 +55,11 @@ def get_chunks(A, O, B, matchings_A, matchings_B):
                         idx_A, idx_O, idx_B = end_A - 1, end_O - 1, end_B - 1
                         i = 1
                         break
-
+                    
+                if not found:
+                    unstable_chunk = ((idx_A + 1, max_idx_A), (idx_O + 1, max_idx_O), (idx_B + 1, max_idx_B))
+                    chunks.append(unstable_chunk)
+                    return chunks
             # stable
             else:
                 stable_chunk = ((idx_A + 1, idx_A + i - 1), (idx_O + 1, idx_O + i - 1), (idx_B + 1, idx_B + i - 1))

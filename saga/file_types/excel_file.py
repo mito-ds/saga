@@ -4,14 +4,31 @@ import pandas as pd
 from pandas import DataFrame
 from pandas import ExcelWriter
 from pandas import ExcelFile
+from math import isnan
+
+def filter_nan(values):
+    for row_idx, row in enumerate(values):
+        to_delete = []
+        for idx, val in enumerate(row):
+            if isinstance(val, float) and isnan(val):
+                to_delete.append(idx)
+
+        for idx in reversed(to_delete):
+            del row[idx]
+
+        values[row_idx] = row
+
+    return values
+
 
 def parse_excel_file(file_id, file_name, file_path):
     xl = pd.ExcelFile(file_path)
-    df = xl.parse('Sheet1')
+    df = xl.parse('Sheet1', convert_float=False)
 
     columns = df.columns
-    values = df.values.tolist()
-    values.insert(0, [val for val in columns])
+    values = filter_nan(df.values.tolist())
+    values.insert(0, [val for val in columns if type(val) == str and not val.startswith("Unnamed:")])
+    print("{}: {}".format(file_path, values))
 
     l = MultiDimList(values, 2)
     return File(file_id, "excel", file_name, l)
