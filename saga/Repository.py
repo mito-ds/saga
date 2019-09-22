@@ -101,12 +101,12 @@ class Repository(object):
             self._copy_file_to_dir(path, self.index_directory)
         else:
             assert os.path.isdir(path)
-            # make ids for all files in directory
             files_in_path = self._relative_paths_in_dir(path)
-            files_in_path = [join(path, f) for f in files_in_path]
+            # we filter out the saga folder, if need be
+            files_in_path = [join(path, f) for f in files_in_path if not f.startswith(".saga")]
             self._try_create_file_ids(files_in_path)
             # copy directory to index
-            self._copy_dir_to_dir(path, join(self.index_directory, path))
+            self._copy_dir_to_dir(path, join(self.index_directory, path), exclude=[".saga"])
 
     def _try_create_file_ids(self, file_paths):
         for path in file_paths:
@@ -336,13 +336,15 @@ class Repository(object):
         self._copy_dir_to_dir(join(".saga/states", state_hash), ".")
 
 
-    def _copy_dir_to_dir(self, src, dst):
+    def _copy_dir_to_dir(self, src, dst, exclude=None):
         """
         src is a relative path. It must be a folder that exists.
         dst is an absolute path. It will be created if it does not exist.
 
         If a path = src/file_name, then this will be copied to dst/file_name
         """
+        if exclude is None:
+            exclude = []
         if src[-1] == "/":
             src = src[:-1]
 
@@ -351,6 +353,7 @@ class Repository(object):
 
         # otherwise, we recursively expore the directory and copy it over
         for root, dirs, files in os.walk(src):
+            dirs[:] = [d for d in dirs if d not in exclude]
             relative_root = root[len(src) + 1:]
 
             # first we copy the directories
