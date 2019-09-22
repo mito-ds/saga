@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="saga-vcs",
-    version="0.0.9",
+    version="0.0.12",
     author="saga",
     author_email="narush@wharton.upenn.edu.com",
     description="saga is a version control CLI that handles many file formats",
