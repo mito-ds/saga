@@ -1,8 +1,8 @@
 # saga
 
-saga is a set of tools for version control. As a user, you can use 
+saga is a set of tools for version control. Think git, but for any file type. As a user, you can use saga to manage your creative projects. 
 
-As a developer, you can use saga's framework to add intelligent version control to any software project. Simply tell saga what your file looks like, and saga will auto-magically allow git-level branching, patching, and merging. Oh gee, think of the collaboration possible!
+As a developer, you can use saga's framework to add intelligent version control to any software project. Simply tell saga what your file format looks like, and saga will auto-magically allow git-level branching, patching, and merging. Oh gee, think of the collaboration possible!
 
 ## Installation Instructions
 
