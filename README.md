@@ -1,22 +1,22 @@
 # saga
 
-saga is a set of tools for version control. Think git, but for any file type. As a user, you can use saga to manage your creative projects. 
+Saga is a set of tools for version control. Saga is like Git, but it works for file formats other than text files. As a user, you can use saga to manage your creative projects. Currently, Saga supports unstructed binary files, text files, CSV files, and Excel files. Unlike Git, Saga can merge changes from different branches from any of these files (if they don't conflict).
 
-As a developer, you can use saga's framework to add intelligent version control to any software project. Simply tell saga what your file format looks like, and saga will auto-magically allow git-level branching, patching, and merging. Oh gee, think of the collaboration possible!
+As a developer, you can use the Saga framework to add version control to new file formats. See examples [here](https://github.com/saga-vcs/saga/blob/master/saga/file_types/text_file.py) and [here](https://github.com/saga-vcs/saga/blob/master/saga/file_types/excel_file.py). Documentation coming soon!
 
 ## Installation Instructions
 
 To install the `saga` command line tool, run:
 
 ~~~~
-pip install saga-vcs
+pip3 install saga-vcs
 ~~~~
 
-Currently, saga only works on macOS. Support for Linux and Windows is coming soon!
+Currently, Saga only works on macOS. Support for Linux and Windows is coming soon!
 
 ## Using saga
 
-Currently, the `saga` command line tool has a very similar interface to git. The following commands are currently supported:
+Currently, the `saga` command line tool has a very similar interface to Git. The following commands are currently supported:
 
 ~~~~
 saga init
@@ -29,7 +29,7 @@ saga checkout
 saga merge
 ~~~~
 
-Some commands don't perform exactly as git does, so watch out! 
+Some commands don't perform exactly as Git does, so watch out! 
 
 ## Warning
 
