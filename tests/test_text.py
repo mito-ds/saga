@@ -20,26 +20,26 @@ def setup_text_files():
     create_text_file("temp/text0", "line1\nline2")
 
 def test_create(setup_text_files):
-    text_file = parse_text_file("temp/text0")
-    assert text_file.file_name == "temp/text0"
+    text_file = parse_text_file("id", "name", "temp/text0")
+    assert text_file.file_name == "name"
     assert text_file.file_contents.multi_dim_list == ["line1", "line2"]
 
 def test_create_then_write(setup_text_files):
-    text_file = parse_text_file("temp/text0")
+    text_file = parse_text_file("id", "name", "temp/text0")
     write_text_file(text_file)
     f = open('temp/text0', 'r')
     assert f.read() == "line1\nline2"
 
 def test_get_operations_no_change(setup_text_files):
-    text_file0 = parse_text_file("temp/text0")
-    text_file1 = parse_text_file("temp/text0")
+    text_file0 = parse_text_file("id", "name", "temp/text0")
+    text_file1 = parse_text_file("id", "name", "temp/text0")
     ops = text_file0.get_operations(text_file1)
     assert len(ops) == 0
     
 def test_get_operations_insert_end(setup_text_files):
-    text_file0 = parse_text_file("temp/text0")
+    text_file0 = parse_text_file("id", "name", "temp/text0")
     create_text_file("temp/text0", "line1\nline2\nline3")
-    text_file1 = parse_text_file("temp/text0")
+    text_file1 = parse_text_file("id", "name", "temp/text0")
     ops = text_file0.get_operations(text_file1)
     assert len(ops) == 1
     assert isinstance(ops[0], OP_MDL_Insert)
@@ -47,9 +47,9 @@ def test_get_operations_insert_end(setup_text_files):
     assert ops[0].value == ["line3"]
 
 def test_get_operations_insert_middle(setup_text_files):
-    text_file0 = parse_text_file("temp/text0")
+    text_file0 = parse_text_file("id", "name", "temp/text0")
     create_text_file("temp/text0", "line1\nline3\nline2")
-    text_file1 = parse_text_file("temp/text0")
+    text_file1 = parse_text_file("id", "name", "temp/text0")
     ops = text_file0.get_operations(text_file1)
     assert len(ops) == 1
     assert isinstance(ops[0], OP_MDL_Insert)
@@ -58,9 +58,9 @@ def test_get_operations_insert_middle(setup_text_files):
 
 
 def test_get_operations_insert_multiple_middle(setup_text_files):
-    text_file0 = parse_text_file("temp/text0")
+    text_file0 = parse_text_file("id", "name", "temp/text0")
     create_text_file("temp/text0", "line1\nline3\nline4\nline2")
-    text_file1 = parse_text_file("temp/text0")
+    text_file1 = parse_text_file("id", "name", "temp/text0")
     ops = text_file0.get_operations(text_file1)
     assert len(ops) == 2
     assert isinstance(ops[0], OP_MDL_Insert)
@@ -71,9 +71,9 @@ def test_get_operations_insert_multiple_middle(setup_text_files):
     assert ops[1].value == ["line4"]
 
 def test_get_operations_remove(setup_text_files):
-    text_file0 = parse_text_file("temp/text0")
+    text_file0 = parse_text_file("id", "name", "temp/text0")
     create_text_file("temp/text0", "line1")
-    text_file1 = parse_text_file("temp/text0")
+    text_file1 = parse_text_file("id", "name", "temp/text0")
     ops = text_file0.get_operations(text_file1)
     assert len(ops) == 1
     assert isinstance(ops[0], OP_MDL_Remove)
@@ -81,9 +81,9 @@ def test_get_operations_remove(setup_text_files):
     assert ops[0].value == ["line2"]
 
 def test_get_operations_remove_all(setup_text_files):
-    text_file0 = parse_text_file("temp/text0")
+    text_file0 = parse_text_file("id", "name", "temp/text0")
     create_text_file("temp/text0", "")
-    text_file1 = parse_text_file("temp/text0")
+    text_file1 = parse_text_file("id", "name", "temp/text0")
     ops = text_file0.get_operations(text_file1)
 
     assert len(ops) == 2
@@ -96,9 +96,9 @@ def test_get_operations_remove_all(setup_text_files):
 
 def test_get_operations_remove_mulitple(setup_text_files):
     create_text_file("temp/text0", "1\n2\n3\n4")
-    text_file0 = parse_text_file("temp/text0")
+    text_file0 = parse_text_file("id", "name", "temp/text0")
     create_text_file("temp/text0", "1\n4\n")
-    text_file1 = parse_text_file("temp/text0")
+    text_file1 = parse_text_file("id", "name", "temp/text0")
     ops = text_file0.get_operations(text_file1)
     assert len(ops) == 2
     assert isinstance(ops[0], OP_MDL_Remove)
@@ -110,9 +110,9 @@ def test_get_operations_remove_mulitple(setup_text_files):
 
 def test_get_operations_insert_remove_change(setup_text_files):
     create_text_file("temp/text0", "line1\nline2111\nline3\nline4")
-    text_file0 = parse_text_file("temp/text0")
+    text_file0 = parse_text_file("id", "name", "temp/text0")
     create_text_file("temp/text0", "line1\nline211\nline4\nxyz")
-    text_file1 = parse_text_file("temp/text0")
+    text_file1 = parse_text_file("id", "name", "temp/text0")
 
     ops = text_file0.get_operations(text_file1)
     print(ops)
@@ -152,9 +152,9 @@ def test_complex_operations(setup_text_files):
     new_code = "\n".join(new_code_list)
 
     create_text_file("temp/text0", old_code)
-    text_file0 = parse_text_file("temp/text0")
+    text_file0 = parse_text_file("id", "name", "temp/text0")
     create_text_file("temp/text0", new_code)
-    text_file1 = parse_text_file("temp/text0")
+    text_file1 = parse_text_file("id", "name", "temp/text0")
 
     ops = text_file0.get_operations(text_file1)
     print(ops)

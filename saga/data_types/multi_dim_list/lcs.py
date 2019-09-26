@@ -73,7 +73,12 @@ def list_from_path(matrix, path):
         curr = curr[step]
     return curr
 
+
 def list_similiarity_function(A, B):
+    if A is None and B is None:
+        return 1
+    if type(A) != type(B):
+        return 0
     if type(A) in (int, float, bool) and type(B) in (int, float, bool):
         if A == B:
             return 1
@@ -87,11 +92,16 @@ def list_similiarity_function(A, B):
             return len(indexes) / max(len(A), len(B))
         return 0
 
+    
+    A = [a for a in A if a is not None]
+    B = [b for b in B if b is not None]
+
     indexes = lcs_similarity(A, B, list_similiarity_function)
     if any(indexes):
         total = sum(sim for _, _, sim in indexes)
         return total / max(len(A), len(B))
     return 0
+
 
 # returns a mapping from "dimension down" to "matches at that level"
 def lcs_multi_dimension(A, B, dimension):    

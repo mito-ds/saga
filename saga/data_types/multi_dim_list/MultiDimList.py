@@ -90,7 +90,7 @@ class MultiDimList(object):
         return operations
 
     def merge(self, a_mdl, b_mdl):
-        merge_res = diff3(a_mdl.multi_dim_list, self.multi_dim_list, b_mdl.multi_dim_list)
+        merge_res = diff3(a_mdl.multi_dim_list, self.multi_dim_list, b_mdl.multi_dim_list, self.dimension)
         if merge_res is None:
             return None
 
