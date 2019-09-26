@@ -19,4 +19,5 @@ class OP_MDL_Insert(Operation):
         from saga.data_types.multi_dim_list.OP_MDL_Remove import OP_MDL_Remove 
         return OP_MDL_Remove(self.file_id, self.path, self.value)
 
-    
+    def __str__(self):
+        return "OP_MDL_Insert: at path {}, inserted {}".format(self.path, self.value)

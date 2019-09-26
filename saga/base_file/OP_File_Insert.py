@@ -19,3 +19,6 @@ class OP_File_Insert(Operation):
     def inverse(self):
         from saga.base_file.OP_File_Remove import OP_File_Remove
         return OP_File_Remove(self.file_id, self.file_type, self.file_name, self.file_contents)
+
+    def __str__(self):
+        return "OP_File_Insert: inserted file {} of type {}".format(self.file_name, self.file_type)

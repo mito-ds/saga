@@ -33,4 +33,9 @@ class File(object):
         operations.extend(self.file_contents.get_operations(other_file.file_contents))
         return operations
 
-    
+    # this should be called on the origin file
+    def merge(self, file_a, file_b):
+        merge_res = self.file_contents.merge(file_a.file_contents, file_b.file_contents)
+        if merge_res is None:
+            return None
+        return File(self.file_id, self.file_type, self.file_name, merge_res)
