@@ -54,6 +54,10 @@ def main():
     parser.parse_args()
     args.func(args)
 
+    # create the parser for the "push" command
+    parser_push = subparsers.add_parser('push', help='command to push folder to server')
+    parser_merge.set_defaults(func=push)
+
 def init(args):
     saga_repo = get_saga_repo_maybe()
     if saga_repo is not None:
@@ -123,3 +127,13 @@ def get_saga_repo_maybe():
             return Repository.read(path) 
         path = os.path.dirname(path)
     return None
+
+def push():
+    saga_repo = get_saga_repo()
+    saga_repo.push_folder()
+    saga_repo.write()
+
+def pull():
+    saga_repo = get_saga_repo()
+    saga_repo.pull_folder()
+    saga_repo.write()
