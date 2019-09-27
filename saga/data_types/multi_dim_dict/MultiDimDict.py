@@ -17,6 +17,18 @@ def value_at_path(arr, path):
         return value_at_path(arr[path[0]], path[1:])
     
 
+def same_paths(dict_a, dict_b):
+    return {k for k in dict_a if k in dict_b and dict_a[k] == dict_b[k]}
+
+def removed_paths(dict_a, dict_b):
+    return set(dict_a.keys()).difference(dict_b.keys())
+
+def inserted_paths(dict_a, dict_b):
+    return removed_paths(dict_b, dict_a)
+
+def changed_paths(dict_a, dict_b):
+    return {k for k in dict_a if k in dict_b and dict_a[k] != dict_b[k]}
+
 class MultiDimDict(object):
 
     def __init__(self, multi_dim_dict, dimension):
@@ -110,4 +122,39 @@ class MultiDimDict(object):
             operations.append(OP_MDD_Change("id", path, old, new))
             path = path[:-1]
             return (operations, path)
+
+    def merge(self, a_mdd, b_mdd):
+        O = self.multi_dim_dict
+        A = a_mdd.multi_dim_dict
+        B = b_mdd.multi_dim_dict
+
+        o_a_changed = changed_paths(O, A)
+        o_a_inserted = inserted_paths(O, A)
+        o_a_removed = removed_paths(O, A)
+
+        o_b_changed = changed_paths(O, B)
+        o_b_inserted = inserted_paths(O, B)
+        o_b_removed = removed_paths(O, B)
+
+        # if we insert something in both, then we have a merge conflict:
+        if any(o_a_inserted.intersection(o_b_inserted)):
+            # TODO: we could also not make it a merge conflict, if they add the same thing
+            return None
+        # if we removed something from one, and change it in the other
+        if any(o_a_removed.intersection(o_b_changed)) or any(o_b_removed.intersection(o_a_changed)):
+            return None
+        # if they were changed in both, we have a merge conflict:
+        if any(o_a_changed.intersection(o_b_changed)):
+            return None
+
+        # TODO: we can probably just avoid the above checking by keep track of what keys are changed
+        new_dict = {k: O[k] for k in O}
+        for removed in o_a_removed.union(o_b_removed):
+            del new_dict[removed]
+        for a in o_a_changed.union(o_a_inserted):
+            new_dict[a] = A[a]
+        for b in o_b_changed.union(o_b_inserted):
+            new_dict[b] = B[b]
+
+        return MultiDimDict(new_dict, self.dimension)
     

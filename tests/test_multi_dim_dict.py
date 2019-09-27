@@ -314,6 +314,48 @@ def test_get_operations_insert_and_remove_and_change():
     assert operations[2].path == []
     assert operations[2].value == {"key_two_dim_one" : "val_two_dim_one"}
 
+def merge_util(O, A, B):
+    o_mdd = MultiDimDict(O, 1)
+    a_mdd = MultiDimDict(A, 1)
+    b_mdd = MultiDimDict(B, 1)
+
+    merge = o_mdd.merge(a_mdd, b_mdd)
+    if merge is None:
+        return None
+    return merge.multi_dim_dict
+
+
+def test_merge_one_change():
+    O = {"key": "value"}
+    A = {"key": "value"}
+    B = {"key": "value1"}
+    merge = merge_util(O, A, B)
+    assert merge == B
+
+def test_merge_change_conflict():
+    O = {"key": "value"}
+    A = {"key": "value2"}
+    B = {"key": "value1"}
+    merge = merge_util(O, A, B)
+    assert merge == None
+
+
+def test_merge_remove_conflict():
+    O = {"key": "value"}
+    A = {"key1": "value2"}
+    B = {"key": "value1"}
+    merge = merge_util(O, A, B)
+    assert merge == None
+
+def test_merge_lots_of_add_and_change():
+    O = {"key": "value"}
+    A = {"key": "value", "key1": "value2", "key4": "v"}
+    B = {"key": "value1", "key3": "value2"}
+    merge = merge_util(O, A, B)
+    assert merge == {"key": "value1", "key3": "value2", "key1": "value2", "key4": "v"}
+
+
+
 
     
 
