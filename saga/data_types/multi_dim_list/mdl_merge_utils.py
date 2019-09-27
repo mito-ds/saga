@@ -88,11 +88,6 @@ def chunks_to_output(A, O, B, matchings_A, matchings_B, chunks, dim):
                 # There's a "location" of these sublist elements in the final list, and then there's the combining
                 # of the sublists when they are equal... 
 
-                print("HERE", chunk)   
-                print(chunk_a)
-                print(chunk_o) 
-                print(chunk_b)
-
                 if len(chunk_a) > len(chunk_o) and len(chunk_b) > len(chunk_o):
                     return None
     
@@ -126,7 +121,6 @@ def chunk_conflicting_or_stable(chunk, A, B, O):
     return (A[s_A - 1: e_A], O[s_O - 1: e_O ], B[s_B - 1: e_B ])
 
 def chunk_changed(matchings, s, e, s_O, e_O):
-    print("MATCHING:", matchings)
     for i in range (s, e + 1):
             if matched(matchings, i) != 1:
                 return True
