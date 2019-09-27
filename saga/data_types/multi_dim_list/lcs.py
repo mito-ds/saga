@@ -3,16 +3,6 @@ A set of functions for computing longest-common subsequences between lists.
 """
 from copy import deepcopy
 
-
-# Standard LCS
-def lcs(A, B):
-    def equal(a, b):
-        if a == b:
-            return 1
-        return 0
-
-    return lcs_similarity(A, B, equal)
-
 # LCS with a similarity function. 
 def lcs_similarity(A, B, similarity_function):
     m = len(A) 
@@ -57,15 +47,15 @@ def lcs_similarity(A, B, similarity_function):
     return matches
 
 
-def arr_equals(A, B):
-    if len(A) != len(B):
-        return False
-    if type(A) in (int, float, bool, str) and type(B) in (int, float, bool, str):
-        return A == B
-    for a, b in zip(A, B):
-        if not arr_equals(a, b):
-            return False
-    return True
+# Standard LCS: the similarity function is just exact equality
+def lcs(A, B):
+    def equal(a, b):
+        if a == b:
+            return 1
+        return 0
+
+    return lcs_similarity(A, B, equal)
+
 
 def list_from_path(matrix, path):
     curr = matrix
@@ -73,35 +63,35 @@ def list_from_path(matrix, path):
         curr = curr[step]
     return curr
 
-
 def list_similiarity_function(A, B):
-    if A is None and B is None:
-        return 1
     if type(A) != type(B):
         return 0
-    if type(A) in (int, float, bool) and type(B) in (int, float, bool):
-        if A == B:
-            return 1
-        else:
-            return 0
-    elif len(A) == 0 and len(B) == 0:
+    elif A is None:
         return 1
-    elif type(A) == str and type(B) == str:
+    elif type(A) in (int, float, bool):
+        return 1 if A == B else 0
+    elif type(A) == str:
+        if len(A) == 0 and len(B) == 0:
+            return 0
         indexes = lcs(A, B)
         if any(indexes):
             return len(indexes) / max(len(A), len(B))
         return 0
+    elif type(A) == list:
+        A = [a for a in A if a is not None]
+        B = [b for b in B if b is not None]
 
-    
-    A = [a for a in A if a is not None]
-    B = [b for b in B if b is not None]
+        indexes = lcs_similarity(A, B, list_similiarity_function)
+        if any(indexes):
+            total = sum(sim for _, _, sim in indexes)
+            return total / max(len(A), len(B))
+        return 0
+    elif type(A) == dict:
+        return .4
 
-    indexes = lcs_similarity(A, B, list_similiarity_function)
-    if any(indexes):
-        total = sum(sim for _, _, sim in indexes)
-        return total / max(len(A), len(B))
-    return 0
-
+    else:
+        print("Unknown type {}".format(type(A)))
+        return 0
 
 # returns a mapping from "dimension down" to "matches at that level"
 def lcs_multi_dimension(A, B, dimension):    
@@ -129,6 +119,11 @@ def get_matching_path(dim_matches, path_is_A, path):
             if path_b == path:
                 return path_a, sim
     return None, None
+
+
+
+
+
 
 
 def inserted_paths(A, B, dim_matches):
