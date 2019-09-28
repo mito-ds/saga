@@ -2,7 +2,6 @@ import pytest
 import os
 from saga.base_file.File import File
 from saga.file_types.binary_file import parse_binary_file, write_binary_file
-from saga.data_types.multi_dim_list.OP_MDL_Change import OP_MDL_Change
 
 def create_binary_file(name, contents):
     if os.path.isfile(name):
@@ -20,7 +19,7 @@ def setup_binary_files():
 def test_create(setup_binary_files):
     binary_file = parse_binary_file("id", "name", "temp/binary0")
     assert binary_file.file_name == "name"
-    assert binary_file.file_contents.multi_dim_list[0] == '12345'
+    assert binary_file.file_contents.mixed_data_type[0] == '12345'
 
 def test_create_then_write(setup_binary_files):
     binary_file = parse_binary_file("id", "name", "temp/binary0")

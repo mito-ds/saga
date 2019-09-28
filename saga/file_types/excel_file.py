@@ -58,9 +58,8 @@ def parse_excel_file(file_id, file_name, file_path):
             mdl = [[]] *  max_row
             for row in rows:
                 mdl[row - 1] = rows[row]
-    print(mdl)
-    l = MultiDimList(mdl, 2)
-    return File(file_id, "excel", file_name, l)
+
+    return File(file_id, "excel", file_name, mdl)
 
 def write_excel_file(file):
     import xlsxwriter
@@ -71,7 +70,7 @@ def write_excel_file(file):
 
     workbook = xlsxwriter.Workbook(file.file_name)
     worksheet = workbook.add_worksheet()
-    for row_idx, row in enumerate(file.file_contents.multi_dim_list):
+    for row_idx, row in enumerate(file.file_contents.mixed_data_type):
         for col_idx, val in enumerate(row):
             worksheet.write(row_idx, col_idx, val)
 

@@ -2,9 +2,6 @@ import pytest
 import os
 from saga.base_file.File import File
 from saga.file_types.text_file import parse_text_file, write_text_file
-from saga.data_types.multi_dim_list.OP_MDL_Change import OP_MDL_Change
-from saga.data_types.multi_dim_list.OP_MDL_Insert import OP_MDL_Insert
-from saga.data_types.multi_dim_list.OP_MDL_Remove import OP_MDL_Remove
 
 def create_text_file(name, contents):
     if os.path.isfile(name):
@@ -22,7 +19,7 @@ def setup_text_files():
 def test_create(setup_text_files):
     text_file = parse_text_file("id", "name", "temp/text0")
     assert text_file.file_name == "name"
-    assert text_file.file_contents.multi_dim_list == ["line1", "line2"]
+    assert text_file.file_contents.mixed_data_type == ["line1", "line2"]
 
 def test_create_then_write(setup_text_files):
     text_file = parse_text_file("id", "name", "temp/text0")

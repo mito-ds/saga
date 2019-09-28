@@ -1,12 +1,11 @@
 import pytest
-from saga.data_types.multi_dim_list.lcs import lcs_multi_dimension, inserted_paths, removed_paths, changed_paths
-
+from saga.data_types.mixed_data_type.lcs import lcs_multi_dimension
 
 def test_basic_col_add():
     A = [["A", "B"], ["C", "D"]]
     B = [["A", "B", "X"], ["C", "D", "Y"]]
 
-    dim_matches = lcs_multi_dimension(A, B, 2)
+    dim_matches = lcs_multi_dimension(A, B)
     inserted_rows, inserted_cols = inserted_paths(A, B, dim_matches)
 
     assert len(inserted_rows) == 0
@@ -18,7 +17,7 @@ def test_basic_row_add():
     A = [["A", "B"], ["C", "D"]]
     B = [["A", "B"], ["C", "D"], ["E", "F"]]
 
-    dim_matches = lcs_multi_dimension(A, B, 2)
+    dim_matches = lcs_multi_dimension(A, B)
     inserted_rows, inserted_cols = inserted_paths(A, B, dim_matches)
 
     assert len(inserted_rows) == 1
@@ -30,7 +29,7 @@ def test_column_add_unification():
     A = [[["A"], ["B"]], [["C"], ["D"]]]
     B = [[["A", "X"], ["B", "Y"]], [["C", "Q"], ["D", "K"]]]
 
-    dim_matches = lcs_multi_dimension(A, B, 3)
+    dim_matches = lcs_multi_dimension(A, B)
     inserted_rows, inserted_cols = inserted_paths(A, B, dim_matches)
     print(inserted_paths(A, B, dim_matches))
 
@@ -43,7 +42,7 @@ def test_remove_row():
     A = [["A", "B"], ["C", "D"]]
     B = [["A", "B"]]
 
-    dim_matches = lcs_multi_dimension(A, B, 2)
+    dim_matches = lcs_multi_dimension(A, B)
     removed_rows, removed_cols = removed_paths(A, B, dim_matches)
 
     assert len(removed_rows) == 1
@@ -54,7 +53,7 @@ def remove_column():
     A = [["A", "B"], ["C", "D"]]
     B = [["A"], ["C"]]
 
-    dim_matches = lcs_multi_dimension(A, B, 2)
+    dim_matches = lcs_multi_dimension(A, B)
     removed_rows, removed_cols = removed_paths(A, B, dim_matches)
 
     assert len(removed_rows) == 0
@@ -65,7 +64,7 @@ def test_column_remove_unification():
     A = [[["A", "X"], ["B", "Y"]], [["C", "Q"], ["D", "K"]]]
     B = [[["A"], ["B"]], [["C"], ["D"]]]
 
-    dim_matches = lcs_multi_dimension(A, B, 3)
+    dim_matches = lcs_multi_dimension(A, B)
     removed_rows, removed_cols = removed_paths(A, B, dim_matches)
 
     assert len(removed_rows) == 0
@@ -78,7 +77,7 @@ def test_change_value_total():
     A = [["A", "B"], ["C", "D"]]
     B = [["A", "B"], ["C", "E"]]
 
-    dim_matches = lcs_multi_dimension(A, B, 2)
+    dim_matches = lcs_multi_dimension(A, B)
     paths = changed_paths(A, B, dim_matches)
     removed_rows, removed_cols = removed_paths(A, B, dim_matches)
     inserted_rows, inserted_cols = inserted_paths(A, B, dim_matches)
@@ -98,7 +97,7 @@ def test_change_value_partial():
     A = [["A", "B"], ["C", "DE"]]
     B = [["A", "B"], ["C", "E"]]
 
-    dim_matches = lcs_multi_dimension(A, B, 2)
+    dim_matches = lcs_multi_dimension(A, B)
     paths = changed_paths(A, B, dim_matches)
     removed_rows, removed_cols = removed_paths(A, B, dim_matches)
     inserted_rows, inserted_cols = inserted_paths(A, B, dim_matches)
@@ -115,7 +114,7 @@ def test_delete_non_rectangular():
     A = [["A", "B"], ["C", "E"]]
     B = [["A"], ["C", "E"]]
 
-    dim_matches = lcs_multi_dimension(A, B, 2)
+    dim_matches = lcs_multi_dimension(A, B)
     paths = changed_paths(A, B, dim_matches)
     removed_rows, removed_cols = removed_paths(A, B, dim_matches)
     inserted_rows, inserted_cols = inserted_paths(A, B, dim_matches)
@@ -132,7 +131,7 @@ def test_delete_non_rectangular_col():
     A = [["A", "B"], ["C"]]
     B = [["A"], ["C"]]
 
-    dim_matches = lcs_multi_dimension(A, B, 2)
+    dim_matches = lcs_multi_dimension(A, B)
     paths = changed_paths(A, B, dim_matches)
     removed_rows, removed_cols = removed_paths(A, B, dim_matches)
     inserted_rows, inserted_cols = inserted_paths(A, B, dim_matches)
@@ -149,7 +148,7 @@ def test_add_row_and_column():
     A = [["A"], ["C"]]
     B = [["A", "B"], ["C", "D"], ["E", "F"]]
 
-    dim_matches = lcs_multi_dimension(A, B, 2)
+    dim_matches = lcs_multi_dimension(A, B)
     paths = changed_paths(A, B, dim_matches)
     removed_rows, removed_cols = removed_paths(A, B, dim_matches)
     inserted_rows, inserted_cols = inserted_paths(A, B, dim_matches)

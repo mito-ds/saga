@@ -1,4 +1,5 @@
 from saga.base_file.OP_File_ChangeName import OP_File_ChangeName
+from saga.data_types.mixed_data_type.MixedDataType import MixedDataType
 
 class File(object):
 
@@ -11,7 +12,7 @@ class File(object):
         self.file_id = file_id
         self.file_type = file_type
         self.file_name = file_name
-        self.file_contents = file_contents
+        self.file_contents = MixedDataType(file_contents)
 
 
     def get_operations(self, other_file):

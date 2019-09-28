@@ -2,9 +2,6 @@ import pytest
 import os
 from saga.base_file.File import File
 from saga.file_types.csv_file import parse_csv_file, write_csv_file
-from saga.data_types.multi_dim_list.OP_MDL_Change import OP_MDL_Change
-from saga.data_types.multi_dim_list.OP_MDL_Insert import OP_MDL_Insert
-from saga.data_types.multi_dim_list.OP_MDL_Remove import OP_MDL_Remove
 
 def create_csv_file(name, contents):
     if os.path.isfile(name):
@@ -22,7 +19,7 @@ def setup_csv_files():
 def test_create(setup_csv_files):
     csv_file = parse_csv_file("id", "name", "temp/csv0")
     assert csv_file.file_name == "name"
-    assert csv_file.file_contents.multi_dim_list == [["name", "email"], ["test", "test@gmail.com"]]
+    assert csv_file.file_contents.mixed_data_type == [["name", "email"], ["test", "test@gmail.com"]]
 
 def test_create_then_write(setup_csv_files):
     csv_file = parse_csv_file("id", "name", "temp/csv0")
