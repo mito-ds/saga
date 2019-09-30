@@ -1,4 +1,5 @@
 from saga.data_types.mixed_data_type.lcs import lcs_with_sim
+from saga.data_types.mixed_data_type.diff_utils import dict_removed_paths, dict_inserted_paths, dict_changed_paths
 
 PRIMITIVE = (int, float, bool, str)
 
@@ -6,6 +7,7 @@ def merge_rec(O, A, B):
     # If one variable is a primitive type, all should be primitive types
     if type(O) in PRIMITIVE or type(A) in PRIMITIVE or type(B) in PRIMITIVE:
         # if a value has been changed in at most one place, then we can merge it
+        assert type(O) in PRIMITIVE and type(A) in PRIMITIVE and type(B) in PRIMITIVE
         if O == A and O == B:
             return O
         elif O != A and O == B:
@@ -19,13 +21,13 @@ def merge_rec(O, A, B):
     assert type(O) == type(A) and type(A) == type(B)
 
     if type(O) == dict:
-        o_a_changed = changed_paths(O, A)
-        o_a_inserted = inserted_paths(O, A)
-        o_a_removed = removed_paths(O, A)
+        o_a_changed = dict_changed_paths(O, A)
+        o_a_inserted = dict_inserted_paths(O, A)
+        o_a_removed = dict_removed_paths(O, A)
 
-        o_b_changed = changed_paths(O, B)
-        o_b_inserted = inserted_paths(O, B)
-        o_b_removed = removed_paths(O, B)
+        o_b_changed = dict_changed_paths(O, B)
+        o_b_inserted = dict_inserted_paths(O, B)
+        o_b_removed = dict_removed_paths(O, B)
 
         # if we insert something in both, then we have a merge conflict:
         if any(o_a_inserted.intersection(o_b_inserted)):
@@ -98,16 +100,6 @@ def merge_rec(O, A, B):
         return calculated_ouput
     else:
         raise ValueError("Invalid type given to merge: {}".format(type(O)))
-
-# utilities for dictonaries
-def removed_paths(dict_a, dict_b):
-    return set(dict_a.keys()).difference(dict_b.keys())
-
-def inserted_paths(dict_a, dict_b):
-    return removed_paths(dict_b, dict_a)
-
-def changed_paths(dict_a, dict_b):
-    return {k for k in dict_a if k in dict_b and dict_a[k] != dict_b[k]}
 
 # utilities for diff3
 

@@ -74,12 +74,15 @@ def similarity_function(A, B):
         return 1 if A == B else 0
     elif type(A) == str:
         if len(A) == 0 and len(B) == 0:
-            return 0
+            return 1
         indexes = lcs(A, B)
         if any(indexes):
             return len(indexes) / max(len(A), len(B))
         return 0
     elif type(A) == list:
+        if len(A) == 0 and len(B) == 0:
+            return 1
+            
         A = [a for a in A if a is not None]
         B = [b for b in B if b is not None]
 

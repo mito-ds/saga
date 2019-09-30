@@ -1,3 +1,6 @@
+from saga.data_types.mixed_data_type.merge_utils import merge_rec
+from saga.data_types.mixed_data_type.diff_utils import inserted_paths, removed_paths, changed_paths
+
 def value_at_path(obj, path):
     if len(path) == 0:
         return obj
@@ -22,7 +25,14 @@ class MixedDataType(object):
         self.mixed_data_type = mixed_data_type
 
     def get_operations(self, mixed_data_type_obj):
-        return []
+        A =  self.mixed_data_type
+        B = mixed_data_type_obj.mixed_data_type
+
+        removed = removed_paths(A, B)
+        changed = changed_paths(A, B)
+        inserted = inserted_paths(A, B)
+
+        return changed + removed + inserted
         """
         A = self.multi_dim_list
         B = mixed_data_type_obj.mixed_data_type

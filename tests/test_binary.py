@@ -39,4 +39,4 @@ def test_get_operations_change(setup_binary_files):
     binary_file1 = parse_binary_file("id", "name", "temp/binary0")
     ops = binary_file0.get_operations(binary_file1)
     assert len(ops) == 1
-    assert isinstance(ops[0], OP_MDL_Change)
+    assert isinstance(ops[0], OP_Change)
