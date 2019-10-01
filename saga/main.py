@@ -50,13 +50,17 @@ def main():
     parser_merge.add_argument('branch', type=str, help='name of branch to merge')
     parser_merge.set_defaults(func=merge)
 
+    # create the parser for the "push" command
+    parser_push = subparsers.add_parser('push', help='command to push folder to server')
+    parser_push.set_defaults(func=push)
+
+    # create the parser for the "pull" command
+    parser_pull = subparsers.add_parser('pull', help='command to pull folder from server')
+    parser_pull.set_defaults(func=pull)
+
     args = parser.parse_args()
     parser.parse_args()
     args.func(args)
-
-    # create the parser for the "push" command
-    parser_push = subparsers.add_parser('push', help='command to push folder to server')
-    parser_merge.set_defaults(func=push)
 
 def init(args):
     saga_repo = get_saga_repo_maybe()
@@ -111,6 +115,19 @@ def merge(args):
     saga_repo.merge(args.branch)
     saga_repo.write()
 
+def push(args):
+    print("PUSHING")
+    saga_repo = get_saga_repo()
+    saga_repo.push_folder(os.getcwd() + "/.saga")
+
+def pull(args):
+    saga_repo = get_saga_repo()
+    saga_repo.pull_folder("/.saga")
+    saga_repo = get_saga_repo()
+    saga_repo.restore_state_to_head()
+
+# Helper functions
+
 def get_saga_repo():
     saga_repo = get_saga_repo_maybe()
     if saga_repo is None:
@@ -128,12 +145,4 @@ def get_saga_repo_maybe():
         path = os.path.dirname(path)
     return None
 
-def push():
-    saga_repo = get_saga_repo()
-    saga_repo.push_folder()
-    saga_repo.write()
-
-def pull():
-    saga_repo = get_saga_repo()
-    saga_repo.pull_folder()
-    saga_repo.write()
+main()
