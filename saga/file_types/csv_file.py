@@ -1,5 +1,4 @@
 from saga.base_file.File import File
-from saga.data_types.multi_dim_list.MultiDimList import MultiDimList
 import csv
 
 def parse_csv_file(file_id, file_name, file_path):
@@ -9,11 +8,10 @@ def parse_csv_file(file_id, file_name, file_path):
         for row in csvreader:
             file_contents.append(row)
 
-    l = MultiDimList(file_contents, 2)
-    return File(file_id, "csv", file_name, l)
+    return File(file_id, "csv", file_name, file_contents)
 
 def write_csv_file(file):
-    lines = [",".join(row) for row in file.file_contents.multi_dim_list]
+    lines = [",".join(row) for row in file.file_contents.mixed_data_type]
     f = open(file.file_name, "w+")
     f.write("\n".join(lines))
     f.close()
