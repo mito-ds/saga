@@ -31,39 +31,16 @@ def test_get_operations_no_change(setup_csv_files):
     csv_file0 = parse_csv_file("id", "name", "temp/csv0")
     csv_file1 = parse_csv_file("id", "name", "temp/csv0")
     ops = csv_file0.get_operations(csv_file1)
-    assert len(ops) == 0
+    for key in ops:
+        assert len(ops[key]) == 0
     
 def test_get_operations_insert_row(setup_csv_files):
     csv_file0 = parse_csv_file("id", "name", "temp/csv0")
     create_csv_file("temp/csv0", "name,email\ntest,test@gmail.com\nharry,harry@gmail.com")
     csv_file1 = parse_csv_file("id", "name", "temp/csv0")
     ops = csv_file0.get_operations(csv_file1)
-    assert len(ops) == 1
-    assert isinstance(ops[0], OP_MDL_Insert)
-    assert ops[0].path == [2]
-    assert ops[0].value == [["harry", "harry@gmail.com"]]
-
-def test_get_operations_insert_column(setup_csv_files):
-    csv_file0 = parse_csv_file("id", "name", "temp/csv0")
-    create_csv_file("temp/csv0", "name,email,height\ntest,test@gmail.com,6")
-    csv_file1 = parse_csv_file("id", "name", "temp/csv0")
-    ops = csv_file0.get_operations(csv_file1)
-    assert len(ops) == 1
-    assert isinstance(ops[0], OP_MDL_Insert)
-    assert ops[0].path == ["_", 2]
-    assert ops[0].value == ["height", "6"]
-
-def test_get_operations_insert_rows_and_column(setup_csv_files):
-    csv_file0 = parse_csv_file("id", "name", "temp/csv0")
-    create_csv_file("temp/csv0", "name,email,height\ntest,test@gmail.com,6\nharry,harry@gmail.com,7")
-    csv_file1 = parse_csv_file("id", "name", "temp/csv0")
-    ops = csv_file0.get_operations(csv_file1)
-    assert len(ops) == 2
-    assert isinstance(ops[0], OP_MDL_Insert)
-    assert isinstance(ops[1], OP_MDL_Insert)
-    assert ops[0].path == [2]
-    assert ops[0].value == [["harry", "harry@gmail.com", "7"]]
-
-    assert ops[1].path == ["_", 2]
-    assert ops[1].value == ["height", "6", "7"]
-
+    assert len(ops["file"]) == 0
+    assert len(ops["changed"]) == 0
+    assert len(ops["inserted"]) == 1
+    assert ops["inserted"] == [[2]]
+    assert len(ops["removed"]) == 0

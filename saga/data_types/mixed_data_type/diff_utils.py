@@ -23,10 +23,8 @@ def _changed_paths(A, B, base_path):
     
     if type(A) == dict:
         changed_keys = dict_changed_paths(A, B)
-        # if the whole dictonary has been changed we report that
-        if len(changed_keys) == len(A) and len(A) == len(B):
-            return [base_path]
-        # otherwise, we report the specific keys that have been changed
+
+        # we only report changes on the lowest level
         for key in changed_keys:
             changed_paths.extend(_changed_paths(A[key], B[key], base_path + [key]))
         
@@ -52,19 +50,27 @@ def removed_paths(A, B):
 
 def _removed_paths(A, B, base_path):
     if type(A) in PRIMITIVE or type(B) in PRIMITIVE:
-        raise ValueError("Error: cannot remove {} on {}".format(A, B))
+        return []
 
     # All variables must have the same type!
     assert type(A) == type(B)
 
     if type(A) == dict:
+        removed = []
         removed_keys = dict_removed_paths(A, B)
         # if the whole dictonary has been changed we report that
-        if len(removed_keys) == len(A):
+        if len(removed_keys) == len(A) and len(A) > 0:
             return [base_path]
+        # otherwise
+        removed.extend([base_path + [key] for key in removed_keys])
+
+        # we also have to recurse on all the changed paths
+        changed_keys = dict_changed_paths(A, B)
+        for key in changed_keys:
+            removed.extend(_removed_paths(A[key], B[key], base_path + [key]))
         
         # we don't recurse, as it doesn't matter what happened below
-        return [base_path + [key] for key in removed_keys]
+        return removed
 
     elif type(A) == list:
         removed_paths = []
@@ -76,11 +82,18 @@ def _removed_paths(A, B, base_path):
 
         for idx in range(len(A)):
             matched = False
-            for [idx_a], _, sim in lcs:
+            for [idx_a], [idx_b], sim in lcs:
                 if idx == idx_a:
                     matched = True
+                    break
             if not matched:
-                removed_paths.extend(base_path + [idx])
+                removed_paths.append(base_path + [idx])
+            elif matched and sim < 1:
+                # if the subtype of the list is not primitive, we have to recurse here also
+                if type(A[idx]) not in PRIMITIVE:
+                    removed_paths.extend(_removed_paths(A[idx], B[idx_b], base_path + [idx]))
+
+                # we have to recurse
 
         return removed_paths
     else:

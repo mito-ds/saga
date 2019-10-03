@@ -32,38 +32,7 @@ class MixedDataType(object):
         changed = changed_paths(A, B)
         inserted = inserted_paths(A, B)
 
-        return changed + removed + inserted
-        """
-        A = self.multi_dim_list
-        B = mixed_data_type_obj.mixed_data_type
-
-        if type(A) != type(B):
-            raise Exception("Type tree cannot change! {} is not {}".format(type(A), type(B)))
-
-        if type(A) == dict:
-
-        elif type(B) == list:
-
-
-        dimension_matches = lcs_multi_dimension(A, B, self.dimension)
-
-        operations = []
-
-        removed_rows, removed_cols = removed_paths(A, B, dimension_matches)
-        for path in removed_rows + removed_cols:
-            operations.append(OP_MDL_Remove("id", path, value_at_path(A, path)))
-
-        inserted_rows, inserted_cols = inserted_paths(A, B, dimension_matches)
-        for path in inserted_rows + inserted_cols:
-            operations.append(OP_MDL_Insert("id", path, value_at_path(B, path)))
-
-        changed = changed_paths(A, B, dimension_matches)
-        for path in changed:
-            a_path, _ = get_matching_path(dimension_matches, False, path)
-            operations.append(OP_MDL_Change("id", path, value_at_path(A, a_path), value_at_path(B, path)))
-        
-        return operations
-        """
+        return {"removed": removed, "changed": changed, "inserted": inserted}
 
     def merge(self, a_mdt, b_mdt):
         O = self.mixed_data_type

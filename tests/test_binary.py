@@ -31,12 +31,13 @@ def test_get_operations_no_changechange(setup_binary_files):
     binary_file0 = parse_binary_file("id", "name", "temp/binary0")
     binary_file1 = parse_binary_file("id", "name", "temp/binary0")
     ops = binary_file0.get_operations(binary_file1)
-    assert len(ops) == 0
+    for key in ops:
+        assert len(ops[key]) == 0
 
 def test_get_operations_change(setup_binary_files):
     binary_file0 = parse_binary_file("id", "name", "temp/binary0")
     create_binary_file("temp/binary0", "54321")
     binary_file1 = parse_binary_file("id", "name", "temp/binary0")
     ops = binary_file0.get_operations(binary_file1)
-    assert len(ops) == 1
-    assert isinstance(ops[0], OP_Change)
+    assert len(ops["changed"]) == 1
+    assert ops["changed"][0] == [0]

@@ -41,11 +41,15 @@ def test_list_change_elements():
 def test_list_all_operations():
     check_ops(["AB", "B", "C"], ["A", "C", "D"], 1, 1, 1)
 
-
 def test_list_in_list():
     check_ops([[]], [[], []], 0, 0, 1)
     check_ops([[]], [], 1, 0, 0)
-    check_ops([["A"]], [["A", "B"]], 0, 1, 0)
+    check_ops([["A"]], [["A", "B"]], 0, 0, 1)
+
+def test_list_in_list_change():
+    check_ops([[]], [[], []], 0, 0, 1)
+    check_ops([[]], [], 1, 0, 0)
+    check_ops([["A"]], [["ABC"]], 0, 1, 0)
 
 def test_dict_in_dict():
     check_ops({"key":{"key": "value"}}, {"key":{"key": "value", "key1": "value"}}, 0, 0, 1)

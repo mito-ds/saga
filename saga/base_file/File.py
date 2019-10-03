@@ -1,4 +1,3 @@
-from saga.base_file.OP_File_ChangeName import OP_File_ChangeName
 from saga.data_types.mixed_data_type.MixedDataType import MixedDataType
 
 class File(object):
@@ -14,24 +13,19 @@ class File(object):
         self.file_name = file_name
         self.file_contents = MixedDataType(file_contents)
 
-
     def get_operations(self, other_file):
         """
-        Get the operations between this file and other_file, which is thought of as the new
-        version of the file. 
+        Get the operations between this file and the new version of the file, other_file
         """
-        #if other_file is None:
-        #    return Insert -- how to do delete?
-
         if self.file_id != other_file.file_id:
             raise ValueError("Can only get operations between different versions of the same file")
 
-        operations = []
+        operations = {"file": []}
         if self.file_name != other_file.file_name:
-            operations.append(OP_File_ChangeName(self.file_id, self.file_name, other_file.file_name))
+            operations["file"].append("Change file name from {} to {}".format(self.file_name, other_file.file_name))
 
         # now we delegate the operations to the file_contents
-        operations.extend(self.file_contents.get_operations(other_file.file_contents))
+        operations.update(self.file_contents.get_operations(other_file.file_contents))
         return operations
 
     # this should be called on the origin file

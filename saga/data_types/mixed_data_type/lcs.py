@@ -43,6 +43,8 @@ def lcs_similarity(A, B, similarity_function):
             i-=1
         else: 
             j-=1
+    
+    matches.reverse()
 
     return matches
 
