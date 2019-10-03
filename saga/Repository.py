@@ -116,6 +116,11 @@ class Repository(object):
     def commit(self, commit_message):
         state_hash = self.index_hash()
         parent_commit_hash = self.branches[self.head]
+        parent_commit = self.get_commit(parent_commit_hash)
+        if parent_commit.state_hash == state_hash:
+            print("Not commiting: no changes to commit")
+            return
+
         commit = Commit(state_hash, [parent_commit_hash], commit_message)
         commit_hash = self._add_commit_to_db(commit)
         print("[{}] {}".format(commit_hash[0:12], commit_message))

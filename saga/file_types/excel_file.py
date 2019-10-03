@@ -1,5 +1,4 @@
 from saga.base_file.File import File
-from saga.data_types.multi_dim_list.MultiDimList import MultiDimList
 
 def char_position(letter):
     return ord(letter) - 65
