@@ -1,5 +1,5 @@
 import pytest
-from saga.data_types.mixed_data_type.merge_utils import merge_rec
+from saga.base_file.mixed_data_type.merge_utils import merge_rec
 
 
 def test_list_simple_conflict():

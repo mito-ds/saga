@@ -1,4 +1,4 @@
-from saga.data_types.mixed_data_type.MixedDataType import MixedDataType
+from saga.base_file.mixed_data_type.MixedDataType import MixedDataType
 
 class File(object):
 

@@ -1,6 +1,6 @@
 import pytest
-from saga.data_types.mixed_data_type.diff_utils import inserted_paths, changed_paths, removed_paths
-from saga.data_types.mixed_data_type.lcs import lcs_multi_dimension
+from saga.base_file.mixed_data_type.diff_utils import inserted_paths, changed_paths, removed_paths
+from saga.base_file.mixed_data_type.lcs import lcs_multi_dimension
 
 def check_ops(A, B, num_removed, num_changed, num_inserted):
     removed = removed_paths(A, B)

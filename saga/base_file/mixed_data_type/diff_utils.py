@@ -1,4 +1,4 @@
-from saga.data_types.mixed_data_type.lcs import lcs_with_sim
+from saga.base_file.mixed_data_type.lcs import lcs_with_sim
 
 PRIMITIVE = (int, float, bool, str)
 

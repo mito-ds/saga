@@ -1,5 +1,5 @@
-from saga.data_types.mixed_data_type.merge_utils import merge_rec
-from saga.data_types.mixed_data_type.diff_utils import inserted_paths, removed_paths, changed_paths
+from saga.base_file.mixed_data_type.merge_utils import merge_rec
+from saga.base_file.mixed_data_type.diff_utils import inserted_paths, removed_paths, changed_paths
 
 def value_at_path(obj, path):
     if len(path) == 0:
