@@ -251,8 +251,8 @@ class Repository(object):
                 old_file = parse_file(file_id, path, join(self.index_directory, path))
                 new_file = parse_file(file_id, path, join(self.base_directory, path))
                 ops = old_file.get_operations(new_file)
-                for op in ops:
-                    print("\t\t:", op)
+                for key in ops:
+                    print("\t\t:", key, ops[key])
                 operations.extend(ops)
             else:
                 print("\tDirectory:", path, "changed")
