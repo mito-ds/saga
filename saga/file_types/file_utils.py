@@ -13,7 +13,8 @@ TEXT_ENDINGS = {
     "c", # c source
     "cc", # c++ source 
     "java", # java source 
-
+    "js",
+    "php"
 }
 
 def is_text(file_path):
