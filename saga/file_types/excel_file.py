@@ -58,16 +58,16 @@ def parse_excel_file(file_id, file_name, file_path):
             for row in rows:
                 mdl[row - 1] = rows[row]
 
-    return File(file_id, "excel", file_name, mdl)
+    return File(file_id, "excel", file_path, file_name, mdl)
 
 def write_excel_file(file):
     import xlsxwriter
     import os
 
-    if os.path.exists(file.file_name):
-        os.remove(file.file_name)
+    if os.path.exists(file.file_path):
+        os.remove(file.file_path)
 
-    workbook = xlsxwriter.Workbook(file.file_name)
+    workbook = xlsxwriter.Workbook(file.file_path)
     worksheet = workbook.add_worksheet()
     for row_idx, row in enumerate(file.file_contents.mixed_data_type):
         for col_idx, val in enumerate(row):

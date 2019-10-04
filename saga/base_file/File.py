@@ -2,7 +2,7 @@ from saga.base_file.mixed_data_type.MixedDataType import MixedDataType
 
 class File(object):
 
-    def __init__(self, file_id, file_type, file_name, file_contents):
+    def __init__(self, file_id, file_type, file_path, file_name, file_contents):
         """
         Create a new representation of a file:
             - file_id, file_type are static and can never change
@@ -10,6 +10,7 @@ class File(object):
         """
         self.file_id = file_id
         self.file_type = file_type
+        self.file_path = file_path
         self.file_name = file_name
         self.file_contents = MixedDataType(file_contents)
 

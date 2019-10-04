@@ -3,10 +3,11 @@ import os
 from saga.base_file.File import File
 from saga.file_types.text_file import parse_text_file, write_text_file
 
-def create_text_file(name, contents):
-    if os.path.isfile(name):
-        os.remove(name)
-    f = open(name, 'w+')
+def create_text_file(path, contents):
+    if os.path.isfile(path):
+        os.remove(path)
+    print("path")
+    f = open(path, 'w+')
     f.write(contents)
     f.close()
 
