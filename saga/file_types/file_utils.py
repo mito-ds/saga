@@ -8,9 +8,12 @@ def is_csv(file_path):
     return file_path.endswith(".csv")
 
 TEXT_ENDINGS = {
-    "txt",
-    "py",
-    "c"
+    "txt", # just text
+    "py", # python
+    "c", # c source
+    "cc", # c++ source 
+    "java", # java source 
+
 }
 
 def is_text(file_path):
