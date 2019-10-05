@@ -10,10 +10,10 @@ def parse_text_file(file_id, file_name, file_path):
         else:
             file_contents.append(line)
 
-    return File(file_id, "text", file_name, file_contents)
+    return File(file_id, "text", file_path, file_name, file_contents)
 
 
 def write_text_file(file):
-    f = open(file.file_name, "w+")
+    f = open(file.file_path, "w+")
     f.write("\n".join(file.file_contents.mixed_data_type))
     f.close()

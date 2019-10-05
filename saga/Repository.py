@@ -113,9 +113,19 @@ class Repository(object):
             if path not in self.file_ids[self.head]:
                 self.file_ids[self.head][path] = self.get_new_file_id()
 
+    def _uncommited_in_index(self):
+        index_state_hash = self.index_hash()
+        commit_state_hash = self.state_hash()
+        return index_state_hash != commit_state_hash
+
     def commit(self, commit_message):
         state_hash = self.index_hash()
         parent_commit_hash = self.branches[self.head]
+
+        if self._uncommited_in_index():
+            print("Not commiting: no changes to commit")
+            return
+
         commit = Commit(state_hash, [parent_commit_hash], commit_message)
         commit_hash = self._add_commit_to_db(commit)
         print("[{}] {}".format(commit_hash[0:12], commit_message))
@@ -136,11 +146,16 @@ class Repository(object):
             print("Error: cannot switch to branch {} as it does not exist".format(branch_name))
             return
 
-        inserted, changed, removed = self.changed_files(self.curr_state_dir(), self.index_directory)
-        if any(inserted) or any(changed) or any(removed):
-            print("Error: please commit changes before switching branches")
+        if self._uncommited_in_index():
+            print("Error: cannot switch branch as there are uncommited changed")
             return
 
+        _, changed, removed = self.changed_files(self.base_directory, self.curr_state_dir())
+        if any(changed) or any(removed):
+            print("Error: please commit or undo changes before switching branches")
+            return
+
+        print("Switching to branch {}".format(branch_name))
         self.head = branch_name
         commit = self.get_commit(self.branches[self.head])
         self._restore_state(commit.state_hash)        
@@ -236,8 +251,8 @@ class Repository(object):
                 old_file = parse_file(file_id, path, join(self.index_directory, path))
                 new_file = parse_file(file_id, path, join(self.base_directory, path))
                 ops = old_file.get_operations(new_file)
-                for op in ops:
-                    print("\t\t:", op)
+                for key in ops:
+                    print("\t\t:", key, ops[key])
                 operations.extend(ops)
             else:
                 print("\tDirectory:", path, "changed")
@@ -332,7 +347,6 @@ class Repository(object):
         
 
     def _restore_state(self, state_hash):
-        print("HERE")
         self._copy_dir_to_dir(join(".saga/states", state_hash), ".")
 
 
