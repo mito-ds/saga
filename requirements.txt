@@ -1,2 +1,3 @@
 pytest
-pandas
+bs4
+xlsxwriter
