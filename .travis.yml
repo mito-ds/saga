@@ -5,4 +5,4 @@ install:
   - pip install -r requirements.txt
 # run all saga tests
 script:
-  - pytest
+  - python3 -m pytest
