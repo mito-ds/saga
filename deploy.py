@@ -26,11 +26,7 @@ os.remove("versionnumber")
 # Finially, we upload this to PyPi
 os.system("twine upload dist/*")
 
-
-
-
-
-
-
-
-
+# Then, we delete the folders again, cuz we don't need them anymore
+for folder in DEPLOYMENT_FOLDERS:
+    if os.path.exists(folder):
+        shutil.rmtree(folder)
