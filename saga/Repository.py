@@ -384,7 +384,7 @@ class Repository(object):
         print("Downloaded File: {}".format(file_location))
 
     def push(self):
-        relative_paths = self._relative_paths_in_dir(".saga")
+        relative_paths = relative_paths_in_dir(".saga")
 
         for path in relative_paths:
             abs_path = os.path.join(os.getcwd(), ".saga", path)

@@ -145,9 +145,5 @@ def get_saga_repo_maybe():
         path = os.path.dirname(path)
     return None
 
-<<<<<<< HEAD
-main()
-=======
 if __name__ == "__main__":
     main()
->>>>>>> master
