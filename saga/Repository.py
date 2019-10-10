@@ -424,9 +424,6 @@ class Repository(object):
         f.close()
         print("Downloaded File: {}".format(file_location))
 
-    def restore_state_to_head(self):
-        self._restore_state(self.state_hash())
-
     def push(self):
         relative_paths = self._relative_paths_in_dir(".saga")
 
@@ -461,3 +458,6 @@ class Repository(object):
         relative_folder_path = folder_path[len(self.base_directory) + 1:]
 
         requests.post(url = URL, data = {"relative_folder_path" : relative_folder_path})
+    
+    def restore_state_to_head(self):
+        self._restore_state(self.state_hash())
