@@ -300,19 +300,14 @@ class Repository(object):
     def _pull_file(self, relative_file_path):
         # api-endpoint 
         URL = "http://localhost:3000/cli/download"
-        
-        file_location = os.path.join(self.base_directory, relative_file_path)
-
-        if os.path.exists(file_location):
-            os.remove(file_location)
 
         # sending get request and saving the response as response object 
         r = requests.get(url = URL, data={'file_location' : relative_file_path})
 
-        f = open(file_location,'wb')
+        f = open(relative_file_path,'wb+')
         f.write(r.content)
         f.close()
-        print("Downloaded File: {}".format(file_location))
+        print("Downloaded File: {}".format(relative_file_path))
 
     def _push_file(self, relative_file_path):
         # api-endpoint 
@@ -327,9 +322,7 @@ class Repository(object):
         # api-endpoint 
         URL = "http://localhost:3000/cli/push-folder"
 
-        relative_folder_path = folder_path[len(self.base_directory) + 1:]
-
-        requests.post(url=URL, data={"relative_folder_path": relative_folder_path})
+        requests.post(url=URL, data={"folder_path": folder_path})
 
     def state_hash(self):
         return self.get_commit(self.branches[self.head]).state_hash
