@@ -387,24 +387,20 @@ class Repository(object):
         relative_paths = relative_paths_in_dir(".saga")
 
         for path in relative_paths:
-            abs_path = os.path.join(os.getcwd(), ".saga", path)
+            abs_path = os.path.join(".saga", path)
             if os.path.isfile(abs_path):
                 # Found a file 
                 self._push_file(abs_path)
             else:
                 self._push_folder(abs_path)
 
-    def _push_file(self, file_path):
+    def _push_file(self, relative_file_path):
         # api-endpoint 
         URL = "http://localhost:3000/cli/single-upload"
 
-        relative_file_path = file_path[len(self.base_directory) + 1:]
+        file_name = os.path.basename(relative_file_path)
 
-        file_name = file_path.split('/')
-        length = len(file_name)
-        file_name = file_name[length - 1]
-
-        with open(file_path, 'rb') as f:
+        with open(relative_file_path, 'rb') as f:
             r = requests.post(URL, files={"file": f}, data={"relative_file_path": relative_file_path, "file_name": file_name})
 
     def _push_folder(self, folder_path):
