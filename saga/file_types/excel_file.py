@@ -1,5 +1,4 @@
 from saga.base_file.File import File
-from saga.data_types.multi_dim_list.MultiDimList import MultiDimList
 
 def char_position(letter):
     return ord(letter) - 65
@@ -58,20 +57,19 @@ def parse_excel_file(file_id, file_name, file_path):
             mdl = [[]] *  max_row
             for row in rows:
                 mdl[row - 1] = rows[row]
-    print(mdl)
-    l = MultiDimList(mdl, 2)
-    return File(file_id, "excel", file_name, l)
+
+    return File(file_id, "excel", file_path, file_name, mdl)
 
 def write_excel_file(file):
     import xlsxwriter
     import os
 
-    if os.path.exists(file.file_name):
-        os.remove(file.file_name)
+    if os.path.exists(file.file_path):
+        os.remove(file.file_path)
 
-    workbook = xlsxwriter.Workbook(file.file_name)
+    workbook = xlsxwriter.Workbook(file.file_path)
     worksheet = workbook.add_worksheet()
-    for row_idx, row in enumerate(file.file_contents.multi_dim_list):
+    for row_idx, row in enumerate(file.file_contents.mixed_data_type):
         for col_idx, val in enumerate(row):
             worksheet.write(row_idx, col_idx, val)
 

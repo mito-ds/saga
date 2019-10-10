@@ -5,19 +5,33 @@ from saga.file_types.csv_file import parse_csv_file, write_csv_file
 from saga.file_types.excel_file import parse_excel_file, write_excel_file
 
 def is_csv(file_path):
-    csv_fileh = open(file_path, 'r')
+    return file_path.endswith(".csv")
+
+TEXT_ENDINGS = {
+    "txt", # just text
+    "py", # python
+    "c", # c source
+    "cc", # c++ source 
+    "java", # java source 
+    "js",
+    "php"
+}
+
+def is_text(file_path):
     try:
-        _ = csv.Sniffer().sniff(csv_fileh.read(1024))
-        csv_fileh.seek(0)
-        return True
-    except csv.Error:
+        ending = file_path.split(".")[-1]
+        return ending in TEXT_ENDINGS
+    except:
         return False
+
+def is_excel(file_path):
+    return file_path.endswith(".xlsx")
 
 
 def parse_file(file_id, file_name, file_path):
-    if file_path.endswith(".txt"):
+    if is_text(file_path):
         return parse_text_file(file_id, file_name, file_path)
-    elif file_path.endswith(".xlsx"):
+    elif is_excel(file_path):
         return parse_excel_file(file_id, file_name, file_path)
     elif is_csv(file_path):
         return parse_csv_file(file_id, file_name, file_path)

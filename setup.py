@@ -1,21 +1,25 @@
+import os
 import setuptools
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+f = open("versionnumber", "r")
+versionnumber = f.read()
+f.close()
+
 setuptools.setup(
     name="saga-vcs",
-    version="0.0.12",
+    version=versionnumber,
     author="saga",
     author_email="narush@wharton.upenn.edu.com",
     description="saga is a version control CLI that handles many file formats",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/naterush/saga",
+    url="https://github.com/saga-vcs/saga",
     packages=setuptools.find_packages(),
     classifiers=[
-        "Programming Language :: Python :: 3",
-        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3"
     ],
      entry_points={
         'console_scripts': [

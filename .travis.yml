@@ -1,0 +1,8 @@
+language: python
+
+# install saga dependencies
+install:
+  - pip install -r requirements.txt
+# run all saga tests
+script:
+  - python3 -m pytest

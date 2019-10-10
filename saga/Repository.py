@@ -1,6 +1,5 @@
 import os
 import pickle
-import shutil
 import hashlib
 import copy
 import filecmp
@@ -9,8 +8,10 @@ import requests
 import os
 import glob
 import json
+import shutil
 from os.path import join, isfile
 from saga.Commit import Commit
+from saga.path_utils import copy_dir_to_dir, copy_file_to_dir, relative_paths_in_dir, changed_files
 from saga.file_types.file_utils import parse_file, write_file
 
 
@@ -39,7 +40,7 @@ class Repository(object):
         os.mkdir(directory + "/.saga/states")
         os.mkdir(directory + "/.saga/index")
         repo = Repository(directory)
-        repo.commit("Create repository") # we add this empty commit so we don't need special cases
+        repo.commit("Create repository", is_empty=True) # we add this empty commit so we don't need special cases
         return repo
 
     @staticmethod
@@ -53,74 +54,43 @@ class Repository(object):
 
     def write(self):
         # read from the saga repo pickle
-        f = open(self.repo_pickle, "wb+")
         p = pickle.dumps(self)
+        f = open(self.repo_pickle, "wb+")
         f.write(p)
         f.close()
 
-    def get_commit(self, commit_hash):
-        f = open(self.commit_directory + commit_hash, "rb")
-        commit_bytes = f.read()
-        f.close()
-        return Commit.from_bytes(commit_bytes)
-
-    def _add_commit_to_db(self, commit):
-        # if the commit exists, we don't need to error
-        commit_hash = commit.hash()
-        commit_bytes = commit.to_bytes()
-        f = open(self.commit_directory + commit_hash, "wb+")
-        f.write(commit_bytes)
-        f.close()
-        return commit_hash
-
-    def index_hash(self):
-        file_hashes = []
-        # we sort to have the same files every time
-        for file_name in sorted(self._relative_paths_in_dir(self.index_directory)):
-            index_file_name = join(self.index_directory, file_name)
-            if os.path.isfile(index_file_name):
-                f = open(index_file_name, "rb")
-                file_bytes = f.read()
-                m = hashlib.sha256()
-                m.update(file_bytes) # we encode the file contents
-                m.update(file_name.encode("utf-8")) # and we encode the file path
-                file_hashes.append(m.hexdigest())
-        m = hashlib.sha256()
-        #TODO: this should be a merkle tree eventually 
-        # (or maybe an merkel-mountain-range), to reap the benefits
-        m.update(",".join(file_hashes).encode('utf-8')) 
-        return m.hexdigest()
-
-    def get_new_file_id(self):
-        # generates a random ID for a file
-        import uuid
-        return uuid.uuid4().hex
-
     def add(self, path):
+        """
+        If a file or folder exists at path, adds to the working index
+        """
         if not os.path.exists(path):
             print("Error: path {} does not exist".format(path))
+            return
 
         self._try_create_file_ids([path])
 
         if os.path.isfile(path):
-            self._copy_file_to_dir(path, self.index_directory)
+            copy_file_to_dir(path, self.index_directory)
         else:
             assert os.path.isdir(path)
-            files_in_path = self._relative_paths_in_dir(path)
+            files_in_path = relative_paths_in_dir(path)
             # we filter out the saga folder, if need be
             files_in_path = [join(path, f) for f in files_in_path if not f.startswith(".saga")]
             self._try_create_file_ids(files_in_path)
             # copy directory to index
-            self._copy_dir_to_dir(path, join(self.index_directory, path), exclude=[".saga"])
+            copy_dir_to_dir(path, join(self.index_directory, path), exclude=[".saga"])
 
-    def _try_create_file_ids(self, file_paths):
-        for path in file_paths:
-            if path not in self.file_ids[self.head]:
-                self.file_ids[self.head][path] = self.get_new_file_id()
-
-    def commit(self, commit_message):
+    def commit(self, commit_message, is_empty=False):
+        """
+        Creates a new commit with commit_message, if there are new changes to commit
+        """
         state_hash = self.index_hash()
         parent_commit_hash = self.branches[self.head]
+
+        if not is_empty and not self._uncommited_in_index():
+            print("Not commiting: no changes to commit")
+            return
+
         commit = Commit(state_hash, [parent_commit_hash], commit_message)
         commit_hash = self._add_commit_to_db(commit)
         print("[{}] {}".format(commit_hash[0:12], commit_message))
@@ -129,6 +99,10 @@ class Repository(object):
         self.branches[self.head] = commit_hash
 
     def create_branch(self, branch_name):
+        """
+        If branch_name does not exist, will create a new branch with this name, 
+        branching off from the current commit on head
+        """
         if branch_name in self.branches:
             print("Error: branch {} already exists".format(branch_name))
         self.branches[branch_name] = self.branches[self.head]
@@ -137,76 +111,45 @@ class Repository(object):
         self.commits[branch_name] = copy.deepcopy(self.commits[self.head])
 
     def switch_to_branch(self, branch_name):
+        """
+        Switches the current head to branch name. Will fail if there are uncommited
+        or unstaged changes (that aren't inserts).
+        """
         if branch_name not in self.branches:
             print("Error: cannot switch to branch {} as it does not exist".format(branch_name))
             return
 
-        inserted, changed, removed = self.changed_files(self.curr_state_dir(), self.index_directory)
-        if any(inserted) or any(changed) or any(removed):
-            print("Error: please commit changes before switching branches")
+        if self._uncommited_in_index():
+            print("Error: cannot switch branch as there are uncommited changed")
             return
 
+        _, changed, removed = changed_files(self.base_directory, self.curr_state_dir())
+        if any(changed) or any(removed):
+            print("Error: please commit or undo changes before switching branches")
+            return
+
+        print("Switching to branch {}".format(branch_name))
         self.head = branch_name
         commit = self.get_commit(self.branches[self.head])
-        self._restore_state(commit.state_hash)        
-
-    def _relative_paths_in_dir(self, directory, ignore=None):    
-        if ignore is None:
-            ignore = []
-
-        # we make sure that the path does not start with a slash
-        if directory[-1] == "/":
-            paths = [path[len(directory):] for path in glob.glob(directory + '/**', recursive=True) if path[len(directory):] != ""]
-        else:
-            paths = [path[len(directory) + 1:] for path in glob.glob(directory + '/**', recursive=True) if path[len(directory) + 1:] != ""]
-        def include_path(path):
-            for ignore_path in ignore:
-                if path.startswith(ignore_path):
-                    return False
-            if path == directory:
-                return False
-            return True
-        return {path for path in paths if include_path(path)}
-
-    def state_hash(self):
-        return self.get_commit(self.branches[self.head]).state_hash
-
-    def curr_state_dir(self):
-        return join(self.state_directory, self.get_commit(self.branches[self.head]).state_hash)
-
-    def changed_files(self, dir1, dir2):
-        previous_state = self._relative_paths_in_dir(dir1)
-        current_state = self._relative_paths_in_dir(dir2)
-
-        removed_paths, changed_paths, inserted_paths  = set(), set(), set()
-        for path in previous_state:
-            if path not in current_state:
-                removed_paths.add(path)
-            else:
-                path1 = join(dir1, path)
-                path2 = join(dir2, path)
-                if isfile(path1) and isfile(path2) and not filecmp.cmp(path1, path2):
-                    changed_paths.add(path)
-                elif (isfile(path1) and not isfile(path2)) or (not isfile(path1) and isfile(path2)):
-                    changed_paths.add(path)
-        for path in current_state:
-            if path not in previous_state:
-                inserted_paths.add(path)
-
-        return removed_paths, changed_paths, inserted_paths
+        self._restore_state(commit.state_hash)
 
     def log(self):
-
+        """
+        Prints all commits in the current branch to the screen
+        """
         for commit_hash in reversed(self.commits[self.head]):
             commit = self.get_commit(commit_hash)
             print("commit: {}".format(commit_hash))
             print("\t{}\n".format(commit.commit_message))
         
     def status(self):
+        """
+        Prints the status of the current branch and index
+        """
         print("On branch {}".format(self.head))
 
-        rem_state_to_index, cha_state_to_index, ins_state_to_index = self.changed_files(self.curr_state_dir(), self.index_directory)
-        rem_index_to_curr, cha_index_to_curr, ins_index_to_curr = self.changed_files(self.index_directory, self.base_directory)
+        rem_state_to_index, cha_state_to_index, ins_state_to_index = changed_files(self.curr_state_dir(), self.index_directory)
+        rem_index_to_curr, cha_index_to_curr, ins_index_to_curr = changed_files(self.index_directory, self.base_directory)
 
         print("Changes staged for commit:")
         for path in rem_state_to_index:
@@ -227,9 +170,11 @@ class Repository(object):
         for path in ins_index_to_curr:
             print("\t{}".format(path))
 
-
     def diff(self):
-        _, changed_paths, _ = self.changed_files(self.index_directory, self.base_directory)
+        """
+        Prints the differences between all files
+        """
+        _, changed_paths, _ = changed_files(self.index_directory, self.base_directory)
 
         print("Git diff:")
         operations = []
@@ -241,8 +186,8 @@ class Repository(object):
                 old_file = parse_file(file_id, path, join(self.index_directory, path))
                 new_file = parse_file(file_id, path, join(self.base_directory, path))
                 ops = old_file.get_operations(new_file)
-                for op in ops:
-                    print("\t\t:", op)
+                for key in ops:
+                    print("\t\t:", key, ops[key])
                 operations.extend(ops)
             else:
                 print("\tDirectory:", path, "changed")
@@ -250,6 +195,9 @@ class Repository(object):
         return operations
 
     def branch(self):
+        """
+        Lists the branches in the repo, as well as the head
+        """
         for branch in self.branches:
             if branch == self.head:
                 print("   * {}".format(branch))
@@ -257,8 +205,13 @@ class Repository(object):
                 print("     {}".format(branch))
 
     def merge(self, other_branch):
+        """
+        Merges current head with a other_branch
+        """
         if other_branch not in self.branches:
             print("Error: cannot merge branch {} as it does not exist".format(other_branch))
+            return
+
 
         lca, need_merge = self.least_common_ancestor(self.head, other_branch)
 
@@ -277,8 +230,8 @@ class Repository(object):
             state_dir_newA = join(self.state_directory, self.state_hash())
             state_dir_newB = join(self.state_directory, self.get_commit(self.branches[other_branch]).state_hash)
 
-            removed_paths_A, changed_paths_A, inserted_paths_A = self.changed_files(state_dir_old, state_dir_newA)
-            removed_paths_B, changed_paths_B, inserted_paths_B = self.changed_files(state_dir_old, state_dir_newB)
+            removed_paths_A, changed_paths_A, inserted_paths_A = changed_files(state_dir_old, state_dir_newA)
+            removed_paths_B, changed_paths_B, inserted_paths_B = changed_files(state_dir_old, state_dir_newB)
 
             possibly_mergable = set() 
             print(inserted_paths_A)
@@ -314,6 +267,12 @@ class Repository(object):
                 write_file(f)
             self.commit("Merged {} into branch {}".format(other_branch, self.head))
 
+    def state_hash(self):
+        return self.get_commit(self.branches[self.head]).state_hash
+
+    def curr_state_dir(self):
+        return join(self.state_directory, self.get_commit(self.branches[self.head]).state_hash)
+
     def least_common_ancestor(self, branch_1, branch_2):
         branch_1_commits = self.commits[branch_1]
         branch_2_commits = self.commits[branch_2]
@@ -333,56 +292,128 @@ class Repository(object):
         if not os.path.isdir(dst):
             os.mkdir(dst)
             # TODO: make this work when the cwd isn't the base repository
-            self._copy_dir_to_dir(".saga/index/", dst)
-        
+            copy_dir_to_dir(".saga/index/", dst)
 
     def _restore_state(self, state_hash):
-        self._copy_dir_to_dir(join(".saga/states", state_hash), ".")
+        copy_dir_to_dir(join(".saga/states", state_hash), ".")
+    
+    def get_commit(self, commit_hash):
+        f = open(self.commit_directory + commit_hash, "rb")
+        commit_bytes = f.read()
+        f.close()
+        return Commit.from_bytes(commit_bytes)
 
+    def _add_commit_to_db(self, commit):
+        # if the commit exists, we don't need to error
+        commit_hash = commit.hash()
+        commit_bytes = commit.to_bytes()
+        f = open(self.commit_directory + commit_hash, "wb+")
+        f.write(commit_bytes)
+        f.close()
+        return commit_hash
 
-    def _copy_dir_to_dir(self, src, dst, exclude=None):
-        """
-        src is a relative path. It must be a folder that exists.
-        dst is an absolute path. It will be created if it does not exist.
+    def index_hash(self):
+        file_hashes = []
+        # we sort to have the same files every time
+        for file_name in sorted(relative_paths_in_dir(self.index_directory)):
+            index_file_name = join(self.index_directory, file_name)
+            if os.path.isfile(index_file_name):
+                f = open(index_file_name, "rb")
+                file_bytes = f.read()
+                m = hashlib.sha256()
+                m.update(file_bytes) # we encode the file contents
+                m.update(file_name.encode("utf-8")) # and we encode the file path
+                file_hashes.append(m.hexdigest())
+        m = hashlib.sha256()
+        #TODO: this should be a merkle tree eventually 
+        # (or maybe an merkel-mountain-range), to reap the benefits
+        m.update(",".join(file_hashes).encode('utf-8')) 
+        return m.hexdigest()
 
-        If a path = src/file_name, then this will be copied to dst/file_name
-        """
-        if exclude is None:
-            exclude = []
-        if src[-1] == "/":
-            src = src[:-1]
+    def get_new_file_id(self):
+        # generates a random ID for a file
+        import uuid
+        return uuid.uuid4().hex
 
-        if not os.path.exists(dst):
-                os.makedirs(dst)
+    def _try_create_file_ids(self, file_paths):
+        for path in file_paths:
+            if path not in self.file_ids[self.head]:
+                self.file_ids[self.head][path] = self.get_new_file_id()
 
-        # otherwise, we recursively expore the directory and copy it over
-        for root, dirs, files in os.walk(src):
-            dirs[:] = [d for d in dirs if d not in exclude]
-            relative_root = root[len(src) + 1:]
+    def _uncommited_in_index(self):
+        index_state_hash = self.index_hash()
+        commit_state_hash = self.state_hash()
+        return index_state_hash != commit_state_hash
 
-            # first we copy the directories
-            for directory in dirs:
-                # if the directory doesn't exist, we make it
-                path = join(dst, relative_root, directory)
-                if not os.path.isdir(path):
-                    os.mkdir(path)
+ ### FROM HERE
 
-            # and then the files
-            for file_name in files:
-                path = join(dst, relative_root, file_name)
-                shutil.copyfile(join(root, file_name), path)
+    def pull(self):
+        URL = "http://localhost:3000/cli/get-folder"
 
-    def _copy_file_to_dir(self, src, dst):
-        """
-        src is a relative path of a file. 
-        dst is an absolute path of a folder. 
+        shutil.rmtree(self.saga_directory)
 
-        src will eixst at join(dst, src)
-        """
+        try:
+            response = requests.get(url = URL, data={'folder_location' : ".saga"})
+            paths = response.json()
 
-        dirname = join(dst, os.path.dirname(src))
-        print(dirname)
-        if not os.path.isdir(dirname):
-            os.makedirs(dirname)
+            # create all the folders we need
+            for path in paths["folder_paths"]:
+                os.makedirs(os.path.join(self.base_directory, path))
 
-        shutil.copyfile(src, join(dst, src))
+            # and then download all the files in these folders
+            for path in paths["file_paths"]:
+                self._pull_file(path)
+        except:
+            print("Error: cannot pull")
+
+    def _pull_file(self, relative_file_path):
+
+        # api-endpoint 
+        URL = "http://localhost:3000/cli/download"
+        file_location = os.path.join(self.base_directory, relative_file_path)
+
+        if os.path.exists(file_location):
+            os.remove(file_location)
+
+        # sending get request and saving the response as response object 
+        r = requests.get(url = URL, data={'file_location' : relative_file_path})
+
+        f = open(file_location,'wb')
+        f.write(r.content)
+        f.close()
+        print("Downloaded File: {}".format(file_location))
+
+    def push(self):
+        relative_paths = self._relative_paths_in_dir(".saga")
+
+        for path in relative_paths:
+            abs_path = os.path.join(os.getcwd(), ".saga", path)
+            if os.path.isfile(abs_path):
+                # Found a file 
+                self._push_file(abs_path)
+            else:
+                self._push_folder(abs_path)
+
+    def _push_file(self, file_path):
+        # api-endpoint 
+        URL = "http://localhost:3000/cli/single-upload"
+
+        relative_file_path = file_path[len(self.base_directory) + 1:]
+
+        file_name = file_path.split('/')
+        length = len(file_name)
+        file_name = file_name[length - 1]
+
+        with open(file_path, 'rb') as f:
+            r = requests.post(URL, files={"file": f}, data={"relative_file_path": relative_file_path, "file_name": file_name})
+
+    def _push_folder(self, folder_path):
+        # api-endpoint 
+        URL = "http://localhost:3000/cli/push-folder"
+
+        relative_folder_path = folder_path[len(self.base_directory) + 1:]
+
+        requests.post(url=URL, data={"relative_folder_path": relative_folder_path})
+
+    def restore_state_to_head(self):
+        self._restore_state(self.state_hash())
