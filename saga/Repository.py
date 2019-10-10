@@ -387,63 +387,31 @@ class Repository(object):
 
         shutil.copyfile(src, join(dst, src))
 
-
-
-    def pull_folder(self, relative_folder_path):
+    def pull(self):
         # api-endpoint 
-        URL = "http://localhost:3000/get-folder"
-
-        base_directory = self.base_directory
+        URL = "http://localhost:3000/cli/get-folder"
 
         shutil.rmtree(self.saga_directory)
-                
-        if not base_directory[len(base_directory) -1] == '/':
-            base_directory = base_directory + "/"
         
         try:
-            response = requests.get(url = URL, data={'folder_location' : relative_folder_path})
+            response = requests.get(url = URL, data={'folder_location' : ".saga"})
             paths = response.json()
-            
-            # download all of the files
-            for path in paths['file_paths']:
+
+            # create all the folders we need
+            for path in paths["folder_paths"]:
+                os.makedirs(os.path.join(self.base_directory, path))
+
+            # and then download all the files in these folders
+            for path in paths["file_paths"]:
                 self._pull_file(path)
-
-            # make all of the empty folders
-            for path in paths['empty_folder_paths']:
-                empty_folder_location = base_directory + path
-                if os.path.exists(empty_folder_location):
-                    os.rmdir(empty_folder_location)
-                os.makedirs(empty_folder_location)
-                print("Downloaded Empty Folder: {}".format(empty_folder_location))
-
-
         except:
-            print("response failed")
+            print("Error: cannot pull")
 
     def _pull_file(self, relative_file_path):
 
         # api-endpoint 
-        URL = "http://localhost:3000/download"
-        
-        # location given here 
-        file_location = self.base_directory
-
-        if not file_location[len(file_location) -1] == '/':
-            file_location = file_location + "/"
-                
-        # append the file name onto the path
-        file_location = file_location + relative_file_path
-
-        file_name = relative_file_path.split('/')
-        length = len(file_name)
-        file_name = file_name[length - 1]
-        file_name_length = len(file_name)
-
-        file_location_excluding_file = file_location[:-file_name_length]
-
-        if not os.path.exists(file_location_excluding_file):
-            # create directory
-            os.makedirs(file_location_excluding_file)
+        URL = "http://localhost:3000/cli/download"
+        file_location = os.path.join(self.base_directory, relative_file_path)
         
         if os.path.exists(file_location):
             os.remove(file_location)
@@ -459,23 +427,21 @@ class Repository(object):
     def restore_state_to_head(self):
         self._restore_state(self.state_hash())
 
-    def push_folder(self, folder_path):
-        # api-endpoint 
-        all_internal_directories = self._relative_paths_in_dir(folder_path)
+    def push(self):
+        relative_paths = self._relative_paths_in_dir(".saga")
 
-        for dir in all_internal_directories:
+        for path in relative_paths:
             #universal_folder_location = self.directory + folder_path + dir
-            universal_folder_location = folder_path + "/" + dir
-            if not os.path.isdir(universal_folder_location):    
-                    # Found a file 
-                    self._push_file(universal_folder_location)       
-            elif len(os.listdir(universal_folder_location)) == 0:
-                    # Found an empty folder
-                    self._push_empty_folder(universal_folder_location)
+            abs_path = os.path.join(os.getcwd(), ".saga", path)
+            if os.path.isfile(abs_path):    
+                # Found a file 
+                self._push_file(abs_path)
+            else:
+                self._push_folder(abs_path)
 
     def _push_file(self, file_path):
         # api-endpoint 
-        URL = "http://localhost:3000/single-upload"
+        URL = "http://localhost:3000/cli/single-upload"
 
         relative_file_path = file_path[len(self.base_directory) + 1:]
 
@@ -488,9 +454,9 @@ class Repository(object):
             r = requests.post(URL, files={"file": f}, data = { "relative_file_path" : relative_file_path, "file_name" : file_name})
             #print("Uploaded: {}".format(file_path))
 
-    def _push_empty_folder(self, folder_path):
+    def _push_folder(self, folder_path):
         # api-endpoint 
-        URL = "http://localhost:3000/single-empty-folder"
+        URL = "http://localhost:3000/cli/push-folder"
 
         relative_folder_path = folder_path[len(self.base_directory) + 1:]
 

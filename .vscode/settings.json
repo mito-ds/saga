@@ -1,5 +1,5 @@
 {
-    "python.pythonPath": "/Users/nate/saga/env/bin/python3",
+    "python.pythonPath": "env/bin/python",
     "python.linting.pylintEnabled": false,
     "python.linting.banditEnabled": true,
     "python.linting.enabled": true

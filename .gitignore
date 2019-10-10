@@ -11,3 +11,4 @@ file_types/photoshop_file/
 build/
 dist/
 saga_vcs.egg-info/
+.mypy_cache/
