@@ -40,15 +40,23 @@ def main():
     parser_branch.set_defaults(func=branch)
 
     # create the parser for the "checkout" command
-    parser_checkout = subparsers.add_parser('checkout', help='command for switching head branch')
+    parser_checkout = subparsers.add_parser('checkout', help='switches the head branch')
     parser_checkout.add_argument('-b', help='flag to create a new branch', action='store_true')
     parser_checkout.add_argument('branch', type=str, help='branch name')
     parser_checkout.set_defaults(func=checkout)
 
     # create the parser for the "merge" command
-    parser_merge = subparsers.add_parser('merge', help='command to merge head branch with some other branch')
+    parser_merge = subparsers.add_parser('merge', help='merges the head branch with some other branch')
     parser_merge.add_argument('branch', type=str, help='name of branch to merge')
     parser_merge.set_defaults(func=merge)
+
+    # create the parser for the "push" command
+    parser_push = subparsers.add_parser('push', help='uploads the local repository to the remote repository')
+    parser_push.set_defaults(func=push)
+
+    # create the parser for the "pull" command
+    parser_pull = subparsers.add_parser('pull', help='downloads the local repository from the remote repository')
+    parser_pull.set_defaults(func=pull)
 
     args = parser.parse_args()
     parser.parse_args()
@@ -106,6 +114,19 @@ def merge(args):
     saga_repo = get_saga_repo()
     saga_repo.merge(args.branch)
     saga_repo.write()
+
+def push(args):
+    print("PUSHING")
+    saga_repo = get_saga_repo()
+    saga_repo.push()
+
+def pull(args):
+    saga_repo = get_saga_repo()
+    saga_repo.pull()
+    saga_repo = get_saga_repo()
+    saga_repo.restore_state_to_head()
+
+# Helper functions
 
 def get_saga_repo():
     saga_repo = get_saga_repo_maybe()

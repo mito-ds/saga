@@ -2,10 +2,18 @@ import os
 import pickle
 import hashlib
 import copy
+import filecmp
+import glob
+import requests 
+import os
+import glob
+import json
+import shutil
 from os.path import join, isfile
 from saga.Commit import Commit
 from saga.path_utils import copy_dir_to_dir, copy_file_to_dir, relative_paths_in_dir, changed_files
 from saga.file_types.file_utils import parse_file, write_file
+
 
 class Repository(object):
 
@@ -259,6 +267,63 @@ class Repository(object):
                 write_file(f)
             self.commit("Merged {} into branch {}".format(other_branch, self.head))
 
+    def pull(self):
+        URL = "http://localhost:3000/cli/get-folder"
+
+        shutil.rmtree(self.saga_directory)
+
+        try:
+            response = requests.get(url = URL, data={'folder_location' : ".saga"})
+            paths = response.json()
+
+            # create all the folders we need
+            for path in paths["folder_paths"]:
+                os.makedirs(os.path.join(self.base_directory, path))
+
+            # and then download all the files in these folders
+            for path in paths["file_paths"]:
+                self._pull_file(path)
+        except:
+            print("Error: cannot pull")
+
+    def push(self):
+        relative_paths = relative_paths_in_dir(".saga")
+
+        for path in relative_paths:
+            abs_path = os.path.join(".saga", path)
+            if os.path.isfile(abs_path):
+                # Found a file 
+                self._push_file(abs_path)
+            else:
+                self._push_folder(abs_path)
+
+    def _pull_file(self, relative_file_path):
+        # api-endpoint 
+        URL = "http://localhost:3000/cli/download"
+
+        # sending get request and saving the response as response object 
+        r = requests.get(url = URL, data={'file_location' : relative_file_path})
+
+        f = open(relative_file_path,'wb+')
+        f.write(r.content)
+        f.close()
+        print("Downloaded File: {}".format(relative_file_path))
+
+    def _push_file(self, relative_file_path):
+        # api-endpoint 
+        URL = "http://localhost:3000/cli/single-upload"
+
+        file_name = os.path.basename(relative_file_path)
+
+        with open(relative_file_path, 'rb') as f:
+            r = requests.post(URL, files={"file": f}, data={"relative_file_path": relative_file_path, "file_name": file_name})
+
+    def _push_folder(self, folder_path):
+        # api-endpoint 
+        URL = "http://localhost:3000/cli/push-folder"
+
+        requests.post(url=URL, data={"folder_path": folder_path})
+
     def state_hash(self):
         return self.get_commit(self.branches[self.head]).state_hash
 
@@ -336,3 +401,6 @@ class Repository(object):
         index_state_hash = self.index_hash()
         commit_state_hash = self.state_hash()
         return index_state_hash != commit_state_hash
+
+    def restore_state_to_head(self):
+        self._restore_state(self.state_hash())
