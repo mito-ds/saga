@@ -34,4 +34,4 @@ class File(object):
         merge_res = self.file_contents.merge(file_a.file_contents, file_b.file_contents)
         if merge_res is None:
             return None
-        return File(self.file_id, self.file_type, self.file_name, merge_res)
+        return File(self.file_id, self.file_type, self.file_path, self.file_name, merge_res)

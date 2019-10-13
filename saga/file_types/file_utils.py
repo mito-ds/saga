@@ -3,6 +3,7 @@ from saga.file_types.binary_file import parse_binary_file, write_binary_file
 from saga.file_types.text_file import parse_text_file, write_text_file
 from saga.file_types.csv_file import parse_csv_file, write_csv_file
 from saga.file_types.excel_file import parse_excel_file, write_excel_file
+from saga.file_types.word_file import parse_word_file, write_word_file
 
 def is_csv(file_path):
     return file_path.endswith(".csv")
@@ -27,6 +28,9 @@ def is_text(file_path):
 def is_excel(file_path):
     return file_path.endswith(".xlsx")
 
+def is_word(file_path):
+    return file_path.endswith(".docx")
+
 
 def parse_file(file_id, file_name, file_path):
     if is_text(file_path):
@@ -35,6 +39,8 @@ def parse_file(file_id, file_name, file_path):
         return parse_excel_file(file_id, file_name, file_path)
     elif is_csv(file_path):
         return parse_csv_file(file_id, file_name, file_path)
+    elif is_word(file_path):
+        return parse_word_file(file_id, file_name, file_path)
     else:
         return parse_binary_file(file_id, file_name, file_path)
 
@@ -48,5 +54,7 @@ def write_file(file):
         write_binary_file(file)
     elif file.file_type == "excel":
         write_excel_file(file)
+    elif file.file_type == "word":
+        write_word_file(file)
     else:
         print("Error: file type {} does not exist".format(file.file_type))

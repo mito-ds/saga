@@ -43,7 +43,7 @@ def copy_file_to_dir(src, dst):
     src will eixst at join(dst, src)
     """
     dirname = os.path.join(dst, os.path.dirname(src))
-    print(dirname)
+
     if not os.path.isdir(dirname):
         os.makedirs(dirname)
 

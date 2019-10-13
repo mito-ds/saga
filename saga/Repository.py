@@ -234,8 +234,7 @@ class Repository(object):
             removed_paths_B, changed_paths_B, inserted_paths_B = changed_files(state_dir_old, state_dir_newB)
 
             possibly_mergable = set() 
-            print(inserted_paths_A)
-            print(inserted_paths_B)
+
             for path in removed_paths_A.intersection(changed_paths_B):
                 print("Confict as {} was removed in {} and modified in {}".format(path, self.head, other_branch))
             for path in removed_paths_B.intersection(changed_paths_A):
@@ -257,6 +256,8 @@ class Repository(object):
                 file_b = parse_file(file_id, path, join(state_dir_newB, path))
 
                 merge_file = file_o.merge(file_a, file_b)
+                merge_file.file_path = file_a.file_path[len(state_dir_old) + 1:]
+
                 if merge_file is None:
                     print("Merge conflict for file {}".format(file_o.file_name))
                     return
@@ -264,7 +265,11 @@ class Repository(object):
                     print("Successfully merged file {}".format(file_o.file_name))
                     files_to_write.append(merge_file)
             for f in files_to_write:
+                # first write it out
                 write_file(f)
+                # and then add it to the index
+                self.add(f.file_path)
+
             self.commit("Merged {} into branch {}".format(other_branch, self.head))
 
     def pull(self):
