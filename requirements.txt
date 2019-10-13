@@ -1,3 +1,4 @@
 pytest
 bs4
 xlsxwriter
+psd-tools

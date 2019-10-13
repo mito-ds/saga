@@ -3,6 +3,7 @@ from saga.file_types.binary_file import parse_binary_file, write_binary_file
 from saga.file_types.text_file import parse_text_file, write_text_file
 from saga.file_types.csv_file import parse_csv_file, write_csv_file
 from saga.file_types.excel_file import parse_excel_file, write_excel_file
+from saga.file_types.photoshop_file import parse_photoshop_file, write_photoshop_file
 
 def is_csv(file_path):
     return file_path.endswith(".csv")
@@ -27,14 +28,19 @@ def is_text(file_path):
 def is_excel(file_path):
     return file_path.endswith(".xlsx")
 
+def is_photoshop(file_path):
+    return file_path.endswith(".psd")
 
 def parse_file(file_id, file_name, file_path):
+    print("file_path:", file_path)
     if is_text(file_path):
         return parse_text_file(file_id, file_name, file_path)
     elif is_excel(file_path):
         return parse_excel_file(file_id, file_name, file_path)
     elif is_csv(file_path):
         return parse_csv_file(file_id, file_name, file_path)
+    elif is_photoshop(file_path):
+        return parse_photoshop_file(file_id, file_name, file_path)
     else:
         return parse_binary_file(file_id, file_name, file_path)
 
