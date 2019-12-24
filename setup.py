@@ -11,7 +11,7 @@ if not commit_message.startswith("release"):
     print("Error: only deploys on release")
     exit(1)
 
-version = str(commit_message.split(" ")[1])
+version = str(commit_message.split(" ")[1]).strip()
 print("Uploading version {}".format(version))
 
 setuptools.setup(
