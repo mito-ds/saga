@@ -41,5 +41,35 @@ class MixedDataType(object):
 
         return MixedDataType(merge_rec(O, A, B))
 
+    def __eq__(self, value):
+        if not isinstance(value, MixedDataType):
+            return False
+        return equal_objs(self.mixed_data_type, value.mixed_data_type)
 
+PRIMITIVE = (int, float, bool, str)
+
+def equal_objs(a, b):
+    if type(a) != type(b):
+        return False
+
+    if type(a) in PRIMITIVE:
+        return a == b
+    
+    if isinstance(a, list):
+        if len(a) != len(b):
+            return False
+        for x, y in zip(a, b):
+            if not equal_objs(x, y):
+                return False
+        return True
+
+    if isinstance(a, dict):
+        if len(a.keys()) != len(b.keys()) or any(a.keys().symmetric_difference(b.keys())):
+            return False
+        for key in a.keys():
+            if not equal_objs(a[key], b[key]):
+                return False
+        return True
+
+    raise ValueError(f"Passed invalid type of {type(a)}")
     

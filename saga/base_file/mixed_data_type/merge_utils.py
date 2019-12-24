@@ -1,7 +1,7 @@
 from saga.base_file.mixed_data_type.lcs import lcs_with_sim
 from saga.base_file.mixed_data_type.diff_utils import dict_removed_paths, dict_inserted_paths, dict_changed_paths
 
-PRIMITIVE = (int, float, bool, str)
+PRIMITIVE = (int, float, bool, str, type(None))
 
 def merge_rec(O, A, B):
     # If one variable is a primitive type, all should be primitive types
@@ -83,7 +83,15 @@ def merge_rec(O, A, B):
 
                     # TODO: not sure about this condition
                     if len(chunk_a) > len(chunk_o) and len(chunk_b) > len(chunk_o):
-                        return None
+                        # ignore nones!
+
+                        overlay = none_overlay(chunk_a, chunk_b)
+                        print(f"OVERLAY {overlay}")
+                        if overlay is not None:
+                            calculated_ouput.extend(overlay)
+                            continue
+                        else:
+                            return None
         
                     for o, a, b in zip(chunk_o, chunk_a, chunk_b):
                         rec_merge = merge_rec(o, a, b)
@@ -102,6 +110,29 @@ def merge_rec(O, A, B):
         raise ValueError("Invalid type given to merge: {}".format(type(O)))
 
 # utilities for diff3
+
+def none_overlay(matrix_a, matrix_b):
+    import itertools
+    # overlays 2 2-d arrays, where None is treated as a blank space
+    overlay = []
+    for a, b in itertools.zip_longest(matrix_a, matrix_b):
+        if a == None:
+            overlay.append(b)
+        elif b == None:
+            overlay.append(a)
+        else:
+            overlay.append([])
+            idx = len(overlay) - 1
+            for x, y in itertools.zip_longest(a, b):
+                if x == y:
+                    overlay[idx].append(x)
+                elif x == None:
+                    overlay[idx].append(y)
+                elif y == None:
+                    overlay[idx].append(x)
+                else:
+                    return None
+    return overlay
 
 def bump_matching(matching):
     new_matchings = []

@@ -156,3 +156,9 @@ def test_complex_operations(setup_text_files):
     assert ops["removed"] == [[1]]
 
 
+def test_merge():
+    from tests.test_utils import do_test_merge
+    for path in os.listdir("tests/merges/text"):
+        path = os.path.join("tests/merges/text", path)
+        if os.path.isdir(path):
+            assert do_test_merge(path, ".txt")
