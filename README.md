@@ -51,5 +51,11 @@ pip install -r requirements.txt;
 
 When inside of the python virtual enviorment:
 ~~~~
-python -m pytest
+python3 -m pytest
 ~~~~
+
+### Profiling a Test
+
+~~~
+python3 -m cProfile -m pytest tests/test_excel.py
+~~~
