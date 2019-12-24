@@ -57,7 +57,10 @@ def get_rows(sheetdata, strings):
                 formula = "=" + cell.contents[0].contents[0]
                 parsed_row[column] = formula
             else:
-                val = int(cell.contents[0].contents[0])
+                try:
+                    val = int(cell.contents[0].contents[0])
+                except:
+                    val = float(cell.contents[0].contents[0])
                 parsed_row[column] = val
 
         rows[row_idx] = parsed_row
