@@ -12,6 +12,7 @@ if not commit_message.startswith("release"):
     exit(1)
 
 version = str(commit_message.split(" ")[1]).strip()
+print("COMMIT MESSAGE{}".format(commit_message))
 print("Uploading version {}".format(version))
 
 setuptools.setup(
