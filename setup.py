@@ -25,6 +25,11 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/saga-vcs/saga",
     packages=setuptools.find_packages(),
+    install_requires=[
+        'XlsxWriter>=1.2',
+        'beautifulsoup4>=4.8',
+        'html5lib>=1.0',
+    ],
     classifiers=[
         "Programming Language :: Python :: 3"
     ],
