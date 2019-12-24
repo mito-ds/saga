@@ -1,16 +1,24 @@
 import os
+import subprocess
 import setuptools
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-f = open("versionnumber", "r")
-versionnumber = f.read()
-f.close()
+# we only deploy when the most recent message is a release
+commit_message = subprocess.check_output(['git', "log", "-1", "--pretty=%B"]).decode("utf-8")
+if not commit_message.startswith("release"):
+    print("Error: only deploys on release")
+    exit(1)
+
+version = commit_message.split(" ")[1]
+
+
+exit(1)
 
 setuptools.setup(
     name="saga-vcs",
-    version=versionnumber,
+    version=version_number,
     author="saga",
     author_email="narush@wharton.upenn.edu.com",
     description="saga is a version control CLI that handles many file formats",
