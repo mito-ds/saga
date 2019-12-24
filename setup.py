@@ -11,14 +11,12 @@ if not commit_message.startswith("release"):
     print("Error: only deploys on release")
     exit(1)
 
-version = commit_message.split(" ")[1]
-
-
-exit(1)
+version = str(commit_message.split(" ")[1])
+print("Uploading version {}".format(version))
 
 setuptools.setup(
     name="saga-vcs",
-    version=version_number,
+    version=version,
     author="saga",
     author_email="narush@wharton.upenn.edu.com",
     description="saga is a version control CLI that handles many file formats",
