@@ -1,5 +1,6 @@
 # Research
 
+
 This is a list of open reasearch problems for generalized version control. 
 
 ## Longest Common Subsequence with a Change Operation - and a Distance Metric
