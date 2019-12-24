@@ -46,7 +46,7 @@ class MixedDataType(object):
             return False
         return equal_objs(self.mixed_data_type, value.mixed_data_type)
 
-PRIMITIVE = (int, float, bool, str)
+PRIMITIVE = (int, float, bool, str, type(None))
 
 def equal_objs(a, b):
     if type(a) != type(b):
