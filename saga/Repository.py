@@ -256,7 +256,7 @@ class Repository(object):
                 file_a = parse_file(file_id, path, join(state_dir_newA, path))
                 file_b = parse_file(file_id, path, join(state_dir_newB, path))
 
-                merge_file = file_o.merge(file_a, file_b)
+                merge_file = file_o.merge(file_a, file_b, path)
                 if merge_file is None:
                     print("Merge conflict for file {}".format(file_o.file_name))
                     return
@@ -265,6 +265,7 @@ class Repository(object):
                     files_to_write.append(merge_file)
             for f in files_to_write:
                 write_file(f)
+                self.add(f.file_path)
             self.commit("Merged {} into branch {}".format(other_branch, self.head))
 
     def pull(self):
