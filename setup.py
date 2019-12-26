@@ -5,13 +5,10 @@ import setuptools
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-# we only deploy when the most recent message is a release
 commit_message = subprocess.check_output(['git', "log", "-1", "--pretty=%B"]).decode("utf-8")
-if not commit_message.startswith("release"):
-    print("Error: only deploys on release")
-    exit(1)
 
-version = str(commit_message.split(" ")[1]).strip()
+# the last element must be a version num er
+version = str(commit_message.split(" ")[-1]).strip()
 print("COMMIT MESSAGE {}".format(commit_message))
 print("Uploading version {}".format(version))
 
