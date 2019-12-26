@@ -53,7 +53,7 @@ pip install -r requirements.txt;
 
 When inside of the python virtual enviorment:
 ~~~~
-python3 -m pytest
+pytest
 ~~~~
 
 ### Profiling a Test
