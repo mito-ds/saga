@@ -24,15 +24,18 @@ def get_rows(sheetdata, strings):
     rows = dict()
 
     # we check if the sheet is empty
-    if len(sheetdata) <= 1:
+    if len(sheetdata) < 1:
         return rows
 
     rows = dict()
+    row_idx = None
     for row in sheetdata:
         try:
             span = row["spans"].split(":")
         except:
             print(row)
+            if row_idx is None:
+                continue
             rows[row_idx] = []
             continue
         start = int(span[0])

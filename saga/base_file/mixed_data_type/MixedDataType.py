@@ -1,4 +1,4 @@
-from saga.base_file.mixed_data_type.merge_utils import merge_rec
+from saga.base_file.mixed_data_type.merge_utils import merge_rec, equal_objs
 from saga.base_file.mixed_data_type.diff_utils import inserted_paths, removed_paths, changed_paths
 
 def value_at_path(obj, path):
@@ -39,7 +39,8 @@ class MixedDataType(object):
         A = a_mdt.mixed_data_type
         B = b_mdt.mixed_data_type
 
-        return MixedDataType(merge_rec(O, A, B))
+        merged, err = merge_rec(O, A, B)
+        return MixedDataType(merged)
 
     def __eq__(self, value):
         if not isinstance(value, MixedDataType):
@@ -48,28 +49,4 @@ class MixedDataType(object):
 
 PRIMITIVE = (int, float, bool, str, type(None))
 
-def equal_objs(a, b):
-    if type(a) != type(b):
-        return False
-
-    if type(a) in PRIMITIVE:
-        return a == b
-    
-    if isinstance(a, list):
-        if len(a) != len(b):
-            return False
-        for x, y in zip(a, b):
-            if not equal_objs(x, y):
-                return False
-        return True
-
-    if isinstance(a, dict):
-        if len(a.keys()) != len(b.keys()) or any(a.keys().symmetric_difference(b.keys())):
-            return False
-        for key in a.keys():
-            if not equal_objs(a[key], b[key]):
-                return False
-        return True
-
-    raise ValueError(f"Passed invalid type of {type(a)}")
     

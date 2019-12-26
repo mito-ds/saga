@@ -7,15 +7,15 @@ def test_list_simple_conflict():
     A = [1, 2]
     B = [1, 3]
 
-    result = merge_rec(O, A, B)
-    assert result == None
+    result, err = merge_rec(O, A, B)
+    assert err is not None
 
 def test_list_simple_merge():
     O = [1]
     A = [0, 1]
     B = [1, 2]
 
-    result = merge_rec(O, A, B)
+    result, err = merge_rec(O, A, B)
     assert result == [0, 1, 2]
 
 def test_dict_simple_conflict():
@@ -23,15 +23,15 @@ def test_dict_simple_conflict():
     O = {"key": "value1"}
     B = {"key": "value2"}
 
-    result = merge_rec(O, A, B)
-    assert result == None
+    result, err = merge_rec(O, A, B)
+    assert err is not None
 
 def test_dict_simple_merge():
     O = {"key": "value"}
     A = {"key": "value1"}
     B = {"key": "value"}
 
-    result = merge_rec(O, A, B)
+    result, err = merge_rec(O, A, B)
     assert result == {"key": "value1"}
 
 
@@ -40,8 +40,8 @@ def test_list_complicated_conflict():
     A = [1, 4, 5, 2, 3, 6]
     B = [1, 2, 4, 5, 3, 6]
 
-    result = merge_rec(O, A, B)
-    assert result == None
+    result, err = merge_rec(O, A, B)
+    assert err is not None
 
 
 def test_list_successful_merge():
@@ -49,7 +49,7 @@ def test_list_successful_merge():
     A = [1, 4, 5, 2, 6]
     B = [1, 2, 6]
 
-    result = merge_rec(O, A, B)
+    result, err = merge_rec(O, A, B)
     assert result == [1, 4, 5, 2, 6]
 
 
@@ -58,7 +58,7 @@ def test_multi_dim_merge_easy():
     A = [[1, 2, 3], [3, 4]]
     B = [[1, 2], [3, 4]]
 
-    result = merge_rec(O, A, B)
+    result, err = merge_rec(O, A, B)
     assert result == [[1, 2, 3], [3, 4]]
 
 
@@ -67,7 +67,7 @@ def test_multi_dim_merge_harder():
     A = [[1, 2, 3], [6, 7], [3, 4]]
     B = [[1, 2], [6, 7], [3, 4, 5]]
 
-    result = merge_rec(O, A, B)
+    result, err = merge_rec(O, A, B)
     assert result == [[1, 2, 3], [6, 7], [3, 4, 5]]
 
 def test_multi_dim_merge_recursive():
@@ -75,7 +75,7 @@ def test_multi_dim_merge_recursive():
     A = [[1, 2, 3], [6, 7], [3, 4]]
     B = [[0, 1, 2], [6, 7]]
 
-    result = merge_rec(O, A, B)
+    result, err = merge_rec(O, A, B)
     assert result == [[0, 1, 2, 3], [6, 7]]
 
 
@@ -84,7 +84,7 @@ def test_multi_dim_merge_recursive_add_on_end():
     A = [[1, 2, 3], [6, 7], [3, 4]]
     B = [[0, 1, 2], [6, 7], [3, 4]]
 
-    result = merge_rec(O, A, B)
+    result, err = merge_rec(O, A, B)
     assert result == None
 
 def test_easy_multi_dim_dict():
@@ -92,7 +92,7 @@ def test_easy_multi_dim_dict():
     A = {"key": {"key": "value1"}}
     B = {"key": {"key": "value"}}
 
-    result = merge_rec(O, A, B)
+    result, err = merge_rec(O, A, B)
     assert result == {"key": {"key": "value1"}}
 
 def test_conflict_multi_dim_dict():
@@ -100,7 +100,7 @@ def test_conflict_multi_dim_dict():
     A = {"key": {"key": "value1"}}
     B = {"key": {"key": "value2"}}
 
-    result = merge_rec(O, A, B)
+    result, err = merge_rec(O, A, B)
     assert result == None
 
 def test_harder_multi_dim_dict():
@@ -108,7 +108,7 @@ def test_harder_multi_dim_dict():
     A = {"key": {"key": "value"}}
     B = {"key": {"key": "value2"}}
 
-    result = merge_rec(O, A, B)
+    result, err = merge_rec(O, A, B)
     assert result == {"key": {"key": "value2"}}
 
 def test_list_of_dicts():
@@ -116,7 +116,7 @@ def test_list_of_dicts():
     A = [{"key": "value1"}, {"key1": "value"}, {"key2": "value"}]
     B = [{"key": "value"}, {"key1": "value1"}, {"key2": "value"}]
 
-    result = merge_rec(O, A, B)
+    result, err = merge_rec(O, A, B)
     assert result == [{"key": "value1"}, {"key1": "value1"}, {"key2": "value"}]
 
 
@@ -125,7 +125,7 @@ def test_dict_of_lists():
     A = {"key": [0, 1]}
     B = {"key": [1, 2]}
 
-    result = merge_rec(O, A, B)
+    result, err = merge_rec(O, A, B)
     assert result == {"key": [0, 1, 2]}
 
 def test_dict_of_lists_of_dicts():
@@ -133,5 +133,5 @@ def test_dict_of_lists_of_dicts():
     A = {"key": [{"key": "value1"}, {"key1": "value"}, {"key2": "value"}]}
     B = {"key": [{"key": "value"}, {"key1": "value1"}, {"key2": "value"}]}
 
-    result = merge_rec(O, A, B)
+    result, err = merge_rec(O, A, B)
     assert result == {"key": [{"key": "value1"}, {"key1": "value1"}, {"key2": "value"}]}

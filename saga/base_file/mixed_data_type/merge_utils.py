@@ -1,21 +1,37 @@
+import itertools
 from saga.base_file.mixed_data_type.lcs import lcs_with_sim
 from saga.base_file.mixed_data_type.diff_utils import dict_removed_paths, dict_inserted_paths, dict_changed_paths
 
 PRIMITIVE = (int, float, bool, str, type(None))
 
 def merge_rec(O, A, B):
+    """
+    Returns a tuple of (merged object, error).
+    If Error = None then the merge was sucessful
+    """
+    if O is None:
+        # this was an add
+        if A is None:
+            return (B, None)
+        if B is None:
+            return (A, None)
+    else:
+        # this was a delete
+        if A is None or B is None:
+            return (None, None)
+
     # If one variable is a primitive type, all should be primitive types
     if type(O) in PRIMITIVE or type(A) in PRIMITIVE or type(B) in PRIMITIVE:
         # if a value has been changed in at most one place, then we can merge it
         assert type(O) in PRIMITIVE and type(A) in PRIMITIVE and type(B) in PRIMITIVE
         if O == A and O == B:
-            return O
+            return (O, None)
         elif O != A and O == B:
-            return A
+            return (A, None)
         elif O == A and O != B:
-            return B
+            return (B, None)
         else:
-            return None
+            return (None, True)
     
     # All variables must have the same type!
     assert type(O) == type(A) and type(A) == type(B)
@@ -32,19 +48,20 @@ def merge_rec(O, A, B):
         # if we insert something in both, then we have a merge conflict:
         if any(o_a_inserted.intersection(o_b_inserted)):
             # TODO: we could also not make it a merge conflict, if they add the same thing
-            return None
+            return (None, True)
         # if we removed something from one, and change it in the other
         if any(o_a_removed.intersection(o_b_changed)) or any(o_b_removed.intersection(o_a_changed)):
-            return None
+            return (None, True)
 
         new_dict = {k: O[k] for k in O}
 
         # if they were changed in both, we need to merge 
         for changed in o_a_changed.intersection(o_b_changed):
-            merged = merge_rec(O[changed], A[changed], B[changed])
-            if merged is None:
-                return None
-            new_dict[changed] = merged
+            merged, err = merge_rec(O[changed], A[changed], B[changed])
+            if err is not None:
+                return (None, True)
+            if merged is not None:
+                new_dict[changed] = merged
 
         for removed in o_a_removed.union(o_b_removed):
             del new_dict[removed]
@@ -53,7 +70,7 @@ def merge_rec(O, A, B):
         for b in o_b_changed.union(o_b_inserted).difference(o_a_changed):
             new_dict[b] = B[b]
 
-        return new_dict
+        return (new_dict, None)
 
     elif type(O) == list:
         # we run a modified version of the diff3 algorithm in this case
@@ -63,13 +80,14 @@ def merge_rec(O, A, B):
 
         calculated_ouput = []
 
-        for chunk in chunks:
+        for chunk_num, chunk in enumerate(chunks):
 
             ((s_O, e_O), (s_A, e_A), (s_B, e_B)) = chunk
 
-            a_changed = chunk_changed(matchings_A, s_A, e_A, s_O, e_O)
-            b_changed = chunk_changed(matchings_B, s_B, e_B, s_O, e_O)
-
+            chunk_in_o = chunk_changed_in_O(chunk, O)
+            a_changed = not equal_objs(chunk_in_o, chunk_changed_in_A(chunk, A))
+            b_changed = not equal_objs(chunk_in_o, chunk_changed_in_B(chunk, B))
+        
             if a_changed and not b_changed:
                 calculated_ouput.extend(chunk_changed_in_A(chunk, A))
             elif b_changed and not a_changed:
@@ -91,28 +109,31 @@ def merge_rec(O, A, B):
                             calculated_ouput.extend(overlay)
                             continue
                         else:
-                            return None
+                            return (None, True)
         
-                    for o, a, b in zip(chunk_o, chunk_a, chunk_b):
-                        rec_merge = merge_rec(o, a, b)
-                        if rec_merge is None:
-                            return None
-                        calculated_ouput.append(rec_merge)  
+                    for o, a, b in itertools.zip_longest(chunk_o, chunk_a, chunk_b):
+                        rec_merge, err = merge_rec(o, a, b)
+                        if err is not None:
+                            return (None, True)
+                        if rec_merge is not None:
+                            calculated_ouput.append(rec_merge)  
 
                 else:
-                    if chunk_a != chunk_b:
-                        return None
+                    # have to check none overlap here, too
+                    overlay = none_overlay_primitive(chunk_a, chunk_b)
+                    if overlay is None:
+                        return (None, True)
 
-                    calculated_ouput.extend(chunk_a)
+                    calculated_ouput.extend(overlay)
 
-        return calculated_ouput
+        return (calculated_ouput, None)
     else:
         raise ValueError("Invalid type given to merge: {}".format(type(O)))
 
 # utilities for diff3
 
 def none_overlay(matrix_a, matrix_b):
-    import itertools
+    
     # overlays 2 2-d arrays, where None is treated as a blank space
     overlay = []
     for a, b in itertools.zip_longest(matrix_a, matrix_b):
@@ -132,6 +153,21 @@ def none_overlay(matrix_a, matrix_b):
                     overlay[idx].append(x)
                 else:
                     return None
+    return overlay
+
+def none_overlay_primitive(list_a, list_b):
+    import itertools
+    # overlays 2 2-d arrays, where None is treated as a blank space
+    overlay = []
+    for a, b in itertools.zip_longest(list_a, list_b):
+        if a == b:
+            overlay.append(a)
+        elif a == None:
+            overlay.append(b)
+        elif b == None:
+            overlay.append(a)
+        else:
+            return None
     return overlay
 
 def bump_matching(matching):
@@ -188,7 +224,12 @@ def get_chunks(O, A, B, matchings_A, matchings_B):
         return chunks
 
 def contains_primitive(l):
-    return len(l) > 0 and type(l[0]) in PRIMITIVE    
+    return len(l) > 0 and type(l[0]) in PRIMITIVE 
+
+def chunk_changed_in_O(chunk, O):
+    #output A[H], A[H], A[H]
+    ((s_O, e_O), _, _) = chunk
+    return O[s_O - 1 : e_O]   
 
 def chunk_changed_in_A(chunk, A):
     #output A[H], A[H], A[H]
@@ -248,3 +289,30 @@ def is_stable_index(matchings_A, matchings_B, idx_O):
                     # return (idx_A, idx_O, idx_B)
                     return (match_A[0][0], match_A[1][0], match_B[0][0])
     return False 
+
+
+def equal_objs(a, b):
+    if type(a) != type(b):
+        return False
+
+    if type(a) in PRIMITIVE:
+        return a == b
+    
+    if isinstance(a, list):
+        if len(a) != len(b):
+            return False
+        for x, y in zip(a, b):
+            if not equal_objs(x, y):
+                return False
+        return True
+
+    if isinstance(a, dict):
+        if len(a.keys()) != len(b.keys()) or \
+            any(set(a.keys()).symmetric_difference(set(b.keys()))):
+            return False
+        for key in a.keys():
+            if not equal_objs(a[key], b[key]):
+                return False
+        return True
+
+    raise ValueError(f"Passed invalid type of {type(a)}")
