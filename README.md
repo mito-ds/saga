@@ -1,6 +1,8 @@
 # saga
 
-Saga is a set of tools for version control. Saga is like Git, but it works for file formats other than text files. As a user, you can use saga to manage your creative projects. Currently, Saga supports unstructed binary files, text files, CSV files, and Excel files. Unlike Git, Saga can merge changes from different branches from any of these files (if they don't conflict).
+Saga is a version control tool like Git, but it can be used to version control files other than just text. 
+
+As a user, you can use currently use saga to manage your creative projects. Currently, saga includes basic support for unstructed binary files, text files, CSV files, and Excel files.
 
 As a developer, you can use the Saga framework to add version control to new file formats. See examples [here](https://github.com/saga-vcs/saga/blob/master/saga/file_types/text_file.py) and [here](https://github.com/saga-vcs/saga/blob/master/saga/file_types/excel_file.py). Documentation coming soon!
 
