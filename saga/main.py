@@ -3,7 +3,7 @@ import argparse
 import os
 from saga.Repository import Repository
 
-def main():
+def create_parser():
     # create the top-level saga parser
     parser = argparse.ArgumentParser(prog='saga')
     subparsers = parser.add_subparsers(help='sub-command help')
@@ -58,8 +58,12 @@ def main():
     parser_pull = subparsers.add_parser('pull', help='downloads the local repository from the remote repository')
     parser_pull.set_defaults(func=pull)
 
+    return parser
+
+
+def main():
+    parser = create_parser()
     args = parser.parse_args()
-    parser.parse_args()
     args.func(args)
 
 def init(args):
