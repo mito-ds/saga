@@ -2,3 +2,4 @@ pytest
 bs4
 xlsxwriter
 html5lib
+requests
