@@ -26,6 +26,7 @@ setuptools.setup(
         'XlsxWriter>=1.2',
         'beautifulsoup4>=4.8',
         'html5lib>=1.0',
+        'requests>-2.2'
     ],
     classifiers=[
         "Programming Language :: Python :: 3"

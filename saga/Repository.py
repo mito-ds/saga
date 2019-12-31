@@ -123,14 +123,14 @@ class Repository(object):
             print("Error: cannot switch branch as there are uncommited changed")
             return
 
-        _, changed, removed = changed_files(self.base_directory, self.curr_state_dir())
+        inserted, changed, removed = changed_files(self.base_directory, self.curr_state_dir())
         if any(changed) or any(removed):
             print("Error: please commit or undo changes before switching branches")
             return
 
         print("Switching to branch {}".format(branch_name))
         self.head = branch_name
-        commit = self.get_commit(self.branches[self.head])
+        commit = self.get_commit(self.branches[self.head])        
         self._restore_state(commit.state_hash)
 
     def log(self):
@@ -353,8 +353,21 @@ class Repository(object):
             copy_dir_to_dir(".saga/index/", dst)
 
     def _restore_state(self, state_hash):
+        # copy the state directory to the current directory
         copy_dir_to_dir(join(".saga/states", state_hash), ".")
-    
+        # remove all the files that shouldn't be in this state
+        inserted, changed, removed = changed_files(".", join(".saga/states", state_hash))
+        for path in inserted:
+            if os.path.isdir(path):
+                os.rmdir(path)
+            else:
+                os.remove(path)
+        # make the index the proper state
+        shutil.rmtree(self.index_directory)
+        os.mkdir(self.index_directory)
+        copy_dir_to_dir(join(".saga/states", state_hash), self.index_directory)
+
+
     def get_commit(self, commit_hash):
         f = open(self.commit_directory + commit_hash, "rb")
         commit_bytes = f.read()

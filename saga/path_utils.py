@@ -16,7 +16,7 @@ def copy_dir_to_dir(src, dst, exclude=None):
         src = src[:-1]
 
     if not os.path.exists(dst):
-            os.makedirs(dst)
+        os.makedirs(dst)
 
     # otherwise, we recursively expore the directory and copy it over
     for root, dirs, files in os.walk(src):
