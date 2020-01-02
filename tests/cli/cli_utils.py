@@ -1,12 +1,13 @@
 import sys
 import os
 import pytest
+import shlex
 from unittest.mock import patch
 from saga.main import main
 from io import StringIO
 
 def run_cmd(cmd):
-    cmd_tokens = cmd.split(" ")
+    cmd_tokens = shlex.split(cmd)
     # mock the input for the parser
     with patch.object(sys, 'argv', cmd_tokens):
         # capture the output 

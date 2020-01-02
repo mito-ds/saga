@@ -15,5 +15,7 @@ def parse_text_file(file_id, file_name, file_path):
 
 def write_text_file(file):
     f = open(file.file_path, "w+")
-    f.write("\n".join(file.file_contents.mixed_data_type))
+    string = "\n".join(file.file_contents.mixed_data_type)
+    print(repr(string))
+    f.write(string)
     f.close()

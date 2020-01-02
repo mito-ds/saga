@@ -1,5 +1,6 @@
 import pytest
 import os
+from tests.test_utils import do_test_merge
 from saga.base_file.File import File
 from saga.file_types.text_file import parse_text_file, write_text_file
 
@@ -155,10 +156,15 @@ def test_complex_operations(setup_text_files):
     assert len(ops["removed"]) == 1
     assert ops["removed"] == [[1]]
 
-
-def test_merge():
-    from tests.test_utils import do_test_merge
-    for path in os.listdir("tests/merges/text"):
-        path = os.path.join("tests/merges/text", path)
+def get_test_merges():
+    merge_tests = []
+    for path in os.listdir("tests/merges/txt"):
+        path = os.path.join("tests/merges/txt", path)
         if os.path.isdir(path):
-            assert do_test_merge(path, ".txt")
+            merge_tests.append(path)
+    return merge_tests
+        
+
+@pytest.mark.parametrize("merge_test_name", get_test_merges())
+def test_merge(merge_test_name):
+    assert do_test_merge(merge_test_name, ".txt")
