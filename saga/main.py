@@ -19,6 +19,8 @@ def create_parser():
 
     # create the parser for the "commit" command
     parser_commit = subparsers.add_parser('commit', help='adds a path to the current index')
+    parser_commit.add_argument('--allow-empty', action='store_true',
+                    help='allow the commit to be empty')
     parser_commit.add_argument('-m', type=str, help='commit string')
     parser_commit.set_defaults(func=commit)
 
@@ -86,7 +88,8 @@ def commit(args):
         commit_message = input("Please enter a commit message: ")
         saga_repo.commit(commit_message)
     else:
-        saga_repo.commit(args.m)
+        print(args)
+        saga_repo.commit(args.m, allowed_empty=args.allow_empty)
     saga_repo.write()
 
 def status(args):
