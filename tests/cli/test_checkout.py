@@ -34,13 +34,16 @@ def test_switch_branch_switches_directory_back(saga_folder):
     assert "master" in current_branch()
     assert os.path.exists(saga_folder.join("file"))
 
-def test_cannot_switch_unadded_changes():
+def test_cannot_switch_removed_change(saga_folder):
     run_cmd("saga branch newbranch")
     random_file("file")
+    run_cmd("saga add file")
+    run_cmd("saga commit -m \"ack\"")
+    os.remove("file")
     out = run_cmd("saga checkout newbranch")
     assert "Error" in out
 
-def test_cannot_switch_uncommitted_changes():
+def test_cannot_switch_uncommitted_changes(saga_folder):
     run_cmd("saga branch newbranch")
     random_file("file")
     run_cmd("saga add file")
