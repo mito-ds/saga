@@ -60,6 +60,14 @@ def create_parser():
     parser_pull = subparsers.add_parser('pull', help='downloads the local repository from the remote repository')
     parser_pull.set_defaults(func=pull)
 
+    # create the parser for the "remote" command
+    parser_remote = subparsers.add_parser(
+        'remote', 
+        help='manage the remote repositories'
+    )
+    parser_remote.add_argument('remote', nargs="?", type=str, help='repository to track')
+    parser_remote.set_defaults(func=remote)
+
     return parser
 
 
@@ -131,6 +139,15 @@ def pull(args):
     saga_repo.pull()
     saga_repo = get_saga_repo()
     saga_repo.restore_state_to_head()
+
+def remote(args):
+    saga_repo = get_saga_repo()
+    if args.remote is None:
+        print(f"Remote branch is {saga_repo.remote_repository}")
+    else:
+        saga_repo.set_remote(args.remote)
+        saga_repo.write()
+
 
 # Helper functions
 

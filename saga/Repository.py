@@ -24,6 +24,7 @@ class Repository(object):
         self.state_directory = self.base_directory + "/.saga/states/"
         self.index_directory = self.base_directory + "/.saga/index/"
         self.repo_pickle = self.base_directory + "/.saga/repository"
+        self.remote_repository = None
         self.head = "master"
         self.branches = {"master" : None} # map from branch name -> commit hash
         self.index = {"master" : set()} # map from branch name -> set of files we are tracking
@@ -58,6 +59,10 @@ class Repository(object):
         f = open(self.repo_pickle, "wb+")
         f.write(p)
         f.close()
+
+    def set_remote(self, remote_repository):
+        self.remote_repository = remote_repository
+        print(f"Set new remote repository to {self.remote_repository}")
 
     def add(self, path):
         """
@@ -274,7 +279,7 @@ class Repository(object):
             )
 
     def pull(self):
-        URL = "http://localhost:3000/cli/get-folder"
+        URL = f"{self.remote_repository}/cli/get-folder"
 
         shutil.rmtree(self.saga_directory)
 
@@ -305,7 +310,7 @@ class Repository(object):
 
     def _pull_file(self, relative_file_path):
         # api-endpoint 
-        URL = "http://localhost:3000/cli/download"
+        URL = f"{self.remote_repository}/cli/download"
 
         # sending get request and saving the response as response object 
         r = requests.get(url = URL, data={'file_location' : relative_file_path})
@@ -317,7 +322,7 @@ class Repository(object):
 
     def _push_file(self, relative_file_path):
         # api-endpoint 
-        URL = "http://localhost:3000/cli/single-upload"
+        URL = f"{self.remote_repository}/cli/single-upload"
 
         file_name = os.path.basename(relative_file_path)
 
@@ -326,7 +331,7 @@ class Repository(object):
 
     def _push_folder(self, folder_path):
         # api-endpoint 
-        URL = "http://localhost:3000/cli/push-folder"
+        URL = f"{self.remote_repository}/cli/push-folder"
 
         requests.post(url=URL, data={"folder_path": folder_path})
 
