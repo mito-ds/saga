@@ -17,7 +17,7 @@ def test_cannot_checkout_create_branch(saga_folder):
 
 def test_switch_branch_switches_directory(saga_folder):
     run_cmd("saga branch newbranch")
-    random_file(saga_folder, "file")
+    random_file("file")
     run_cmd("saga add file")
     run_cmd("saga commit -m \"ah\"")
     run_cmd("saga checkout newbranch")
@@ -26,7 +26,7 @@ def test_switch_branch_switches_directory(saga_folder):
 
 def test_switch_branch_switches_directory_back(saga_folder):
     run_cmd("saga branch newbranch")
-    random_file(saga_folder, "file")
+    random_file("file")
     run_cmd("saga add file")
     run_cmd("saga commit -m \"ah\"")
     run_cmd("saga checkout newbranch")
@@ -36,13 +36,13 @@ def test_switch_branch_switches_directory_back(saga_folder):
 
 def test_cannot_switch_unadded_changes():
     run_cmd("saga branch newbranch")
-    random_file(saga_folder, "file")
+    random_file("file")
     out = run_cmd("saga checkout newbranch")
     assert "Error" in out
 
 def test_cannot_switch_uncommitted_changes():
     run_cmd("saga branch newbranch")
-    random_file(saga_folder, "file")
+    random_file("file")
     run_cmd("saga add file")
     out = run_cmd("saga checkout newbranch")
     assert "Error" in out

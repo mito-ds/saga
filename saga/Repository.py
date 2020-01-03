@@ -40,7 +40,7 @@ class Repository(object):
         os.mkdir(directory + "/.saga/states")
         os.mkdir(directory + "/.saga/index")
         repo = Repository(directory)
-        repo.commit("Create repository", is_empty=True) # we add this empty commit so we don't need special cases
+        repo.commit("Create repository", allowed_empty=True) # we add this empty commit so we don't need special cases
         return repo
 
     @staticmethod
@@ -80,15 +80,15 @@ class Repository(object):
             # copy directory to index
             copy_dir_to_dir(path, join(self.index_directory, path), exclude=[".saga"])
 
-    def commit(self, commit_message, is_empty=False):
+    def commit(self, commit_message, allowed_empty=False):
         """
         Creates a new commit with commit_message, if there are new changes to commit
         """
         state_hash = self.index_hash()
         parent_commit_hash = self.branches[self.head]
 
-        if not is_empty and not self._uncommited_in_index():
-            print("Not commiting: no changes to commit")
+        if not allowed_empty and not self._uncommited_in_index():
+            print("Error: no changes to commit")
             return
 
         commit = Commit(state_hash, [parent_commit_hash], commit_message)
@@ -214,6 +214,10 @@ class Repository(object):
 
 
         lca, need_merge = self.least_common_ancestor(self.head, other_branch)
+        from saga.CommitGraph import CommitGraph
+        commit_graph = CommitGraph(self.commit_directory)
+        lcas = commit_graph.least_common_ancestors(self.branches[self.head], self.branches[other_branch])
+        assert lcas.pop() == lca
 
         if not need_merge:
             if len(self.commits[other_branch]) > len(self.commits[self.head]):
@@ -234,8 +238,6 @@ class Repository(object):
             removed_paths_B, changed_paths_B, inserted_paths_B = changed_files(state_dir_old, state_dir_newB)
 
             possibly_mergable = set() 
-            print(inserted_paths_A)
-            print(inserted_paths_B)
             for path in removed_paths_A.intersection(changed_paths_B):
                 print("Confict as {} was removed in {} and modified in {}".format(path, self.head, other_branch))
             for path in removed_paths_B.intersection(changed_paths_A):
@@ -266,7 +268,10 @@ class Repository(object):
             for f in files_to_write:
                 write_file(f)
                 self.add(f.file_path)
-            self.commit("Merged {} into branch {}".format(other_branch, self.head))
+            self.commit(
+                "Merged {} into branch {}".format(other_branch, self.head),
+                allowed_empty=True
+            )
 
     def pull(self):
         URL = "http://localhost:3000/cli/get-folder"
@@ -369,7 +374,7 @@ class Repository(object):
 
 
     def get_commit(self, commit_hash):
-        f = open(self.commit_directory + commit_hash, "rb")
+        f = open(os.path.join(self.commit_directory, commit_hash), "rb")
         commit_bytes = f.read()
         f.close()
         return Commit.from_bytes(commit_bytes)

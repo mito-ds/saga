@@ -17,13 +17,15 @@ def run_cmd(cmd):
             sys.stdout.close()
     return out
 
-@pytest.fixture
+@pytest.yield_fixture
 def saga_folder(tmpdir):
+    og_dir = os.getcwd()
     os.chdir(tmpdir)
     run_cmd("saga init")
-    return tmpdir
+    yield tmpdir
+    os.chdir(og_dir)
 
-def random_file(saga_folder, file_name):
+def random_file(file_name):
     with open(file_name, 'wb+') as fout:
         fout.write(os.urandom(1024))
 

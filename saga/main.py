@@ -88,7 +88,6 @@ def commit(args):
         commit_message = input("Please enter a commit message: ")
         saga_repo.commit(commit_message)
     else:
-        print(args)
         saga_repo.commit(args.m, allowed_empty=args.allow_empty)
     saga_repo.write()
 

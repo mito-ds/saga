@@ -7,7 +7,6 @@ def test_init_creates_folder(tmpdir):
     run_cmd("saga init")
     assert os.path.exists(tmpdir.join(".saga"))
 
-
 def test_init_fails_existing(tmpdir):
     os.chdir(tmpdir)
     run_cmd("saga init")
