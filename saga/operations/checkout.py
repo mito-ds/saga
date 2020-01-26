@@ -1,7 +1,7 @@
-from saga.Repository1 import Repository1
+from saga.Repository import Repository
 from saga.path_utils import changed_files
 
-def checkout(repository: Repository1, branch_name: str):
+def checkout(repository: Repository, branch_name: str):
     """
     Changes head branch to branch_name.
 

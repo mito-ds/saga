@@ -1,10 +1,10 @@
 from os import mkdir
 from typing import List
-from saga.Repository1 import Repository1
+from saga.Repository import Repository
 from saga.path_utils import copy_dir_to_dir
 
 def commit_int(
-        repository: Repository1, 
+        repository: Repository, 
         commit_message: str,
         parent_commit_hashes: List[str],
         allow_empty: bool=False
@@ -43,7 +43,7 @@ def commit_int(
     print("[{}] {}".format(commit.hash[0:12], commit_message))
 
 
-def commit(repository: Repository1, commit_message: str, allow_empty: bool=False):
+def commit(repository: Repository, commit_message: str, allow_empty: bool=False):
     """
     Creates a new commit with commit_messages on the HEAD branch.
 

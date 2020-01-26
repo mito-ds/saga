@@ -1,11 +1,11 @@
 import os
 from pathlib import Path
 from shutil import copyfile
-from saga.Repository1 import Repository1
+from saga.Repository import Repository
 from saga.path_utils import copy_dir_to_dir
 
 
-def add(repository: Repository1, add_path: str):
+def add(repository: Repository, add_path: str):
     
     add_path = Path(add_path)
 

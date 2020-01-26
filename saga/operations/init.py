@@ -1,7 +1,7 @@
 from os import getcwd, mkdir
 from pathlib import Path
 from typing import Optional
-from saga.Repository1 import Repository1
+from saga.Repository import Repository
 from saga.operations.commit import commit
 
 def get_saga_repo_path(directory: Path) -> Optional[Path]:
@@ -31,7 +31,7 @@ def init(directory: Path):
     (directory / ".saga" / "branches").mkdir()
 
     # create the repository container object
-    repository = Repository1(directory)
+    repository = Repository(directory)
 
     # create an empty commit on the master branch, so no special cases
     commit(

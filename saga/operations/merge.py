@@ -1,12 +1,12 @@
 from saga.path_utils import changed_files
-from saga.Repository1 import Repository1
+from saga.Repository import Repository
 from saga.CommitGraph import CommitGraph, NEED_MERGE
 from saga.file_types.file_utils import parse_file, write_file
 from saga.operations.add import add
 from saga.operations.commit import commit
 
 
-def fast_forward(repository: Repository1, other_branch: str):
+def fast_forward(repository: Repository, other_branch: str):
     # Get the head commit on the other branch
     other_branch_head_hash = repository.head_commit_from_branch(other_branch)
     other_branch_head_commit = repository.get_commit(other_branch_head_hash)
@@ -15,7 +15,7 @@ def fast_forward(repository: Repository1, other_branch: str):
     print("Fast-forward branch {} to branch {}".format(repository.head, other_branch))
 
 
-def merge(repository: Repository1, other_branch: str):
+def merge(repository: Repository, other_branch: str):
     """
     Merges current head with a other_branch
     """
