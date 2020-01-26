@@ -12,6 +12,9 @@ def copy_dir_to_dir(src, dst, exclude=None):
     """
     if exclude is None:
         exclude = []
+    from pathlib import Path
+    if isinstance(src, Path):
+        src = str(src)
     if src[-1] == "/":
         src = src[:-1]
 
@@ -56,6 +59,10 @@ def relative_paths_in_dir(directory, ignore=None):
     if ignore is None:
         ignore = []
 
+    from pathlib import Path
+    if (isinstance(directory, Path)):
+        directory = str(directory)
+
     # we make sure that the path does not start with a slash
     if directory[-1] == "/":
         paths = [path[len(directory):] for path in glob.glob(directory + '/**', recursive=True) if path[len(directory):] != ""]
@@ -71,23 +78,23 @@ def relative_paths_in_dir(directory, ignore=None):
     return {path for path in paths if include_path(path)}
 
 def changed_files(dir1, dir2):
-        previous_state = relative_paths_in_dir(dir1)
-        current_state = relative_paths_in_dir(dir2)
+    previous_state = relative_paths_in_dir(dir1)
+    current_state = relative_paths_in_dir(dir2)
 
-        removed_paths, changed_paths, inserted_paths  = set(), set(), set()
-        for path in previous_state:
-            if path not in current_state:
-                removed_paths.add(path)
-            else:
-                path1 = os.path.join(dir1, path)
-                path2 = os.path.join(dir2, path)
-                if os.path.isfile(path1) and os.path.isfile(path2) and not filecmp.cmp(path1, path2):
-                    changed_paths.add(path)
-                elif (os.path.isfile(path1) and not os.path.isfile(path2)) or \
-                    (not os.path.isfile(path1) and os.path.isfile(path2)):
-                    changed_paths.add(path)
-        for path in current_state:
-            if path not in previous_state:
-                inserted_paths.add(path)
+    removed_paths, changed_paths, inserted_paths  = set(), set(), set()
+    for path in previous_state:
+        if path not in current_state:
+            removed_paths.add(path)
+        else:
+            path1 = os.path.join(dir1, path)
+            path2 = os.path.join(dir2, path)
+            if os.path.isfile(path1) and os.path.isfile(path2) and not filecmp.cmp(path1, path2):
+                changed_paths.add(path)
+            elif (os.path.isfile(path1) and not os.path.isfile(path2)) or \
+                (not os.path.isfile(path1) and os.path.isfile(path2)):
+                changed_paths.add(path)
+    for path in current_state:
+        if path not in previous_state:
+            inserted_paths.add(path)
 
-        return removed_paths, changed_paths, inserted_paths
+    return removed_paths, changed_paths, inserted_paths

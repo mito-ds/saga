@@ -8,6 +8,7 @@ class Commit(object):
         self.parent_commit_hashes = parent_commit_hashes
         self.commit_message = commit_message
 
+    @property
     def hash(self):
         m = hashlib.sha256()
         m.update(self.to_bytes())
@@ -18,6 +19,7 @@ class Commit(object):
 
     @staticmethod
     def from_bytes(commit_bytes):
+
         return pickle.loads(commit_bytes)
 
 

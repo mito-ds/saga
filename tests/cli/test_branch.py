@@ -14,7 +14,8 @@ def test_create_branch(saga_folder):
 
 def test_switch_branch(saga_folder):
     run_cmd("saga branch newbranch")
-    run_cmd("saga checkout newbranch")
+    out = run_cmd("saga checkout newbranch")
+    print(out)
     out = run_cmd("saga branch")
     out_list = out.split(" ")
     assert "newbranch" in out_list[out_list.index("*") + 1]

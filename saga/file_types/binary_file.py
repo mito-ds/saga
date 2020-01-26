@@ -1,6 +1,8 @@
 from saga.base_file.File import File
 
 def parse_binary_file(file_id, file_name, file_path):
+    import os
+    print(os.listdir(os.getcwd()))
     f = open(file_path, "r")
     file_contents = [f.read()]
     f.close()

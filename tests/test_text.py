@@ -167,4 +167,4 @@ def get_test_merges():
 
 @pytest.mark.parametrize("merge_test_name", get_test_merges())
 def test_merge(merge_test_name):
-    assert do_test_merge(merge_test_name, ".txt")
+    assert do_test_merge(merge_test_name, "txt")

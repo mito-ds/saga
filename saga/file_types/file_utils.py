@@ -1,31 +1,28 @@
-import csv
+from pathlib import Path
 from saga.file_types.binary_file import parse_binary_file, write_binary_file
 from saga.file_types.text_file import parse_text_file, write_text_file
 from saga.file_types.csv_file import parse_csv_file, write_csv_file
 from saga.file_types.excel_file import parse_excel_file, write_excel_file
 
-def is_csv(file_path):
-    return file_path.endswith(".csv")
+def is_csv(file_path: Path):
+    return file_path.suffix == ".csv"
 
 TEXT_ENDINGS = {
-    "txt", # just text
-    "py", # python
-    "c", # c source
-    "cc", # c++ source 
-    "java", # java source 
-    "js",
-    "php"
+    ".txt", # just text
+    ".py", # python
+    ".c", # c source
+    ".cc", # c++ source 
+    ".java", # java source 
+    ".js",
+    ".php"
 }
 
-def is_text(file_path):
-    try:
-        ending = file_path.split(".")[-1]
-        return ending in TEXT_ENDINGS
-    except:
-        return False
+def is_text(file_path: str):
+    print(file_path.suffix)
+    return file_path.suffix in TEXT_ENDINGS
 
 def is_excel(file_path):
-    return file_path.endswith(".xlsx")
+    return file_path.suffix == ".xlsx"
 
 
 def parse_file(file_id, file_name, file_path):

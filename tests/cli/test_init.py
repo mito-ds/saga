@@ -4,7 +4,8 @@ from tests.cli.cli_utils import run_cmd
 
 def test_init_creates_folder(tmpdir):
     os.chdir(tmpdir)
-    run_cmd("saga init")
+    out = run_cmd("saga init")
+    assert "Created" in out
     assert os.path.exists(tmpdir.join(".saga"))
 
 def test_init_fails_existing(tmpdir):

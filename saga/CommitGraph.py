@@ -1,10 +1,12 @@
 import os
 from saga.Commit import Commit
 
+NEED_MERGE = True
+
 class CommitGraph(object):
 
-    def __init__(self, commit_directory):
-        self.commit_directory = commit_directory
+    def __init__(self, repository):
+        self.repository = repository
 
     def least_common_ancestors(self, commit_hash_1, commit_hash_2):
         # returns a list of all the common ancestors of commits
@@ -15,29 +17,26 @@ class CommitGraph(object):
         reached = set()
         while any(current):
             curr = current.pop()
+            # subtree
+            if curr == commit_hash_2:
+                return not NEED_MERGE, {curr}
             if curr not in reached:
                 reached.add(curr)
-                curr_commit = self.get_commit(curr)
+                curr_commit = self.repository.get_commit(curr)
                 current.update(set(curr_commit.parent_commit_hashes))
         
         # then we walk the ancestors of the second commit hash
         current = {commit_hash_2}
         while any(current):
             curr = current.pop()
+            # in this case (one branch is subbranch of the other)
+            # we can just return this single commit
+            if curr == commit_hash_1:
+                return not NEED_MERGE, {commit_hash_1}
             if curr in reached:
                 lca.add(curr)
             else:
-                curr_commit = self.get_commit(curr)
+                curr_commit = self.repository.get_commit(curr)
                 current.update(set(curr_commit.parent_commit_hashes))
         
-        return lca
-
-
-    def get_commit(self, commit_hash):
-        f = open(os.path.join(self.commit_directory, commit_hash), "rb")
-        commit_bytes = f.read()
-        f.close()
-        return Commit.from_bytes(commit_bytes)
-
-
-    
+        return NEED_MERGE, lca

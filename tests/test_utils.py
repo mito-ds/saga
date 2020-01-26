@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 from saga.file_types.file_utils import parse_file
 
 
@@ -12,16 +12,12 @@ def do_test_merge(folder_path, ending):
     This returns true iff a and b merged with the original as base
     results in the merged file!
     """ 
-    origin = parse_file("id", "file", os.path.join(folder_path, "origin" + ending))
-    a = parse_file("id", "file", os.path.join(folder_path, "a" + ending))
-    b = parse_file("id", "file", os.path.join(folder_path, "b" + ending))
-    merge = parse_file("id", "file", os.path.join(folder_path, "merge" + ending))
-    print(origin.file_contents.mixed_data_type)
-    print(a.file_contents.mixed_data_type)
-    print(b.file_contents.mixed_data_type)
-    print(merge.file_contents.mixed_data_type)
+    path = Path(folder_path)
+    origin = parse_file("id", "file", path / f"origin.{ending}")
+    a = parse_file("id", "file", path / f"a.{ending}")
+    b = parse_file("id", "file", path / f"b.{ending}")
+    merge = parse_file("id", "file", path / f"merge.{ending}")
     calculated_merge = origin.merge(a, b)
-    print(calculated_merge.file_contents.mixed_data_type)
 
     return merge.file_contents == calculated_merge.file_contents
 

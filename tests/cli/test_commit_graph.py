@@ -1,6 +1,8 @@
 import os
+from pathlib import Path
 from tests.cli.cli_utils import run_cmd, saga_folder, random_file
 from saga.CommitGraph import CommitGraph
+from saga.Repository1 import Repository1
 
 def partial_to_full_hash(saga_folder, partial_hash):
     for path in os.listdir(os.path.join(saga_folder, ".saga", "commits")):
@@ -34,8 +36,9 @@ def test_lca_simple(tmpdir):
     b_blurb = run_cmd("saga commit --allow-empty -m \"back\"")
     b_hash = blurb_to_hash(str(tmpdir), b_blurb)
     # check that the lca is the initial commit, from both
-    commit_graph = CommitGraph(os.path.join(tmpdir, ".saga", "commits"))
-    lcas = commit_graph.least_common_ancestors(a_hash, b_hash)
+    repo = Repository1(Path(tmpdir))
+    commit_graph = CommitGraph(repo)
+    need_merge, lcas = commit_graph.least_common_ancestors(a_hash, b_hash)
     assert len(lcas) == 1
     assert lcas.pop() == init_hash
 
@@ -65,8 +68,10 @@ def test_lca_merge(tmpdir):
     b_blurb = run_cmd("saga commit --allow-empty -m \"back\"")
     b_hash = blurb_to_hash(str(tmpdir), b_blurb)
     # check that the lca is the initial commit, from both
-    commit_graph = CommitGraph(os.path.join(tmpdir, ".saga", "commits"))
-    lcas = commit_graph.least_common_ancestors(merge_hash, b_hash)
+    repo = Repository1(Path(tmpdir))
+    repo.debug()
+    commit_graph = CommitGraph(repo)
+    need_merge, lcas = commit_graph.least_common_ancestors(merge_hash, b_hash)
     assert len(lcas) == 1
     assert lcas.pop() == init_hash
 

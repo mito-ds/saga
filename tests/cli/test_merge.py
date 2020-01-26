@@ -2,6 +2,7 @@ import os
 import pytest
 import shutil
 import filecmp
+from pathlib import Path
 from saga.file_types.file_utils import parse_file
 from tests.cli.cli_utils import (
     run_cmd, 
@@ -45,21 +46,21 @@ def test_merge(saga_folder, merge_test_name, file_type):
 
     # we add file a to branch a
     run_cmd("saga checkout brancha")
-    shutil.copyfile(a, saga_folder.join(file_name))
+    shutil.copyfile(a, file_name)
     run_cmd(f"saga add {file_name}")
     run_cmd("saga commit -m \"add file a\"")
 
     # we add file b to branch b
     run_cmd("saga checkout branchb")
-    shutil.copyfile(b, saga_folder.join(file_name))
+    shutil.copyfile(b, f"{file_name}")
     run_cmd(f"saga add {file_name}")
     run_cmd("saga commit -m \"add file b\"")
 
     # then, we try and merge from one branch to the other
     m = run_cmd("saga merge brancha")
-    print(m)
 
     # and check this is the correct merged result
     path = str(saga_folder.join(file_name))
-    assert parse_file("", merge, merge).file_contents == \
-        parse_file("", path, path).file_contents
+    merge = parse_file("", merge, Path(merge)).file_contents
+    assert merge == \
+        parse_file("", path, Path(path)).file_contents
