@@ -1,5 +1,6 @@
 from saga.Repository import Repository
 
+
 def list_branches(repository: Repository):
     """
     Lists the branches in the repo, as well as the head

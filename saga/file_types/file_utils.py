@@ -4,22 +4,26 @@ from saga.file_types.text_file import parse_text_file, write_text_file
 from saga.file_types.csv_file import parse_csv_file, write_csv_file
 from saga.file_types.excel_file import parse_excel_file, write_excel_file
 
+
 def is_csv(file_path: Path):
     return file_path.suffix == ".csv"
 
+
 TEXT_ENDINGS = {
-    ".txt", # just text
-    ".py", # python
-    ".c", # c source
-    ".cc", # c++ source 
-    ".java", # java source 
-    ".js",
-    ".php"
+    ".txt",  # just text
+    ".py",  # python
+    ".c",  # c source
+    ".cc",  # c++ source
+    ".java",  # java source
+    ".js",  # js source
+    ".php"  # php source
 }
+
 
 def is_text(file_path: str):
     print(file_path.suffix)
     return file_path.suffix in TEXT_ENDINGS
+
 
 def is_excel(file_path):
     return file_path.suffix == ".xlsx"

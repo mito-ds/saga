@@ -1,7 +1,5 @@
-import os
-from saga.Commit import Commit
-
 NEED_MERGE = True
+
 
 class CommitGraph(object):
 
@@ -24,7 +22,7 @@ class CommitGraph(object):
                 reached.add(curr)
                 curr_commit = self.repository.get_commit(curr)
                 current.update(set(curr_commit.parent_commit_hashes))
-        
+
         # then we walk the ancestors of the second commit hash
         current = {commit_hash_2}
         while any(current):
@@ -38,5 +36,5 @@ class CommitGraph(object):
             else:
                 curr_commit = self.repository.get_commit(curr)
                 current.update(set(curr_commit.parent_commit_hashes))
-        
+
         return NEED_MERGE, lca

@@ -1,7 +1,6 @@
-import os
-#from saga.commands.utils import get_saga_repo
 from saga.operations.commit import commit
 from saga.commands.utils import get_saga_repo
+
 
 def command_commit(args):
     saga_repo = get_saga_repo()

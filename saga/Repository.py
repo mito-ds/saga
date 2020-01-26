@@ -1,29 +1,23 @@
 import os
-import pickle
 import hashlib
-import copy
-import filecmp
-import glob
-import requests 
-import os
-import glob
-import json
+import requests
 import shutil
 from typing import Optional, List
 from pathlib import Path
-from os.path import join, isfile
+from os.path import join
 from saga.Commit import Commit
-from saga.path_utils import copy_dir_to_dir, copy_file_to_dir, relative_paths_in_dir, changed_files
-from saga.file_types.file_utils import parse_file, write_file
-
+from saga.path_utils import (
+    copy_dir_to_dir,
+    relative_paths_in_dir,
+    changed_files
+)
+from saga.file_types.file_utils import parse_file
 
 
 class Repository(object):
 
     def __init__(self, directory: Path):
         self.base_directory = directory
-        self.file_ids = {"master": dict()} # map from branch -> file_name -> permanent_file_id
-        self.commits = {"master": []} # this is an ugly hack for now, but we keep track of commit hashes on any branch
 
     def debug(self):
         for branch in self.branches:
@@ -61,7 +55,9 @@ class Repository(object):
 
     @property
     def branches(self) -> List[str]:
-        return [str(path.parts[-1]) for path in self.branch_directory.iterdir()]
+        return [
+            str(path.parts[-1]) for path in self.branch_directory.iterdir()
+        ]
 
     @property
     def head_location(self) -> Path:
@@ -95,13 +91,15 @@ class Repository(object):
                 f = open(index_file_name, "rb")
                 file_bytes = f.read()
                 m = hashlib.sha256()
-                m.update(file_bytes) # we encode the file contents
-                m.update(file_name.encode("utf-8")) # and we encode the file path
+                # we encode the file contents
+                # and we encode the file path
+                m.update(file_bytes)
+                m.update(file_name.encode("utf-8"))
                 file_hashes.append(m.hexdigest())
         m = hashlib.sha256()
-        #TODO: this should be a merkle tree eventually 
+        # TODO: this should be a merkle tree eventually
         # (or maybe an merkel-mountain-range), to reap the benefits
-        m.update(",".join(file_hashes).encode('utf-8')) 
+        m.update(",".join(file_hashes).encode('utf-8'))
         return m.hexdigest()
 
     @property
@@ -123,7 +121,6 @@ class Repository(object):
             with open(self.remote_location, "w+") as f:
                 f.write("None")
             return "None"
-
 
     def head_commit_from_branch(self, branch_name: str) -> str:
         branch_file = self.branch_directory / branch_name
@@ -150,10 +147,10 @@ class Repository(object):
         with (self.commit_directory / commit_hash).open("rb") as f:
             return Commit.from_bytes(f.read())
         return None
-        
+
     def add_commit(
-            self, 
-            state_hash: str, 
+            self,
+            state_hash: str,
             previous_commit_hashes: List[str],
             commit_message: str
         ) -> Optional[Commit]:

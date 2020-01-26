@@ -1,8 +1,8 @@
-from os import getcwd, mkdir
 from pathlib import Path
 from typing import Optional
 from saga.Repository import Repository
 from saga.operations.commit import commit
+
 
 def get_saga_repo_path(directory: Path) -> Optional[Path]:
     while directory != Path("/"):
@@ -11,16 +11,17 @@ def get_saga_repo_path(directory: Path) -> Optional[Path]:
         directory = directory.parent
     return None
 
+
 def init(directory: Path):
     """
     Creates a new saga project in the given directory.
 
-    Fails if the given directory is a sub-directory of an existing 
-    saga project, or if the directory already contains a saga project. 
+    Fails if the given directory is a sub-directory of an existing
+    saga project, or if the directory already contains a saga project.
     """
     # ensure this directory isn't inside saga project
     saga_repo_path = get_saga_repo_path(directory)
-    if saga_repo_path != None:
+    if saga_repo_path is not None:
         print(f"Error: saga project already exists at {saga_repo_path}")
 
     # create empty saga folder, sub-folders
@@ -39,10 +40,6 @@ def init(directory: Path):
         "Created repository",
         allow_empty=True
     )
-    
+
     # Notify the user of success
-    print("Initialized empty saga repository in {}".format(repository.saga_directory))
-
-        
-
-
+    print(f"Initialized empty saga repository in {repository.saga_directory}")

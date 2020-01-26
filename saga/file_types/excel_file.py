@@ -2,23 +2,27 @@ from saga.base_file.File import File
 from bs4 import BeautifulSoup
 from zipfile import ZipFile
 
+
 def char_position(letter):
     return ord(letter) - 65
+
 
 def get_index(column):
     # for now, we're only gonna do single letter columns
     return char_position(column)
 
+
 def get_strings(zf):
     try:
         with zf.open('xl/sharedStrings.xml') as stringFile:
             soup = BeautifulSoup(stringFile.read(), 'html5lib')
-            unique_strs =  [None] * int(soup.body.sst["count"])
+            unique_strs = [None] * int(soup.body.sst["count"])
             for i, val in enumerate(soup.body.sst):
                 unique_strs[i] = str(val.contents[0].contents[0])
         return unique_strs
-    except:
+    except Exception:
         return []
+
 
 def get_rows(sheetdata, strings):
     rows = dict()
@@ -32,23 +36,22 @@ def get_rows(sheetdata, strings):
     for row in sheetdata:
         try:
             span = row["spans"].split(":")
-        except:
+        except Exception:
             print(row)
             if row_idx is None:
                 continue
             rows[row_idx] = []
             continue
-        start = int(span[0])
         end = int(span[1])
-        parsed_row = [None] * end 
+        parsed_row = [None] * end
         row_idx = None
         for cell in row:
             cell_name = cell["r"]
             col_str = "".join([c for c in cell_name if c.isalpha()])
             row_idx = int(cell_name[len(col_str):])
-            
+
             column = get_index(col_str)
-            
+
             is_string = "t" in cell.attrs
             is_formula = len(cell.contents) > 1
 
@@ -62,13 +65,14 @@ def get_rows(sheetdata, strings):
             else:
                 try:
                     val = int(cell.contents[0].contents[0])
-                except:
+                except Exception:
                     val = float(cell.contents[0].contents[0])
                 parsed_row[column] = val
 
         rows[row_idx] = parsed_row
 
     return rows
+
 
 def get_cells(zf, strings):
     with zf.open('xl/worksheets/sheet1.xml') as myfile:
@@ -79,13 +83,14 @@ def get_cells(zf, strings):
 
         if not any(rows):
             return []
-        
-        max_row = max(rows) 
-        mdl = [[]] *  max_row
+
+        max_row = max(rows)
+        mdl = [[]] * max_row
         for row in rows:
             mdl[row - 1] = rows[row]
-            
+
     return mdl
+
 
 def parse_excel_file(file_id, file_name, file_path):
 
@@ -97,6 +102,7 @@ def parse_excel_file(file_id, file_name, file_path):
         cells = get_cells(zf, strings)
 
     return File(file_id, "excel", file_path, file_name, cells)
+
 
 def write_excel_file(file):
     import xlsxwriter
@@ -112,4 +118,3 @@ def write_excel_file(file):
             worksheet.write(row_idx, col_idx, val)
 
     workbook.close()
-

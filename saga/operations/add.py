@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 from shutil import copyfile
 from saga.Repository import Repository
@@ -6,7 +5,7 @@ from saga.path_utils import copy_dir_to_dir
 
 
 def add(repository: Repository, add_path: str):
-    
+
     add_path = Path(add_path)
 
     if not add_path.exists():
