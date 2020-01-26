@@ -1,15 +1,17 @@
 import pickle
 import hashlib
 
+
 class State():
 
     def __init__(self, files, prev_state_hash):
         # map from file_id -> file object
-        self.files = files 
+        self.files = files
         self.prev_state_hash = prev_state_hash
 
     def __getitem__(self, file_id):
-        return self.files.get(file_id, None) # we return None of the file does not exist
+        # we return None of the file does not exist
+        return self.files.get(file_id, None)
 
     def __setitem__(self, file_id, file):
         self.files[file_id] = file
@@ -18,7 +20,9 @@ class State():
         return file_name in self.files
 
     def __len__(self):
-        return sum(1 for file_id in self.files if self.files[file_id] is not None)
+        return sum(
+            1 for file_id in self.files if self.files[file_id] is not None
+        )
 
     def get_hash(self):
         m = hashlib.sha256()
@@ -30,8 +34,3 @@ class State():
 
     def from_string(self, str):
         return pickle.loads(str)
-
-    
-
-
-    
