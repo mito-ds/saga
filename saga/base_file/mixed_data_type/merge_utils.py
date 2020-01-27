@@ -169,7 +169,7 @@ def none_overlay(matrix_a, matrix_b):
             overlay.append([])
             idx = len(overlay) - 1
             for x, y in itertools.zip_longest(a, b):
-                if x is y:
+                if x == y or x is y:
                     overlay[idx].append(x)
                 elif x is None:
                     overlay[idx].append(y)
@@ -184,7 +184,7 @@ def none_overlay_primitive(list_a, list_b):
     # overlays 2 2-d arrays, where None is treated as a blank space
     overlay = []
     for a, b in itertools.zip_longest(list_a, list_b):
-        if a is b:
+        if a is b or a == b:
             overlay.append(a)
         elif a is None:
             overlay.append(b)
