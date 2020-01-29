@@ -20,12 +20,11 @@ TEXT_ENDINGS = {
 }
 
 
-def is_text(file_path: str):
-    print(file_path.suffix)
+def is_text(file_path: Path):
     return file_path.suffix in TEXT_ENDINGS
 
 
-def is_excel(file_path):
+def is_excel(file_path: Path):
     return file_path.suffix == ".xlsx"
 
 

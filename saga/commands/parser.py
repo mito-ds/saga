@@ -2,6 +2,7 @@ import argparse
 from saga.commands.command_add import command_add
 from saga.commands.command_branch import command_branch
 from saga.commands.command_checkout import command_checkout
+from saga.commands.command_clone import command_clone
 from saga.commands.command_commit import command_commit
 from saga.commands.command_diff import command_diff
 from saga.commands.command_init import command_init
@@ -122,6 +123,18 @@ def create_saga_parser():
         help='downloads the local repository from the remote repository'
     )
     parser_pull.set_defaults(func=command_pull)
+
+    # create the parser for the "clone" command
+    parser_clone = subparsers.add_parser(
+        'clone',
+        help='downloads a new local repository from the remote repository'
+    )
+    parser_clone.add_argument(
+        'clone_url',
+        type=str,
+        help='url of remote repository to clone'
+    )
+    parser_clone.set_defaults(func=command_clone)
 
     # create the parser for the "remote" command
     parser_remote = subparsers.add_parser(

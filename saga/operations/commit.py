@@ -36,6 +36,10 @@ def commit_int(
         commit_message
     )
 
+    if commit is None:
+        print("Error: could not create new commit")
+        exit(1)
+
     # update the head commit of the head branch
     repository.update_head_commit(commit)
 

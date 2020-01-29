@@ -119,10 +119,10 @@ class Repository(object):
                 return f.readline()
         else:
             with open(self.remote_location, "w+") as f:
-                f.write("None")
-            return "None"
+                f.write("http://localhost:3000")
+            return "http://localhost:3000"
 
-    def head_commit_from_branch(self, branch_name: str) -> str:
+    def head_commit_from_branch(self, branch_name: str) -> Optional[str]:
         branch_file = self.branch_directory / branch_name
         if not branch_file.exists():
             return None

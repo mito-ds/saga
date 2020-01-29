@@ -1,3 +1,4 @@
+from saga.base_file.mixed_data_type.constants import PRIMITIVE
 from saga.base_file.mixed_data_type.merge_utils import merge_rec, equal_objs
 from saga.base_file.mixed_data_type.diff_utils import (
     inserted_paths, removed_paths, changed_paths
@@ -54,6 +55,3 @@ class MixedDataType(object):
         if not isinstance(value, MixedDataType):
             return False
         return equal_objs(self.mixed_data_type, value.mixed_data_type)
-
-
-PRIMITIVE = (int, float, bool, str, type(None))

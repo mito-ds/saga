@@ -1,18 +1,9 @@
+from saga.base_file.mixed_data_type.constants import PRIMITIVE
 from saga.base_file.mixed_data_type.lcs import lcs_with_sim
-
-PRIMITIVE = (int, float, bool, str)
-
-
-def paths(A, B):
-    # returns a triple (removed_paths, changed_paths, inserted_paths)
-    if type(A) in PRIMITIVE or type(B) in PRIMITIVE:
-        assert type(A) in PRIMITIVE and type(B) in PRIMITIVE
-        return [], [], [] if A == B else [], [[]], []
 
 
 def changed_paths(A, B):
     return _changed_paths(A, B, [])
-
 
 def _changed_paths(A, B, base_path):
     if type(A) in PRIMITIVE or type(B) in PRIMITIVE:

@@ -1,8 +1,6 @@
 from saga.commands.utils import get_saga_repo
-
+from saga.operations.pull import pull
 
 def command_pull(args):
     saga_repo = get_saga_repo()
-    saga_repo.pull()
-    saga_repo = get_saga_repo()
-    saga_repo.restore_state_to_head()
+    pull(saga_repo)

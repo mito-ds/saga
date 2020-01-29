@@ -12,3 +12,4 @@ saga_vcs.egg-info/
 .DS_Store
 .vscode
 .mypy_cache/
+__pycache__/

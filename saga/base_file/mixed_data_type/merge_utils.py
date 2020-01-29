@@ -1,11 +1,9 @@
 import itertools
+from saga.base_file.mixed_data_type.constants import PRIMITIVE
 from saga.base_file.mixed_data_type.lcs import lcs_with_sim
 from saga.base_file.mixed_data_type.diff_utils import (
     dict_removed_paths, dict_inserted_paths, dict_changed_paths
 )
-
-PRIMITIVE = (int, float, bool, str, type(None))
-
 
 def merge_rec(origin, A, B):
     """

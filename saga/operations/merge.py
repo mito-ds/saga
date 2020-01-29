@@ -9,6 +9,10 @@ from saga.operations.commit import commit
 def fast_forward(repository: Repository, other_branch: str):
     # Get the head commit on the other branch
     other_branch_head_hash = repository.head_commit_from_branch(other_branch)
+    if other_branch_head_hash is None:
+        print(f"Error: cannot fast forward as {other_branch} has no head")
+        exit(1)
+
     other_branch_head_commit = repository.get_commit(other_branch_head_hash)
     repository.update_head_commit(other_branch_head_commit)
     repository.restore_state(other_branch_head_commit.state_hash)

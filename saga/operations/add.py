@@ -4,7 +4,7 @@ from saga.Repository import Repository
 from saga.path_utils import copy_dir_to_dir
 
 
-def add(repository: Repository, add_path: str):
+def add(repository: Repository, add_path: Path):
 
     add_path = Path(add_path)
 
