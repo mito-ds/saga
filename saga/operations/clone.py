@@ -1,8 +1,8 @@
 import requests
 import zipfile
+from os import remove
 
 def clone(clone_url: str):
-    print(clone_url)
     with requests.get(clone_url, stream=True) as response:
         # throw an error, if there is wone
         response.raise_for_status()
@@ -14,5 +14,6 @@ def clone(clone_url: str):
 
     with zipfile.ZipFile("sagatmp.zip", 'r') as zip_ref:
         zip_ref.extractall()
+    remove("sagatmp.zip")
 
     print(f"Cloned {clone_url}")
