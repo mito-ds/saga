@@ -12,6 +12,7 @@ from saga.commands.command_pull import command_pull
 from saga.commands.command_push import command_push
 from saga.commands.command_remote import command_remote
 from saga.commands.command_status import command_status
+from saga.commands.command_test import command_test
 
 
 def create_saga_parser():
@@ -148,5 +149,11 @@ def create_saga_parser():
         help='repository to track'
     )
     parser_remote.set_defaults(func=command_remote)
+
+    # JUST FOR TESTING!
+    parser_test = subparsers.add_parser(
+        'test',
+    )
+    parser_test.set_defaults(func=command_test)
 
     return parser
