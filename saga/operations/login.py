@@ -11,14 +11,17 @@ def login(login_url: str) -> Optional[Session]:
     password = getpass()
 
     try:
-        session.post(
+        r = session.post(
             login_url,
             data = {
                 "username": username,
                 "password": password
             }
         )
-        
-        return session
+
+        if r.status_code == 200:
+            return session
+        # login failed
+        return None
     except Exception:
         return None
