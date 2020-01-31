@@ -1,5 +1,7 @@
-from saga.commands.utils import get_saga_repo
+from saga.commands.utils import get_repository
+from saga.operations.diff import diff
 
 
 def command_diff(args):
-    get_saga_repo().diff()
+    repository = get_repository()
+    diff(repository)

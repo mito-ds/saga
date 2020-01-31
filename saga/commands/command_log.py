@@ -1,6 +1,6 @@
-from saga.commands.utils import get_saga_repo
-
+from saga.commands.utils import get_repository
+from saga.operations.log import log
 
 def command_log(args):
-    saga_repo = get_saga_repo()
-    saga_repo.log()
+    repository = get_repository()
+    log(repository)

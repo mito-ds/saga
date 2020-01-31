@@ -138,6 +138,15 @@ class Repository(object):
         return head_commit.state_hash
 
     @property
+    def curr_state_directory(self) -> Path:
+        """
+        Returns the path with of the head state directory
+        """
+        return self.state_directory / self.state_hash
+
+    
+
+    @property
     def uncommited_in_index(self):
         index_state_hash = self.index_hash
         commit_state_hash = self.state_hash
@@ -195,49 +204,6 @@ class Repository(object):
         with self.remote_location.open("w+") as f:
             f.write(remote_repository)
         print(f"Set new remote repository to {self.remote_repository}")
-
-    def log(self):
-        """
-        Prints all commits in the current branch to the screen
-        """
-        for commit_hash in reversed(self.commits[self.head]):
-            commit = self.get_commit(commit_hash)
-            print("commit: {}".format(commit_hash))
-            print("\t{}\n".format(commit.commit_message))
-
-    def status(self):
-        """
-        Prints the status of the current branch and index
-        """
-        print("On branch {}".format(self.head))
-
-        rem_state_to_idx, cha_state_to_idx, ins_state_to_idx = changed_files(
-            self.curr_state_dir(),
-            self.index_directory
-        )
-        rem_index_to_cur, cha_index_to_cur, ins_index_to_cur = changed_files(
-            self.index_directory,
-            self.base_directory
-        )
-
-        print("Changes staged for commit:")
-        for path in rem_state_to_idx:
-            print(f"\tremoved: {path}")
-        for path in ins_state_to_idx:
-            print(f"\tinserted: {path}")
-        for path in cha_state_to_idx:
-            if path not in cha_index_to_cur and path not in rem_index_to_cur:
-                print(f"\tmodified: {path}")
-
-        print("Change not staged for commit:")
-        for path in rem_index_to_cur:
-            print(f"\tremoved: {path}")
-        for path in cha_index_to_cur:
-            print(f"\tmodified: {path}")
-
-        print("Untracked files:")
-        for path in ins_index_to_cur:
-            print(f"\t{path}")
 
     def diff(self):
         """

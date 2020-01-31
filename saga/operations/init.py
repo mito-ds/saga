@@ -4,7 +4,7 @@ from saga.Repository import Repository
 from saga.operations.commit import commit
 
 
-def get_saga_repo_path(directory: Path) -> Optional[Path]:
+def get_repository_path(directory: Path) -> Optional[Path]:
     while directory != Path("/"):
         if (directory / ".saga").is_dir():
             return directory / ".saga"
@@ -20,9 +20,9 @@ def init(directory: Path):
     saga project, or if the directory already contains a saga project.
     """
     # ensure this directory isn't inside saga project
-    saga_repo_path = get_saga_repo_path(directory)
-    if saga_repo_path is not None:
-        print(f"Error: saga project already exists at {saga_repo_path}")
+    repository_path = get_repository_path(directory)
+    if repository_path is not None:
+        print(f"Error: saga project already exists at {repository_path}")
 
     # create empty saga folder, sub-folders
     (directory / ".saga").mkdir()

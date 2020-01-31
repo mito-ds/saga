@@ -1,10 +1,10 @@
-from saga.commands.utils import get_saga_repo
+from saga.commands.utils import get_repository
 from saga.operations.checkout import checkout
 from saga.operations.create_branch import create_branch
 
 
 def command_checkout(args):
-    saga_repo = get_saga_repo()
+    repository = get_repository()
     if args.b:
-        create_branch(saga_repo, args.branch)
-    checkout(saga_repo, args.branch)
+        create_branch(repository, args.branch)
+    checkout(repository, args.branch)

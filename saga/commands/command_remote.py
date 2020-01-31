@@ -1,9 +1,9 @@
-from saga.commands.utils import get_saga_repo
+from saga.commands.utils import get_repository
 
 
 def command_remote(args):
-    saga_repo = get_saga_repo()
+    repository = get_repository()
     if args.remote is None:
-        print(f"Remote branch is {saga_repo.remote_repository}")
+        print(f"Remote branch is {repository.remote_repository}")
     else:
-        saga_repo.set_remote(args.remote)
+        repository.set_remote(args.remote)

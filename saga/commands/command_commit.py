@@ -1,9 +1,9 @@
 from saga.operations.commit import commit
-from saga.commands.utils import get_saga_repo
+from saga.commands.utils import get_repository
 
 
 def command_commit(args):
-    saga_repo = get_saga_repo()
+    repository = get_repository()
     if args.m is None:
         args.m = input("Please enter a commit message: ")
-    commit(saga_repo, args.m, allow_empty=args.allow_empty)
+    commit(repository, args.m, allow_empty=args.allow_empty)

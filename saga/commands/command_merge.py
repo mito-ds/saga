@@ -1,7 +1,7 @@
-from saga.commands.utils import get_saga_repo
+from saga.commands.utils import get_repository
 from saga.operations.merge import merge
 
 
 def command_merge(args):
-    saga_repo = get_saga_repo()
-    merge(saga_repo, args.branch)
+    repository = get_repository()
+    merge(repository, args.branch)

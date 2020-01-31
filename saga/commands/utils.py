@@ -3,16 +3,16 @@ from pathlib import Path
 from saga.Repository import Repository
 
 
-def get_saga_repo():
-    saga_repo = get_saga_repo_maybe()
-    if saga_repo is None:
+def get_repository():
+    repository = get_repository_maybe()
+    if repository is None:
         print("Error: command cannot run as no saga repo exists")
         exit(1)
     else:
-        return saga_repo
+        return repository
 
 
-def get_saga_repo_maybe():
+def get_repository_maybe():
     # TODO: rewrite with path.parent and Path.home()
 
     path = os.getcwd()

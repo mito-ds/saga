@@ -1,6 +1,6 @@
-from saga.commands.utils import get_saga_repo
-
+from saga.commands.utils import get_repository
+from saga.operations.status import status
 
 def command_status(args):
-    saga_repo = get_saga_repo()
-    saga_repo.status()
+    repository = get_repository()
+    status(repository)
