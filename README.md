@@ -1,10 +1,14 @@
 # saga
 
-Saga is a version control tool like Git, but it can be used to version control files other than just text. 
+Saga is a version control CLI like inspired by Git. Unlike Git, it is designed to work for file formats other than text. TL;DR: imagine if you could merge your Excel files too. 
 
-As a user, you can use currently use saga to manage your creative projects. Currently, saga includes basic support for unstructed binary files, text files, CSV files, and Excel files.
+If you want to use Saga to manage your creative projects (code, design, excel, etc), you can install the tool with:
 
-As a developer, you can use the Saga framework to add version control to new file formats. See examples [here](https://github.com/saga-vcs/saga/blob/master/saga/file_types/text_file.py) and [here](https://github.com/saga-vcs/saga/blob/master/saga/file_types/excel_file.py). Documentation coming soon!
+~~~~
+pip3 install saga-vcs
+~~~~
+
+If you want to add version control to a file format saga does not currently support, you can see examples of doing so [here](https://github.com/saga-vcs/saga/blob/master/saga/file_types/text_file.py) and [here](https://github.com/saga-vcs/saga/blob/master/saga/file_types/excel_file.py). Documentation coming soon!
 
 ## Installation Instructions
 
@@ -14,7 +18,7 @@ To install the `saga` command line tool, run:
 pip3 install saga-vcs
 ~~~~
 
-Currently, Saga only works on macOS. Support for Linux and Windows is coming soon!
+Currently, Saga only works on macOS and maybe Linux. Windows support coming eventually!
 
 ## Using saga
 
