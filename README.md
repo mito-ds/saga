@@ -29,6 +29,8 @@ saga status
 saga branch
 saga checkout
 saga merge
+saga push
+saga pull
 ~~~~
 
 Some commands don't perform exactly as Git does, so watch out! 
