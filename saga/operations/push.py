@@ -13,14 +13,17 @@ def push(repository: Repository):
 
     url = f"{repository.remote_repository}/cli/push/{repository.base_directory.name}"
 
+    # label it a tmp file
+    tmp_zip_file = repository.base_directory.parent / "saga_tmp_zip"
+
     # first we zip the entire repository
-    shutil.make_archive("sagatmp", 'zip', repository.base_directory)
+    shutil.make_archive(tmp_zip_file, 'zip', repository.base_directory)
 
     # then we send it across the wire
-    with open("sagatmp.zip", 'rb') as f:
+    with open(f"{tmp_zip_file}.zip", 'rb') as f:
         session.post(
             url,
             files={"file": f}
         )
-    os.remove("sagatmp.zip")
+    os.remove(f"{tmp_zip_file}.zip")
     print(f"Pushed {repository.base_directory.name} to {repository.remote_repository}")
