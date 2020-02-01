@@ -11,7 +11,7 @@ def push(repository: Repository):
         print("Login failed. Quiting")
         exit(1)
 
-    url = f"{repository.remote_repository}/cli/push/{repository.base_directory.name}"
+    url = f"{repository.remote_repository}/{repository.base_directory.name}.saga"
 
     # label it a tmp file
     tmp_zip_file = repository.base_directory.parent / "saga_tmp_zip"
