@@ -23,6 +23,10 @@ def saga_folder(tmpdir):
     run_cmd("saga init")
     return tmpdir
 
+def empty_file(file_name):
+    with open(file_name, 'wb+') as fout:
+        pass
+
 def random_file(file_name):
     with open(file_name, 'wb+') as fout:
         fout.write(os.urandom(1024))

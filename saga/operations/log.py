@@ -11,4 +11,9 @@ def log(repository: Repository):
         if commit is not None:
             print("commit: {}".format(commit.hash))
             print("\t{}\n".format(commit.commit_message))
-            curr_commits.extend(commit.parent_commit_hashes)
+            parent_commits = [
+                repository.get_commit(parent_commit_hash)
+                for parent_commit_hash in commit.parent_commit_hashes
+                if parent_commit_hash is not None
+            ]
+            curr_commits.extend(parent_commits)
