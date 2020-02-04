@@ -52,7 +52,8 @@ git clone https://github.com/saga-vcs/saga.git;
 cd saga;
 python3 -m venv env;
 source env/bin/activate;
-pip install -r requirements.txt;
+pip3 install -r requirements.txt;
+python3 -m saga.main CMD
 ~~~~
 
 ### Running Tests
