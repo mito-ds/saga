@@ -8,7 +8,7 @@ def login(login_url: str) -> Optional[Session]:
     # TODO: in the future, we can read these
     # from the global saga config file
     username = input("Username: ")
-    password = getpass()
+    password = input("Password: ")
 
     try:
         r = session.post(
@@ -23,5 +23,6 @@ def login(login_url: str) -> Optional[Session]:
             return session
         # login failed
         return None
-    except Exception:
+    except Exception as e:
+        print(e)
         return None

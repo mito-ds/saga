@@ -4,18 +4,7 @@ from os import remove
 from getpass import getpass
 
 def command_test(args):
-    s = requests.Session()
-
-    username = input("Username: ")
-    password = getpass()
-
-    s.post(
-        "http://localhost:3000/login",
-        data = {
-            "username": username,
-            "password": password
-        }
-    )
+    
     url = "http://localhost:3000/cli/pull/saga"
 
     with s.get(url, stream=True) as response:

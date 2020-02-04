@@ -204,37 +204,3 @@ class Repository(object):
         with self.remote_location.open("w+") as f:
             f.write(remote_repository)
         print(f"Set new remote repository to {self.remote_repository}")
-
-    def diff(self):
-        """
-        Prints the differences between all files
-        """
-        _, changed_paths, _ = changed_files(
-            self.index_directory,
-            self.base_directory
-        )
-
-        print("Git diff:")
-        operations = []
-        for path in changed_paths:
-            if os.path.isfile(path):
-                print("\tFile:", path)
-                file_id = self.file_ids[self.head][path]
-                old_file = parse_file(
-                    file_id,
-                    path,
-                    self.index_directory / path
-                )
-                new_file = parse_file(
-                    file_id,
-                    path,
-                    self.base_directory / path
-                )
-                ops = old_file.get_operations(new_file)
-                for key in ops:
-                    print("\t\t:", key, ops[key])
-                operations.extend(ops)
-            else:
-                print("\tDirectory:", path, "changed")
-
-        return operations
