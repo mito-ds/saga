@@ -1,3 +1,0 @@
-[submodule "saga-server"]
-	path = saga-server
-	url = https://github.com/saga-vcs/saga-server.git
