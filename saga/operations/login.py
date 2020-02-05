@@ -10,6 +10,7 @@ def login(login_url: str) -> Optional[Session]:
     username = input("Username: ")
     password = input("Password: ")
 
+    print(username, password)
     try:
         r = session.post(
             login_url,
@@ -18,6 +19,7 @@ def login(login_url: str) -> Optional[Session]:
                 "password": password
             }
         )
+        print(r)
 
         if r.status_code == 200:
             return session

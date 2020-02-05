@@ -9,7 +9,8 @@ def push(repository: Repository):
 
     if session is None:
         print("Login failed. Quiting")
-        exit(1)
+        #exit(1)
+        return
 
     url = f"{repository.remote_repository}/{repository.base_directory.name}.saga"
 
