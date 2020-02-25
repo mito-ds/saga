@@ -204,3 +204,8 @@ class Repository(object):
         with self.remote_location.open("w+") as f:
             f.write(remote_repository)
         print(f"Set new remote repository to {self.remote_repository}")
+
+    def get_state_hash(self, branch):
+        commit_hash = self.head_commit_from_branch(branch)
+        commit = self.get_commit(commit_hash)
+        return commit.state_hash

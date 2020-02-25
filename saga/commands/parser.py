@@ -12,6 +12,7 @@ from saga.commands.command_pull import command_pull
 from saga.commands.command_push import command_push
 from saga.commands.command_remote import command_remote
 from saga.commands.command_status import command_status
+from saga.commands.command_state_hash import command_state_hash
 from saga.commands.command_test import command_test
 
 
@@ -149,6 +150,19 @@ def create_saga_parser():
         help='repository to track'
     )
     parser_remote.set_defaults(func=command_remote)
+
+    # create parser to get the head state hash of branch
+    parser_state_hash = subparsers.add_parser(
+        'state_hash',
+        help='get state hash of branch'
+    )
+    parser_state_hash.add_argument(
+        'branch',
+        type=str,
+        help='name of branch to get head state hash'
+    )
+    parser_state_hash.set_defaults(func=command_state_hash)
+
 
     # JUST FOR TESTING!
     parser_test = subparsers.add_parser(
